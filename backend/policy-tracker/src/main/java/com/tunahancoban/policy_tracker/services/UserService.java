@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.services;
 
+import com.tunahancoban.policy_tracker.model.Role;
 import com.tunahancoban.policy_tracker.model.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public List<User> getUserWithParam(String id ,String firstName, String lastName,String email , String role){
+    public List<User> getUserWithParam(String id ,String firstName, String lastName,String email , Role role){
         User searchCriteria = new User();
         searchCriteria.setId(id);
         searchCriteria.setFirstName(firstName);
@@ -38,6 +39,7 @@ public class UserService {
         if(userRepository.existsByEmail(user.getEmail())){
             throw new RuntimeException("This email already used by someone");
         }
+        
         String rawPassword = user.getPassword();
         String hashedPassword = passwordEncoder.encode(rawPassword);
         user.setPassword(hashedPassword);
