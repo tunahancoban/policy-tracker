@@ -1,8 +1,9 @@
 package com.tunahancoban.policy_tracker.controller;
 
-import com.tunahancoban.policy_tracker.model.RestResponse;
-import com.tunahancoban.policy_tracker.model.Role;
-import com.tunahancoban.policy_tracker.model.User;
+import com.tunahancoban.policy_tracker.model.DTO.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.RestResponse;
+import com.tunahancoban.policy_tracker.model.enums.Role;
+import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.services.UserService;
 
 import jakarta.validation.Valid;
@@ -37,9 +38,9 @@ public class RestUserController {
 
     // 2. CREATE User
     @PostMapping(path="/create-user")
-    public RestResponse<User> createUser(@Valid @RequestBody User user) {
+    public RestResponse<User> createUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            User createdUser = userService.createUser(user);
+            User createdUser = userService.createUser(registerRequest);
             return RestResponse.success("Kullanıcı başarıyla oluşturuldu.", createdUser);
         } catch (Exception e) {
             return RestResponse.error("Kullanıcı oluşturulurken hata: " + e.getMessage());

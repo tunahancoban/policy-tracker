@@ -1,5 +1,5 @@
 package com.tunahancoban.policy_tracker.repository;
-import com.tunahancoban.policy_tracker.model.User;
+import com.tunahancoban.policy_tracker.model.entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface UserRepository extends MongoRepository<User, String> {

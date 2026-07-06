@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model;
+package com.tunahancoban.policy_tracker.model.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class LoginResponse {
+
     private String token;
     private String role;
     private String userEmail;
+
+    public LoginResponse(String role, String userEmail){
+        this.role= role;
+        this.userEmail= userEmail;
+    }
 }

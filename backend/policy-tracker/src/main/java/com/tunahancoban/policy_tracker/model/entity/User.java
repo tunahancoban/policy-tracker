@@ -1,4 +1,6 @@
-package com.tunahancoban.policy_tracker.model;
+package com.tunahancoban.policy_tracker.model.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tunahancoban.policy_tracker.model.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -40,10 +42,12 @@ public class User implements UserDetails {
     private String email; //Unique
 
     @NotBlank(message = "Password cannot be null")
+    @JsonIgnore
     private String password;
 
     @NotNull(message = "Role cannot be null")
     private Role role;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

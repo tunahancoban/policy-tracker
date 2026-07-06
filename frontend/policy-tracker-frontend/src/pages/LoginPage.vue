@@ -3,12 +3,19 @@
         <q-page-container>
 
             <q-page class="login-bg flex flex-center q-pa-md">
+
                 <q-card class="login-card shadow-24 q-pa-lg">
 
                     <q-card-section class="text-center q-pb-none">
+
+                        <q-img src="../assets/quasar-logo-vertical.svg" class="q-mb-md "
+                            style="width: 120px; height: 120px;" />
                         <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">Sigorta Poliçe Takip</div>
+
                         <div class="text-caption text-grey-6 q-mt-xs">Devam etmek için lütfen giriş yapın</div>
                     </q-card-section>
+
+
 
                     <q-card-section>
                         <q-form @submit.prevent="handleLogin" class="q-gutter-y-md">
@@ -55,6 +62,7 @@ import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { api } from '../boot/axios';
 import { useAuthStore } from '../stores/auth';
+import { Notify } from 'quasar';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -67,25 +75,35 @@ const router = useRouter();
 const handleLogin = async () => {
     try {
         isLoading.value = true;
+
         const response = await api.post('/rest/api/auth/login-request', {
             email: email.value,
             password: password.value
         });
 
         const restResponse = response.data;
-        if (restResponse.success && restResponse.data) {
-            const { token, role, userEmail } = restResponse.data;
-            authStore.saveLoginData({ token, role, userEmail });
 
-            // Yönlendirme öncesi çökme riskini sıfırlamak için alert kullandık
+        if (restResponse.success && restResponse.data) {
+            const { role, userEmail } = restResponse.data;
+            authStore.saveLoginData({ role, userEmail });
             await router.push('/dashboard');
         } else {
-            alert('Giriş başarısız: ' + (restResponse.message || 'Bilinmeyen hata'));
+            Notify.create({
+                actions: [{ label: 'Kapat', color: 'white' }],
+                message: 'Giriş başarısız: ' + (restResponse.message || 'Bilinmeyen hata'),
+                color: 'red',
+                position: 'bottom'
+            });
         }
 
     } catch (error) {
         console.error('An unexpected error occurred:', error);
-        alert('Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.');
+        Notify.create({
+            actions: [{ label: 'Kapat', color: 'white' }],
+            message: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+            color: 'red',
+            position: 'bottom'
+        });
     } finally {
         isLoading.value = false;
     }
@@ -95,14 +113,15 @@ const handleLogin = async () => {
 <style scoped>
 .login-bg {
     background-image: url('../assets/login_background.jpg');
-    background-size: cover;
+    background-size: c over;
     background-position: center;
 }
 
 .login-card {
     width: 200%;
     max-width: 400px;
-    background-color: #ffffff;
+    background-image: linear-gradient(to bottom right, #d8d8d8, #ffffff);
+    outline: 3px solid #c2c2c2;
 }
 
 .tracking-wide {

@@ -1,8 +1,8 @@
 package com.tunahancoban.policy_tracker.services;
 
-import com.tunahancoban.policy_tracker.model.LoginRequest;
-import com.tunahancoban.policy_tracker.model.LoginResponse;
-import com.tunahancoban.policy_tracker.model.User;
+import com.tunahancoban.policy_tracker.model.DTO.LoginRequest;
+import com.tunahancoban.policy_tracker.model.DTO.LoginResponse;
+import com.tunahancoban.policy_tracker.model.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

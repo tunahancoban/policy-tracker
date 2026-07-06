@@ -1,7 +1,8 @@
 package com.tunahancoban.policy_tracker.services;
 
-import com.tunahancoban.policy_tracker.model.Role;
-import com.tunahancoban.policy_tracker.model.User;
+import com.tunahancoban.policy_tracker.model.DTO.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.enums.Role;
+import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -27,22 +28,28 @@ public class UserService {
         searchCriteria.setEmail(email);
         searchCriteria.setRole(role);
 
-        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues();
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
         Example<User> example = Example.of(searchCriteria, matcher);
 
         return userRepository.findAll(example);
     }
 
-    public User createUser(User user){
+    public User createUser(RegisterRequest registerRequest){
 
-        if(userRepository.existsByEmail(user.getEmail())){
+        if(userRepository.existsByEmail(registerRequest.getEmail())){
             throw new RuntimeException("This email already used by someone");
         }
         
-        String rawPassword = user.getPassword();
+        String rawPassword = registerRequest.getPassword();
         String hashedPassword = passwordEncoder.encode(rawPassword);
+        User user = new User();
+
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
+        user.setEmail(registerRequest.getEmail());
         user.setPassword(hashedPassword);
+        user.setRole(registerRequest.getRole());
 
         return userRepository.save(user);
     }

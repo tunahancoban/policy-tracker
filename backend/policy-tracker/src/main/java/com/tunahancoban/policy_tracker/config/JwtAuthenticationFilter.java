@@ -1,8 +1,10 @@
 package com.tunahancoban.policy_tracker.config;
+
 import com.tunahancoban.policy_tracker.services.JWTService;
 import com.tunahancoban.policy_tracker.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -22,36 +24,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final UserService userService;
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String email;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // 1. Tarayıcının ön kontrol (OPTIONS) isteklerini doğrudan geçirelim
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        email = jwtService.extractEmail(jwt);
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            //This method returns a list but email is unique so we can take the first object
-            UserDetails userDetails = this.userService.getUserWithParam(null,null,null, email,null).getFirst();
 
-            //Is token still valid?
-            if(jwtService.isTokenValid(jwt, userDetails)){
+        String jwt = null;
+        String email = null;
+
+        // 2. JWT'yi HEADER yerine COOKIE içinden okuyoruz
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                // NOT: Quasar/Backend tarafında cookie'ye hangi ismi verdiysen buraya onu yaz! (Örn: "jwt", "token" vb.)
+                if ("jwt_token".equals(cookie.getName())) {
+                    jwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        // 3. Eğer cookie'de token bulunamadıysa zincire devam et (Spring Security 403 verecektir, normal)
+        if (jwt == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 4. Token varsa mail adresini çıkart ve doğrula
+        email = jwtService.extractEmail(jwt);
+
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userService.getUserWithParam(null, null, null, email, null).getFirst();
+
+            if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
