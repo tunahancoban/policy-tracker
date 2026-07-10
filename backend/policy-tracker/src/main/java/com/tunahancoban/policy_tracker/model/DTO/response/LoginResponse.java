@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO;
+package com.tunahancoban.policy_tracker.model.DTO.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

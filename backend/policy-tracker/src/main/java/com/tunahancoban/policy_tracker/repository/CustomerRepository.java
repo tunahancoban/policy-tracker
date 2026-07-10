@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface CustomerRepository extends MongoRepository<Customer, String> {
     boolean existsByCustomerID(String customerID);
     boolean existsByIdentityNumber(String identityNUmber);
+    Customer findByCustomerID(String customerId);
 }

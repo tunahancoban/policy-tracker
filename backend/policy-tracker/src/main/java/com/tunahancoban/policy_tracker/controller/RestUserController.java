@@ -1,13 +1,14 @@
 package com.tunahancoban.policy_tracker.controller;
 
-import com.tunahancoban.policy_tracker.model.DTO.RegisterRequest;
-import com.tunahancoban.policy_tracker.model.DTO.RestResponse;
+import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
-import com.tunahancoban.policy_tracker.services.UserService;
+import com.tunahancoban.policy_tracker.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,49 +24,39 @@ public class RestUserController {
 
     // 1. FIND User
     @GetMapping(path= "/with-params")
-    public RestResponse<List<User>> getUserWithParam(@RequestParam(name = "id", required = false) String id,
-                                                     @RequestParam(name = "firstName", required = false) String firstName,
-                                                     @RequestParam(name = "lastName", required = false) String lastName,
-                                                     @RequestParam(name = "email", required = false) String email,
-                                                     @RequestParam(name = "role", required = false) Role role) {
-        try {
-            List<User> users = userService.getUserWithParam(id, firstName, lastName, email, role);
-            return RestResponse.success("Users are listed successfully.", users);
-        } catch (Exception e) {
-            return RestResponse.error("An error occurred while listing users.: " + e.getMessage());
-        }
+    public ResponseEntity<RestResponse<List<User>>> getUserWithParam(@RequestParam(name = "id", required = false) String id,
+                                                                     @RequestParam(name = "firstName", required = false) String firstName,
+                                                                     @RequestParam(name = "lastName", required = false) String lastName,
+                                                                     @RequestParam(name = "email", required = false) String email,
+                                                                     @RequestParam(name = "role", required = false) Role role) {
+
+        List<User> users = userService.getUserWithParam(id, firstName, lastName, email, role);
+        return ResponseEntity.ok(RestResponse.success("Kullanıcılar başarıyla listelendi", users));
     }
 
     // 2. CREATE User
     @PostMapping(path="/create-user")
-    public RestResponse<User> createUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
+    public ResponseEntity<RestResponse<User>> createUser(@Valid @RequestBody RegisterRequest registerRequest) {
+
             User createdUser = userService.createUser(registerRequest);
-            return RestResponse.success("Kullanıcı başarıyla oluşturuldu.", createdUser);
-        } catch (Exception e) {
-            return RestResponse.error("Kullanıcı oluşturulurken hata: " + e.getMessage());
-        }
+            return ResponseEntity.ok(RestResponse.success("Kullanıcı başarıyla oluşturuldu.", createdUser));
+
     }
 
     // 3. DELETE User
     @DeleteMapping(path="/delete-user/{id}")
-    public RestResponse<Void> deleteUser(@PathVariable(name = "id") String id) {
-        try {
-            userService.deleteUser(id);
-            return RestResponse.success("Kullanıcı başarıyla silindi.");
-        } catch (Exception e) {
-            return RestResponse.error("Kullanıcı silinirken hata: " + e.getMessage());
-        }
+    public ResponseEntity<RestResponse<Void>> deleteUser(@PathVariable(name = "id") String id) {
+
+        userService.deleteUser(id);
+        return ResponseEntity.ok(RestResponse.success("Kullanıcı başarıyla silindi."));
+
     }
 
     // 4. UPDATE User
     @PatchMapping(path = "/update-user/{id}", consumes = "application/json")
-    public RestResponse<Void> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
-        try {
-            userService.updateUser(id, updates);
-            return RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi.");
-        } catch (Exception e) {
-            return RestResponse.error("Kullanıcı güncellenirken hata: " + e.getMessage());
-        }
+    public ResponseEntity<RestResponse<Void>> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
+
+        userService.updateUser(id, updates);
+        return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi."));
     }
 }

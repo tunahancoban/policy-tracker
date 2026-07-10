@@ -57,12 +57,14 @@
     </q-layout>
 </template>
 
+
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { api } from '../boot/axios';
 import { useAuthStore } from '../stores/auth';
 import { Notify } from 'quasar';
+import type { AxiosError } from 'axios';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -85,8 +87,13 @@ const handleLogin = async () => {
 
         if (restResponse.success && restResponse.data) {
             const { role, userEmail } = restResponse.data;
+
             authStore.saveLoginData({ role, userEmail });
-            await router.push('/dashboard');
+
+            authStore.isInitialized = true;
+
+            await router.push({ name: 'dashboard' });
+
         } else {
             Notify.create({
                 actions: [{ label: 'Kapat', color: 'white' }],
@@ -98,9 +105,14 @@ const handleLogin = async () => {
 
     } catch (error) {
         console.error('An unexpected error occurred:', error);
+
+        const axiosError = error as AxiosError;
+        const apiError = axiosError.response?.data as { success: boolean; message: string; data: unknown } | undefined;
+        const errorMessage = apiError?.message || 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.';
+
         Notify.create({
             actions: [{ label: 'Kapat', color: 'white' }],
-            message: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+            message: errorMessage,
             color: 'red',
             position: 'bottom'
         });
@@ -113,7 +125,7 @@ const handleLogin = async () => {
 <style scoped>
 .login-bg {
     background-image: url('../assets/login_background.jpg');
-    background-size: c over;
+    background-size: cover;
     background-position: center;
 }
 

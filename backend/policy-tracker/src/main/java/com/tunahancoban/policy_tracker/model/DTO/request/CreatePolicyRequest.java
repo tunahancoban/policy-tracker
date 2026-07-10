@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO;
+package com.tunahancoban.policy_tracker.model.DTO.request;
 
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;

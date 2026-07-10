@@ -44,7 +44,7 @@ public class SecurityConfig {
         // Kural 1: Cookie kullanılacağı için "*" GEÇERSİZDİR. Tam adres yazmalısınız.
         configuration.setAllowedOrigins(List.of("http://localhost:9000"));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
 
         // Kural 2: Cookie (Credentials) geçişine backend'in izin vermesi şarttır

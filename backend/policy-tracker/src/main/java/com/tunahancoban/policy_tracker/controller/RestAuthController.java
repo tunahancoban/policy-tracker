@@ -1,12 +1,13 @@
 package com.tunahancoban.policy_tracker.controller;
 
-import com.tunahancoban.policy_tracker.model.DTO.LoginRequest;
-import com.tunahancoban.policy_tracker.model.DTO.LoginResponse;
-import com.tunahancoban.policy_tracker.model.DTO.RestResponse;
-import com.tunahancoban.policy_tracker.services.AuthService;
+import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
+import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
+import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
+import com.tunahancoban.policy_tracker.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:9000", allowCredentials = "true")
@@ -18,8 +19,8 @@ public class RestAuthController {
     private final AuthService authService;
 
     @PostMapping(path = "/login-request")
-    public RestResponse<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response){
-        try{
+    public ResponseEntity<RestResponse<LoginResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response){
+
             LoginResponse loginResponse = authService.authenticate(request);
             Cookie cookie = new Cookie("jwt_token", loginResponse.getToken());
             cookie.setHttpOnly(true);
@@ -30,11 +31,12 @@ public class RestAuthController {
             response.addCookie(cookie);
 
             LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getUserEmail());
-            return RestResponse.success("Başarıyla giriş yapıldı", newLoginResponse);
-
-        }catch(Exception e){
-            return RestResponse.error(e.getMessage());
-        }
+            return ResponseEntity.ok(RestResponse.success("Başarıyla giriş yapıldı", newLoginResponse));
+    }
+    @GetMapping(path = "/me")
+    public ResponseEntity<RestResponse<LoginResponse>> getCurrentUser(){
+        LoginResponse loginResponse = authService.getCurrentUser();
+        return  ResponseEntity.ok(RestResponse.success("Bilgiler başarıyla yüklendi", loginResponse));
     }
 
 }

@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.services;
+package com.tunahancoban.policy_tracker.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,6 +30,7 @@ public class JWTService {
         this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
     }
 
+    //It generates JWT token
     public String generateToken(UserDetails userDetails){
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -51,7 +52,9 @@ public class JWTService {
                 .signWith(secretKey, SignatureAlgorithm.HS256) // Signed with key
                 .compact();
     }
+    //Helper methods
 
+    //Extract claims
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
@@ -64,19 +67,19 @@ public class JWTService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
+    //Extract email
     public String extractEmail(String token){
         return extractClaim(token, Claims::getSubject);
     }
-
+    //Extract expiration
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
+    //Extract token expired
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-
+    //Extract is token valid
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractEmail(token); // Get email from token
 

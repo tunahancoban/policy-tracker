@@ -47,19 +47,43 @@
                         </div>
                     </q-card-section>
 
+
                     <q-card-section class="q-pt-none">
-                        <div class="text-subtitle1 text-weight-bold q-mb-sm">Son İşlemler</div>
-                        <q-list separator>
-                            <q-item v-for="(activity, index) in activities" :key="index">
-                                <q-item-section>
-                                    <q-item-label class="text-weight-medium">{{ activity.title }}</q-item-label>
-                                    <q-item-label caption>{{ activity.description }}</q-item-label>
-                                </q-item-section>
-                                <q-item-section side top>
-                                    <q-item-label caption>{{ formatDate(activity.date) }}</q-item-label>
-                                </q-item-section>
-                            </q-item>
-                        </q-list>
+                        <div class="q-px-md q-py-sm">
+                            <q-timeline color="secondary">
+                                <q-timeline-entry heading> Son İşlemler </q-timeline-entry>
+
+                                <q-timeline-entry v-for="(activity, index) in activities" :key="index"
+                                    :title="activity.type" :subtitle="formatDate(activity.dateTime)">
+                                    <div class="text-body2 text-grey-8">
+                                        {{ activity.detail }}
+                                    </div>
+                                </q-timeline-entry>
+                            </q-timeline>
+                        </div>
+                    </q-card-section>
+
+                    <q-card-section>
+                        <div class="text-subtitle1 q-mb-md text-center">Sistem Analiz Grafikleri</div>
+                        <div class="row q-col-gutter-md">
+
+                            <div class="col-12 col-md-6">
+                                <q-card flat bordered class="q-pa-sm">
+                                    <q-card-section style="position: relative; height: 320px; width: 100%;">
+                                        <canvas ref="myPieChartCanvas"></canvas>
+                                    </q-card-section>
+                                </q-card>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <q-card flat bordered class="q-pa-sm">
+                                    <q-card-section style="position: relative; height: 320px; width: 100%;">
+                                        <canvas ref="myBarChartCanvas"></canvas>
+                                    </q-card-section>
+                                </q-card>
+                            </div>
+
+                        </div>
                     </q-card-section>
 
                 </q-card>
@@ -70,9 +94,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { api } from '../boot/axios';
 import { Notify } from 'quasar';
+import Chart from 'chart.js/auto';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 interface DashboardData {
     totalCustomers: number;
@@ -82,9 +108,15 @@ interface DashboardData {
 }
 
 interface RecentActivity {
-    title: string;
-    description: string;
-    date: string;
+    type: string;
+    detail: string;
+    dateTime: string;
+}
+
+// Java'daki ChartResponse DTO'sunun frontend interface karşılığı
+interface ChartResponseData {
+    typeLabels: Record<string, number>;      // Map<String, Long>
+    monthlyPremium: Record<string, number>;   // Map<String, Double>
 }
 
 const summary = ref<DashboardData>({
@@ -96,11 +128,23 @@ const summary = ref<DashboardData>({
 
 const activities = ref<RecentActivity[]>([]);
 
+// API'den gelen ham grafik verilerini tutacak ref
+const chartDataFromApi = ref<ChartResponseData>({
+    typeLabels: {},
+    monthlyPremium: {}
+});
+
+// Canvas elementlerini yakalayacak olan ref'ler (Template kısmında ref isimlerinin bunlarla uyuştuğundan emin ol)
+const myPieChartCanvas = ref<HTMLCanvasElement | null>(null);
+const myBarChartCanvas = ref<HTMLCanvasElement | null>(null);
+
+
 const fetchDashboardData = async () => {
     try {
-        const [summaryResponse, activitiesResponse] = await Promise.all([
+        const [summaryResponse, activitiesResponse, chartsResponse] = await Promise.all([
             api.get('/rest/api/dashboard/get-summary'),
-            api.get('/rest/api/dashboard/get-recent-activities/5')
+            api.get('/rest/api/dashboard/get-recent-activities/5'),
+            api.get('/rest/api/dashboard/get-charts')
         ]);
 
         const summaryResult = summaryResponse.data;
@@ -114,7 +158,15 @@ const fetchDashboardData = async () => {
         if (activitiesResult.success && activitiesResult.data) {
             activities.value = activitiesResult.data;
         } else {
-            showErrorNotify('Son işlemler alınamadı: ' + (activitiesResult.message || 'Bilinmeyen hata'));
+            showErrorNotify('Son işlemler verileri alınamadı: ' + (activitiesResult.message || 'Bilinmeyen hata'));
+        }
+
+        // Backend Map verilerini buraya kaydediyoruz
+        const chartsResult = chartsResponse.data;
+        if (chartsResult.success && chartsResult.data) {
+            chartDataFromApi.value = chartsResult.data;
+        } else {
+            showErrorNotify('Grafik verileri alınamadı: ' + (chartsResult.message || 'Bilinmeyen hata'));
         }
 
     } catch (error: unknown) {
@@ -138,7 +190,116 @@ const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 };
 
+const policyColorMap: Record<string, string> = {
+    'KASKO': '#1976D2',
+    'TRAFIK': '#26A69A',
+    'SAGLIK': '#21BA45',
+    'KONUT': '#F2C037',
+    'DASK': '#9C27B0',
+};
+
+const pieChartData = computed(() => {
+    const labels = Object.keys(chartDataFromApi.value.typeLabels);
+
+    const backgroundColors = labels.map(label => policyColorMap[label] || '#607D8B');
+
+    return {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Poliçe Sayısı',
+                backgroundColor: backgroundColors,
+                data: Object.values(chartDataFromApi.value.typeLabels)
+            }
+        ]
+    };
+});
+
+// 2. Bar Grafiği İçin Dinamik Veri
+const barChartData = computed(() => ({
+    labels: Object.keys(chartDataFromApi.value.monthlyPremium),
+    datasets: [
+        {
+            label: 'Aylık Toplam Prim (TL)',
+            backgroundColor: '#26A69A',
+            data: Object.values(chartDataFromApi.value.monthlyPremium)
+        }
+    ]
+}));
+
+let pieDelayed = false;
+let barDelayed = false;
+
 onMounted(async () => {
+    // Önce tüm verileri API'den bekliyoruz
     await fetchDashboardData();
+
+
+
+    // 1. Pasta Grafiğini Çizdir (Poliçe Tür Dağılımı + Yüzdelik Eklenti)
+    if (myPieChartCanvas.value) {
+        new Chart(myPieChartCanvas.value, {
+            type: 'doughnut',
+            data: pieChartData.value,
+            plugins: [ChartDataLabels],
+            options: {
+                responsive: true,
+                animation: {
+                    onComplete: () => { pieDelayed = true; },
+                    delay: (context) => {
+                        let delay = 0;
+                        if (context.type === 'data' && context.mode === 'default' && !pieDelayed) {
+                            delay = context.dataIndex * 300 + context.datasetIndex * 100;
+                        }
+                        return delay;
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Poliçe Türü Dağılımı' },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value, ctx) => {
+                            const datasets = ctx.chart.data?.datasets;
+                            const datapoints = (datasets && datasets[0]?.data ? datasets[0].data : []) as number[];
+                            const total = datapoints.reduce((total, num) => total + num, 0);
+                            return total > 0 ? `%${Math.round((value / total) * 100)}` : '%0';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Bar Grafiğini Çizdir (Aylık Primler + Özel Gecikmeli Animasyon)
+    if (myBarChartCanvas.value) {
+        new Chart(myBarChartCanvas.value, {
+            type: 'bar',
+            data: barChartData.value,
+            options: {
+                responsive: true,
+                animation: {
+                    onComplete: () => { barDelayed = true; },
+                    delay: (context) => {
+                        let delay = 0;
+                        if (context.type === 'data' && context.mode === 'default' && !barDelayed) {
+                            delay = context.dataIndex * 300 + context.datasetIndex * 100;
+                        }
+                        return delay;
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Aylık Prim Gelişimi' }
+                }
+            }
+        });
+    }
 });
 </script>

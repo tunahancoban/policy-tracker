@@ -1,7 +1,7 @@
 package com.tunahancoban.policy_tracker.config;
 
-import com.tunahancoban.policy_tracker.services.JWTService;
-import com.tunahancoban.policy_tracker.services.UserService;
+import com.tunahancoban.policy_tracker.service.JWTService;
+import com.tunahancoban.policy_tracker.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO;
+package com.tunahancoban.policy_tracker.model.DTO.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DashboardSummaryDTO {
+public class DashboardSummaryResponse {
     private long totalCustomers;
     private long activePolicyNumber;
     private long expiringSoonPolicies;

@@ -1,6 +1,6 @@
-package com.tunahancoban.policy_tracker.services;
+package com.tunahancoban.policy_tracker.service;
 
-import com.tunahancoban.policy_tracker.model.DTO.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
@@ -21,39 +21,45 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public List<User> getUserWithParam(String id ,String firstName, String lastName,String email , Role role){
-        User searchCriteria = new User();
-        searchCriteria.setId(id);
-        searchCriteria.setFirstName(firstName);
-        searchCriteria.setLastName(lastName);
-        searchCriteria.setEmail(email);
-        searchCriteria.setRole(role);
+        //Creates a searchCriteria
+        User searchCriteria = User.builder()
+                .id(id)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .role(role)
+                .build();
 
+        //Searches the user
         ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-
         Example<User> example = Example.of(searchCriteria, matcher);
 
         return userRepository.findAll(example);
     }
 
     public User createUser(RegisterRequest registerRequest){
-
+        //Checks user is exist
         if(userRepository.existsByEmail(registerRequest.getEmail())){
             throw new RuntimeException("This email already used by someone");
         }
-        
+
+        //It is hashing password
         String rawPassword = registerRequest.getPassword();
         String hashedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User();
 
-        user.setFirstName(registerRequest.getFirstName());
-        user.setLastName(registerRequest.getLastName());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(hashedPassword);
-        user.setRole(registerRequest.getRole());
+        //It saves user
+        User user = User.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .password(hashedPassword)
+                .role(registerRequest.getRole())
+                .build();
 
         return userRepository.save(user);
     }
 
+    //Delete user
     public void deleteUser(String id){
         if (!userRepository.existsById(id)){
             throw new RuntimeException("This id does not exist. ID: " +id);
@@ -61,6 +67,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    //Update User
     public void updateUser(String id , Map<String, Object> updates){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("This id does not exist. ID: " + id));

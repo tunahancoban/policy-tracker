@@ -4,10 +4,7 @@ import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Policy {
     @Id
     private String id;
@@ -34,7 +32,7 @@ public class Policy {
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate startDate; //Policy start date
+    private LocalDate startDate; 
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
