@@ -9,17 +9,31 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresGuest: true },
   },
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('@/pages/DashboardPage.vue'),
+    path: '/',
+    component: () => import('@/layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
-  },
-
-  {
-    path: '/customers',
-    name: 'customers',
-    component: () => import('@/pages/CustomerPage.vue'),
-    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('@/pages/DashboardPage.vue'),
+      },
+      {
+        path: 'customers',
+        name: 'customers',
+        component: () => import('@/pages/CustomerPage.vue'),
+      },
+      {
+        path: 'customer/:id',
+        name: 'customer-detail',
+        component: () => import('@/pages/CustomerDetailPage.vue'),
+      },
+      {
+        path: 'policy',
+        name: 'policy',
+        component: () => import('@/pages/PolicyPage.vue'),
+      },
+    ],
   },
 
   {

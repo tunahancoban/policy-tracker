@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { api } from '../boot/axios';
 
 interface CustomerData {
-  customerID: string;
+  customerId: string;
   firstName: string;
   lastName: string;
   identityNumber: string;
@@ -49,6 +49,29 @@ export const useCustomerStore = defineStore('customer', () => {
       isInitialized.value = true;
     }
   };
+  const searchCustomer = async (searchParams: Record<string, string>) => {
+    isLoading.value = true;
+    try {
+      // URL'i temiz tutup, nesneyi doğrudan config içindeki params'a paslıyoruz
+      const response = await api.get<ApiResponse<CustomerData[]>>(
+        '/rest/api/customer/with-params',
+        { params: searchParams },
+      );
+
+      if (response.data.success && response.data.data) {
+        customerData.value = Array.isArray(response.data.data)
+          ? response.data.data
+          : [response.data.data];
+      } else {
+        customerData.value = [];
+      }
+    } catch (error) {
+      console.error('searchCustomer başarısız oldu:', error);
+      customerData.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   const addCustomer = async (newCustomer: CustomerData) => {
     isLoading.value = true;
@@ -80,7 +103,7 @@ export const useCustomerStore = defineStore('customer', () => {
     isLoading.value = true;
     try {
       const response = await api.patch<ApiResponse<CustomerData[]>>(
-        `/rest/api/customer/update-customer/${updatedCustomer.customerID}`,
+        `/rest/api/customer/update-customer/${updatedCustomer.customerId}`,
         updatedCustomer,
       );
       if (response.data.success && response.data.data) {
@@ -88,12 +111,12 @@ export const useCustomerStore = defineStore('customer', () => {
           const resData = response.data.data as unknown;
 
           const targetID = Array.isArray(resData)
-            ? (resData as CustomerData[])[0]?.customerID
-            : (resData as CustomerData)?.customerID;
+            ? (resData as CustomerData[])[0]?.customerId
+            : (resData as CustomerData)?.customerId;
 
-          const finalID = targetID ?? updatedCustomer.customerID;
+          const finalID = targetID ?? updatedCustomer.customerId;
 
-          const index = customerData.value.findIndex((c) => c.customerID === finalID);
+          const index = customerData.value.findIndex((c) => c.customerId === finalID);
           if (index !== -1) {
             const incomingObj = Array.isArray(resData)
               ? (resData as CustomerData[])[0]
@@ -111,10 +134,10 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
-  const deleteCustomer = async (customerID: string) => {
+  const deleteCustomer = async (customerId: string) => {
     try {
       const response = await api.delete<ApiResponse<null>>(
-        `/rest/api/customer/delete-customer/${customerID}`,
+        `/rest/api/customer/delete-customer/${customerId}`,
       );
       if (response.data.success) {
         customerData.value = [];
@@ -135,5 +158,6 @@ export const useCustomerStore = defineStore('customer', () => {
     addCustomer,
     updateCustomer,
     deleteCustomer,
+    searchCustomer,
   };
 });

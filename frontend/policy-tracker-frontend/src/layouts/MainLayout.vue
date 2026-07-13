@@ -3,18 +3,26 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title> Policy Tracker Panel </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header class="text-weight-bold text-uppercase text-grey-7">
+          Yönetim Paneli
+        </q-item-label>
 
-        <EssentialLink v-for="link in linksList" :key="link.label" v-bind="link" />
+        <q-item v-for="link in linksList" :key="link.label" clickable v-ripple :to="link.link"
+          active-class="bg-blue-1 text-primary text-weight-bold">
+          <q-item-section avatar>
+            <q-icon :name="link.icon" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ link.label }}</q-item-label>
+            <q-item-label caption class="text-grey-6">{{ link.caption }}</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -26,51 +34,33 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from '@/components/EssentialLink.vue';
 
-const linksList: EssentialLinkProps[] = [
+interface MenuLink {
+  label: string;
+  caption: string;
+  icon: string;
+  link: string;
+}
+
+const linksList: MenuLink[] = [
   {
-    label: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
+    label: 'Dashboard',
+    caption: 'Sistem özet grafiklerinin yer aldığı ana sayfa.',
+    icon: 'dashboard',
+    link: '/dashboard',
   },
   {
-    label: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
+    label: 'Müşteriler',
+    caption: 'Müşteri ekleme, listeleme ve detay yönetimi.',
+    icon: 'people',
+    link: '/customers',
   },
   {
-    label: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    label: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    label: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    label: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    label: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
+    label: 'Poliçeler',
+    caption: 'Poliçe yönetim',
+    icon: 'policy',
+    link: '/policy'
+  }
 ];
 
 const leftDrawerOpen = ref(false);

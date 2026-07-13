@@ -48,21 +48,6 @@
                     </q-card-section>
 
 
-                    <q-card-section class="q-pt-none">
-                        <div class="q-px-md q-py-sm">
-                            <q-timeline color="secondary">
-                                <q-timeline-entry heading> Son İşlemler </q-timeline-entry>
-
-                                <q-timeline-entry v-for="(activity, index) in activities" :key="index"
-                                    :title="activity.type" :subtitle="formatDate(activity.dateTime)">
-                                    <div class="text-body2 text-grey-8">
-                                        {{ activity.detail }}
-                                    </div>
-                                </q-timeline-entry>
-                            </q-timeline>
-                        </div>
-                    </q-card-section>
-
                     <q-card-section>
                         <div class="text-subtitle1 q-mb-md text-center">Sistem Analiz Grafikleri</div>
                         <div class="row q-col-gutter-md">
@@ -83,6 +68,21 @@
                                 </q-card>
                             </div>
 
+                        </div>
+                    </q-card-section>
+
+                    <q-card-section class="q-pt-none">
+                        <div class="q-px-md q-py-sm scroll" style="max-height: 400px; overflow-y: auto;">
+                            <q-timeline color="secondary">
+                                <q-timeline-entry heading> Son İşlemler </q-timeline-entry>
+
+                                <q-timeline-entry v-for="(activity, index) in activities" :key="index"
+                                    :title="activity.type" :subtitle="formatDate(activity.dateTime)">
+                                    <div class="text-body2 text-grey-8">
+                                        {{ activity.detail }}
+                                    </div>
+                                </q-timeline-entry>
+                            </q-timeline>
                         </div>
                     </q-card-section>
 
