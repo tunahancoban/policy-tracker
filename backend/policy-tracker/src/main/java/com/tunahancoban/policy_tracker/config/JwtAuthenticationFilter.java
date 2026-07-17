@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. Tarayıcının ön kontrol (OPTIONS) isteklerini doğrudan geçirelim
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
@@ -40,10 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = null;
         String email = null;
 
-        // 2. JWT'yi HEADER yerine COOKIE içinden okuyoruz
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                // NOT: Quasar/Backend tarafında cookie'ye hangi ismi verdiysen buraya onu yaz! (Örn: "jwt", "token" vb.)
                 if ("jwt_token".equals(cookie.getName())) {
                     jwt = cookie.getValue();
                     break;
@@ -51,13 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 3. Eğer cookie'de token bulunamadıysa zincire devam et (Spring Security 403 verecektir, normal)
         if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 4. Token varsa mail adresini çıkart ve doğrula
         email = jwtService.extractEmail(jwt);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

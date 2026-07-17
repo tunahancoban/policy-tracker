@@ -47,11 +47,11 @@
 import { ref, onMounted } from 'vue';
 import { useCustomerStore } from '../stores/customer';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router'; // Yönlendirme için router'ı import ettik
+import { useRouter } from 'vue-router';
 import CustomerModal from '../components/CustomerModal.vue';
 
 // ── Extracted modules ──────────────────────────────────────────────
-import type { LocalCustomerData } from '../types/customer.types';
+import type { Customer } from '../types/customer.types';
 import { customerColumns } from '../types/customer.types';
 import { useCustomerSearch } from '../composables/useCustomerSearch';
 
@@ -62,13 +62,13 @@ const router = useRouter(); // Router nesnesini oluşturduk
 const searchQuery = ref<string>('');
 
 const showModal = ref(false);
-const editingCustomer = ref<LocalCustomerData | undefined>(undefined);
+const editingCustomer = ref<Customer | undefined>(undefined);
 
 // ── Search composable ──────────────────────────────────────────────
 const { onSearch } = useCustomerSearch(searchQuery, customerStore);
 
 // Satıra tıklandığında detay sayfasına uçuran fonksiyon
-const goToCustomerDetail = (evt: unknown, row: LocalCustomerData) => {
+const goToCustomerDetail = (evt: unknown, row: Customer) => {
     // routes.ts dosyasındaki name: 'customer-detail' ile eşleşiyor
     void router.push({ name: 'customer-detail', params: { id: row.customerId } });
 };
@@ -83,7 +83,7 @@ const openAddModal = () => {
 };
 
 const openEditModal = (customer: unknown) => {
-    editingCustomer.value = customer as LocalCustomerData;
+    editingCustomer.value = customer as Customer;
     showModal.value = true;
 };
 
@@ -91,7 +91,7 @@ const onCustomerSaved = async () => {
     await customerStore.fetchCustomerData();
 };
 
-const toggleActiveStatus = async (customer: LocalCustomerData, newStatus: boolean) => {
+const toggleActiveStatus = async (customer: Customer, newStatus: boolean) => {
     try {
         await customerStore.updateCustomer({
             ...customer,
@@ -110,7 +110,7 @@ const toggleActiveStatus = async (customer: LocalCustomerData, newStatus: boolea
     }
 };
 
-const confirmDelete = (customer: LocalCustomerData) => {
+const confirmDelete = (customer: Customer) => {
     if (!customer.customerId) return;
 
     $q.dialog({
@@ -137,7 +137,6 @@ const confirmDelete = (customer: LocalCustomerData) => {
 </script>
 
 <style scoped>
-/* Tablo satırlarının üzerine gelindiğinde tıklanabilir olduğunu belli etmek için el işareti koyuyoruz */
 .customer-table :deep(.q-table tbody tr) {
     cursor: pointer;
 }

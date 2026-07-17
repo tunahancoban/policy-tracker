@@ -10,17 +10,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "customers")
-@Builder
+@Builder(toBuilder = true)
 public class Customer {
 
     @Id
     private String id;
 
-    private String customerID;
+    private String customerId;
 
     @NotBlank(message = "Name cannot be null")
     private String firstName;
@@ -48,5 +47,7 @@ public class Customer {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
     private Boolean active = true;
+
+
 
 }

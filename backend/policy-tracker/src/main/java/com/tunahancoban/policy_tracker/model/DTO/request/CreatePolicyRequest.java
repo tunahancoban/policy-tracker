@@ -30,7 +30,7 @@ public class CreatePolicyRequest {
     private LocalDate endDate; //Policy end date
 
     @Positive
-    private double premium;
+    private Double premium;
 
 
 }

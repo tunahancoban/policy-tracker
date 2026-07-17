@@ -33,10 +33,19 @@ public class RestAuthController {
             LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getUserEmail());
             return ResponseEntity.ok(RestResponse.success("Başarıyla giriş yapıldı", newLoginResponse));
     }
-    @GetMapping(path = "/me")
-    public ResponseEntity<RestResponse<LoginResponse>> getCurrentUser(){
-        LoginResponse loginResponse = authService.getCurrentUser();
-        return  ResponseEntity.ok(RestResponse.success("Bilgiler başarıyla yüklendi", loginResponse));
+
+    @PostMapping(path = "/logout")
+    public ResponseEntity<RestResponse<Void>> logout(HttpServletResponse response){
+        Cookie cookie = new Cookie("jwt_token", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); //Token lifecycle
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(RestResponse.success("Başarıyla çıkış yapıldı" ));
+
     }
 
 }

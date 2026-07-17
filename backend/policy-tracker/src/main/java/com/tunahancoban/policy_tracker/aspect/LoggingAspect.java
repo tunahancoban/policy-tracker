@@ -27,7 +27,7 @@ public class LoggingAspect {
 
         if(result instanceof Customer){
             Customer createdCustomer = (Customer) result;
-            finalDetail += " Müşteri ID: " +createdCustomer.getCustomerID();
+            finalDetail += " Müşteri ID: " +createdCustomer.getCustomerId();
         } else {
             //If method returns nothing catches the parameter
             Object[] methodArgs = joinPoint.getArgs();

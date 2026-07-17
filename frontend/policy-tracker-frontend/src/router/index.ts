@@ -7,11 +7,14 @@ import {
   createWebHistory,
 } from 'vue-router';
 
+import { useQuasar } from 'quasar';
+
 import routes from './routes';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '../stores/auth';
+
+const $q = useQuasar();
 
 export default defineRouter(({ store }) => {
-  //  Buradaki { store } parametresini açtık
   const createHistory = import.meta.env.QUASAR_SERVER
     ? createMemoryHistory
     : import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'
@@ -46,6 +49,17 @@ export default defineRouter(({ store }) => {
       next({ name: 'dashboard' });
     } else {
       next();
+    }
+
+    if (to.meta.requiresAdmin) {
+      // Kullanıcı giriş yapmış mı VE rolü 'ADMIN' mi?
+      if (authStore.isAuthenticated && authStore.userRole === 'ADMIN') {
+        next();
+      } else {
+        // Admin değilse yetkisiz sayfa uyarısı verebilir veya Dashboard'a fırlatabilirsin
+        $q.notify({ message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.', color: 'negative' });
+        next({ name: 'dashboard' });
+      }
     }
   });
 

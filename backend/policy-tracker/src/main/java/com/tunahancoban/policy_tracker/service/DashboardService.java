@@ -1,6 +1,5 @@
 package com.tunahancoban.policy_tracker.service;
 
-import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.model.DTO.response.ChartResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;

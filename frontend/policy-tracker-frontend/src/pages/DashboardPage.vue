@@ -1,8 +1,5 @@
 <template>
-    <q-layout view="lHh Lpr lFf">
-        <q-page-container>
-
-            <q-page class="q-pa-md">
+    <q-page class="q-pa-md fade-in-up">
                 <q-card class="my-card">
                     <q-card-section>
                         <div class="text-h6">Dashboard</div>
@@ -87,10 +84,7 @@
                     </q-card-section>
 
                 </q-card>
-            </q-page>
-
-        </q-page-container>
-    </q-layout>
+    </q-page>
 </template>
 
 <script setup lang="ts">
@@ -113,10 +107,9 @@ interface RecentActivity {
     dateTime: string;
 }
 
-// Java'daki ChartResponse DTO'sunun frontend interface karşılığı
 interface ChartResponseData {
-    typeLabels: Record<string, number>;      // Map<String, Long>
-    monthlyPremium: Record<string, number>;   // Map<String, Double>
+    typeLabels: Record<string, number>;    
+    monthlyPremium: Record<string, number>;   
 }
 
 const summary = ref<DashboardData>({
@@ -128,13 +121,11 @@ const summary = ref<DashboardData>({
 
 const activities = ref<RecentActivity[]>([]);
 
-// API'den gelen ham grafik verilerini tutacak ref
 const chartDataFromApi = ref<ChartResponseData>({
     typeLabels: {},
     monthlyPremium: {}
 });
 
-// Canvas elementlerini yakalayacak olan ref'ler (Template kısmında ref isimlerinin bunlarla uyuştuğundan emin ol)
 const myPieChartCanvas = ref<HTMLCanvasElement | null>(null);
 const myBarChartCanvas = ref<HTMLCanvasElement | null>(null);
 
@@ -161,7 +152,6 @@ const fetchDashboardData = async () => {
             showErrorNotify('Son işlemler verileri alınamadı: ' + (activitiesResult.message || 'Bilinmeyen hata'));
         }
 
-        // Backend Map verilerini buraya kaydediyoruz
         const chartsResult = chartsResponse.data;
         if (chartsResult.success && chartsResult.data) {
             chartDataFromApi.value = chartsResult.data;
@@ -231,12 +221,8 @@ let pieDelayed = false;
 let barDelayed = false;
 
 onMounted(async () => {
-    // Önce tüm verileri API'den bekliyoruz
     await fetchDashboardData();
 
-
-
-    // 1. Pasta Grafiğini Çizdir (Poliçe Tür Dağılımı + Yüzdelik Eklenti)
     if (myPieChartCanvas.value) {
         new Chart(myPieChartCanvas.value, {
             type: 'doughnut',
@@ -272,7 +258,6 @@ onMounted(async () => {
         });
     }
 
-    // 2. Bar Grafiğini Çizdir (Aylık Primler + Özel Gecikmeli Animasyon)
     if (myBarChartCanvas.value) {
         new Chart(myBarChartCanvas.value, {
             type: 'bar',

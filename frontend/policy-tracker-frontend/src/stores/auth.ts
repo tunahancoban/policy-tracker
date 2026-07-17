@@ -2,17 +2,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { api } from '../boot/axios';
-
+import type { ApiResponse } from '../types/api.types';
 interface UserData {
   role: string;
   userEmail: string;
-}
-
-// Backend'den gelen genel API yanıt yapısı
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -21,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isInitialized = ref<boolean>(false);
 
   const isAuthenticated = computed(() => !!userEmail.value);
+  const isAdmin = computed(() => userRole.value === 'ROLE_ADMIN');
 
   const saveLoginData = (userData: UserData) => {
     userRole.value = userData.role;
@@ -29,17 +23,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   const checkAuth = async () => {
     try {
-      // 1. Axios tipini ApiResponse<UserData> olarak güncelledik
-      const response = await api.get<ApiResponse<UserData>>('/rest/api/auth/me');
+      const response = await api.get<ApiResponse<UserData>>('/rest/api/profile/me');
 
       const restResponse = response.data;
 
-      // 2. Gelen verinin başarılı olduğunu ve içinin dolu olduğunu kontrol ediyoruz
       if (restResponse.success && restResponse.data) {
         userRole.value = restResponse.data.role;
         userEmail.value = restResponse.data.userEmail;
       } else {
-        // Eğer success false geldiyse state'i temizle
         userRole.value = null;
         userEmail.value = null;
       }
@@ -52,10 +43,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  const logout = () => {
-    userRole.value = null;
-    userEmail.value = null;
-    isInitialized.value = false;
+  const logout = async () => {
+    try {
+      await api.post<ApiResponse<void>>('/rest/api/auth/logout');
+    } catch (error) {
+      console.error('Logout isteği sırasında hata oluştu:', error);
+    } finally {
+      userRole.value = null;
+      userEmail.value = null;
+      isInitialized.value = false;
+    }
   };
 
   return {
@@ -63,6 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
     userEmail,
     isInitialized,
     isAuthenticated,
+    isAdmin,
     saveLoginData,
     checkAuth,
     logout,

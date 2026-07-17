@@ -1,6 +1,8 @@
 package com.tunahancoban.policy_tracker.service;
 
+import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
@@ -31,14 +33,17 @@ public class UserService {
                 .build();
 
         //Searches the user
-        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<User> example = Example.of(searchCriteria, matcher);
 
         return userRepository.findAll(example);
     }
 
     public User createUser(RegisterRequest registerRequest){
-        //Checks user is exist
+        //Checks user does exist
         if(userRepository.existsByEmail(registerRequest.getEmail())){
             throw new RuntimeException("This email already used by someone");
         }
@@ -68,9 +73,11 @@ public class UserService {
     }
 
     //Update User
-    public void updateUser(String id , Map<String, Object> updates){
+    public boolean updateUser(String id , Map<String, Object> updates){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("This id does not exist. ID: " + id));
+
+        User.UserBuilder userBuilder = user.toBuilder();
 
         updates.forEach((key, value) -> {
             switch (key) {
@@ -79,26 +86,31 @@ public class UserService {
                     if (userRepository.existsByEmailAndIdNot(newEmail, id)) {
                         throw new RuntimeException("This email is taken");
                     }
-                    user.setEmail(newEmail);
+                    userBuilder.email(newEmail);
                     break;
 
                 case "firstName":
-                    user.setFirstName((String) value);
+                    userBuilder.firstName((String) value);
                     break;
 
                 case "lastName":
-                    user.setLastName((String) value);
+                    userBuilder.lastName((String) value);
                     break;
 
                 case "password":
                     String rawPassword = (String) value;
                     if (rawPassword != null && !rawPassword.trim().isEmpty()) {
-                        user.setPassword(passwordEncoder.encode(rawPassword));
+                        userBuilder.password(passwordEncoder.encode(rawPassword));
                     }
+                    break;
+                case "role":
+                    userBuilder.role(Role.valueOf((String) value));
                     break;
             }
         });
-        userRepository.save(user);
+        User updatedUser = userBuilder.build();
+        userRepository.save(updatedUser);
+        return true;
     }
 
 }

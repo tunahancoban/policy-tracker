@@ -19,7 +19,6 @@
 
                     <q-card-section class="q-pa-md">
                         <q-list dense>
-                            23
                             <q-item class="q-py-sm">
                                 <q-item-section avatar><q-icon name="account_box" color="primary" /></q-item-section>
                                 <q-item-section>
@@ -34,7 +33,7 @@
                                 <q-item-section>
                                     <q-item-label caption>T.C. Kimlik No </q-item-label>
                                     <q-item-label class="text-weight-medium">{{ customer.identityNumber
-                                        }}</q-item-label>
+                                    }}</q-item-label>
                                 </q-item-section>
                             </q-item>
 
@@ -52,7 +51,7 @@
                                 <q-item-section>
                                     <q-item-label caption>Telefon Numarası</q-item-label>
                                     <q-item-label class="text-weight-medium">{{ customer.phoneNumber || 'Belirtilmedi'
-                                        }}</q-item-label>
+                                    }}</q-item-label>
                                 </q-item-section>
                             </q-item>
 
@@ -73,7 +72,7 @@
                                     <q-item-label>
                                         <q-chip :color="customer.active ? 'positive' : 'negative'" text-color="white"
                                             dense class="text-weight-bold">
-                                            {{ customer.active ? 'AKTİF MÜŞTERİ' : 'PASİF' }}
+                                            {{ customer.active ? 'AKTİF ' : 'PASİF' }}
                                         </q-chip>
                                     </q-item-label>
                                 </q-item-section>
@@ -103,13 +102,13 @@
                         </div>
 
                         <div v-else>
-                            <q-table flat bordered :rows="policies" :columns="policyColumns" row-key="id"
+                            <q-table flat bordered :rows="policies" :columns="policyColumns" row-key="policyId"
                                 :loading="isPoliciesLoading" no-data-label="Poliçe bulunamadı.">
-                                <template v-slot:body-cell-status="props">
+                                <template v-slot:body-cell-statu="props">
                                     <q-td :props="props" class="text-center">
-                                        <q-chip :color="props.row.status === 'AKTİF' ? 'positive' : 'warning'"
-                                            text-color="white" dense>
-                                            {{ props.row.status }}
+                                        <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white"
+                                            dense class="text-weight-bold">
+                                            {{ calculateRemainingDays(props.row.endDate) }}
                                         </q-chip>
                                     </q-td>
                                 </template>
@@ -131,48 +130,20 @@ import { useRoute } from 'vue-router';
 import { api } from '../boot/axios';
 import { useCustomerStore } from '../stores/customer';
 import CustomerModal from '../components/CustomerModal.vue';
-
-// Müşteri Tipi
-interface Customer {
-    customerId?: string;
-    firstName?: string;
-    lastName?: string;
-    identityNumber?: string;
-    email?: string;
-    phoneNumber?: string;
-    fullAddress?: string;
-    district?: string;
-    city?: string;
-    active?: boolean;
-}
-
-// Poliçe Tipi
-interface Policy {
-    policyId: string;
-    type: string;
-    startDate: string;
-    endDate: string;
-    premium: number;
-    customerId: string;
-}
+import type { Customer } from '../types/customer.types';
+import type { Policy } from '../types/policy.types';
+import { policyColumns } from '../types/policy.types';
+import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper'
 
 const route = useRoute();
 const customerId = route.params.id as string;
 
 const customerStore = useCustomerStore();
 
-const customer = ref<Customer>({});
+const customer = ref<Partial<Customer>>({});
 const policies = ref<Policy[]>([]);
 const isPoliciesLoading = ref<boolean>(false);
 const showModal = ref(false);
-
-const policyColumns = [
-    { name: 'policyId', label: 'Poliçe No', field: 'policyId', align: 'left' as const, sortable: true },
-    { name: 'type', label: 'Poliçe Türü', field: 'type', align: 'left' as const, sortable: true },
-    { name: 'startDate', label: 'Başlangıç Tarihi', field: 'startDate', align: 'center' as const },
-    { name: 'endDate', label: 'Bitiş Tarihi', field: 'endDate', align: 'center' as const },
-    { name: 'premium', label: 'Prim Tutarı', field: (row: Policy) => `${row.premium} TL`, align: 'right' as const },
-];
 
 const fetchCustomerDetails = async () => {
     try {

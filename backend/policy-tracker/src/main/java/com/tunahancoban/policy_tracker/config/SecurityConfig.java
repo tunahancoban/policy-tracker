@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/rest/api/auth/**").permitAll()
+                        .requestMatchers("/rest/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/rest/api/profile/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -41,13 +43,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Kural 1: Cookie kullanılacağı için "*" GEÇERSİZDİR. Tam adres yazmalısınız.
         configuration.setAllowedOrigins(List.of("http://localhost:9000"));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
 
-        // Kural 2: Cookie (Credentials) geçişine backend'in izin vermesi şarttır
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

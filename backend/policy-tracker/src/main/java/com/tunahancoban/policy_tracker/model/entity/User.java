@@ -20,8 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
-@Builder
+@Builder(toBuilder = true)
 public class User implements UserDetails {
     @Id
     private String id; //Unique
@@ -75,5 +74,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
+    }
+
+    public String toString() {
+        return "User(id=" + this.getId() + ", firstName=" + this.getFirstName() + ", lastName=" + this.getLastName() + ", email=" + this.getEmail()  + ", role=" + this.getRole() + ")";
     }
 }

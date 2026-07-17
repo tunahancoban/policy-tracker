@@ -60,6 +60,18 @@ const linksList: MenuLink[] = [
     caption: 'Poliçe yönetim',
     icon: 'policy',
     link: '/policy'
+  },
+  {
+    label: 'Profil Yönetimi',
+    caption: 'Profil yönetim',
+    icon: 'settings',
+    link: '/profile'
+  },
+  {
+    label: 'Kullanıcı Yönetimi',
+    caption: 'Kullanıcı yönetim',
+    icon: 'account_circle',
+    link: '/users'
   }
 ];
 

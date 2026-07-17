@@ -5,40 +5,51 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'login',
-    component: () => import('@/pages/LoginPage.vue'),
+    component: () => import('../pages/LoginPage.vue'),
     meta: { requiresGuest: true },
   },
   {
     path: '/',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: () => import('../layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
       {
         path: 'dashboard',
         name: 'dashboard',
-        component: () => import('@/pages/DashboardPage.vue'),
+        component: () => import('../pages/DashboardPage.vue'),
       },
       {
         path: 'customers',
         name: 'customers',
-        component: () => import('@/pages/CustomerPage.vue'),
+        component: () => import('../pages/CustomerPage.vue'),
       },
       {
         path: 'customer/:id',
         name: 'customer-detail',
-        component: () => import('@/pages/CustomerDetailPage.vue'),
+        component: () => import('../pages/CustomerDetailPage.vue'),
       },
       {
         path: 'policy',
         name: 'policy',
-        component: () => import('@/pages/PolicyPage.vue'),
+        component: () => import('../pages/PolicyPage.vue'),
+      },
+      {
+        path: 'users',
+        name: 'users',
+        component: () => import('../pages/UserManagementPage.vue'),
+        meta: { requiresAdmin: true },
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: () => import('../pages/ProfilePage.vue'),
       },
     ],
   },
 
   {
     path: '/:catchAll(.*)*',
-    component: () => import('@/pages/ErrorNotFound.vue'),
+    component: () => import('../pages/ErrorNotFound.vue'),
   },
 ];
 

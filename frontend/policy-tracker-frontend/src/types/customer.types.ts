@@ -4,7 +4,7 @@
  */
 
 /** Matches the backend CustomerData contract returned by the REST API. */
-export interface LocalCustomerData {
+export interface Customer {
   customerId: string;
   firstName: string;
   lastName: string;
@@ -31,7 +31,7 @@ export const customerColumns = [
   {
     name: 'fullName',
     label: 'Ad Soyad',
-    field: (row: LocalCustomerData) => `${row.firstName} ${row.lastName}`,
+    field: (row: Customer) => `${row.firstName} ${row.lastName}`,
     align: 'left' as const,
     sortable: true,
   },
@@ -42,3 +42,18 @@ export const customerColumns = [
   { name: 'active', label: 'Aktif/Pasif', field: 'active', align: 'center' as const },
   { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const },
 ];
+
+export const initialForm = {
+  customerId: '',
+  firstName: '',
+  lastName: '',
+  identityNumber: '',
+  email: '',
+  phoneNumber: '',
+  city: '',
+  district: '',
+  fullAddress: '',
+  active: true,
+  createdAt: '',
+  updatedAt: '',
+};

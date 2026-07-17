@@ -38,13 +38,15 @@ public class RestPolicyController {
     //3. DELETE policy
     @DeleteMapping(path="/delete-policy/{id}")
     public ResponseEntity<RestResponse<Void>> deleteUser(@PathVariable(name = "id") String id) {
-        return null;
+        policyService.deletePolicy(id);
+        return ResponseEntity.ok(RestResponse.success("Poliçe başarıyla silindi: "+ id));
     }
 
     // 4. UPDATE policy
     @PatchMapping(path = "/update-policy/{id}", consumes = "application/json")
-    public RestResponse<Void> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
-        return null;
+    public ResponseEntity<RestResponse<Void>> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
+        policyService.updatePolicy(id, updates);
+        return ResponseEntity.ok(RestResponse.success("Poliçe başarıyla güncellendi: "+ id));
     }
 
 }

@@ -27,16 +27,16 @@
                     </div>
 
                     <div class="col-12 col-md-3 row q-gutter-x-sm justify-end">
-                        <q-btn label="Temizle" color="grey-6" flat dense @click="resetFilters" />
-                        <q-btn label="Filtrele" color="primary" icon="filter_alt" class="q-px-md" @click="onSearch" />
+                        <q-btn label="Temizle" color="primary" @click="resetFilters" />
                     </div>
                 </div>
             </q-card-section>
         </q-card>
 
         <q-card flat bordered>
-            <q-table flat :rows="policies" :columns="columns" row-key="policyId" :loading="isLoading"
-                no-data-label="Kriterlere uygun poliçe kaydı bulunamadı." loading-label="Veriler getiriliyor...">
+            <q-table flat :rows="policyStore.policies" :columns="policyColumns" row-key="policyId"
+                :loading="policyStore.isLoading" no-data-label="Kriterlere uygun poliçe kaydı bulunamadı."
+                loading-label="Veriler getiriliyor...">
                 <template v-slot:body-cell-type="props">
                     <q-td :props="props">
                         <q-chip :color="props.row.type === 'TRAFİK' ? 'teal-2' : 'purple-2'"
@@ -53,11 +53,24 @@
                     </q-td>
                 </template>
 
+                <template v-slot:body-cell-statu="props">
+                    <q-td :props="props" class="text-center">
+                        <!-- Burada hesaplama fonksiyonunu çağırıp ekrana basıyoruz -->
+                        <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
+                            class="text-weight-bold">
+                            {{ calculateRemainingDays(props.row.endDate) }}
+                        </q-chip>
+                    </q-td>
+                </template>
+
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center">
-                        <q-btn flat round color="primary" icon="visibility" size="sm"
-                            :to="`/customers/${props.row.customerId}`">
+                        <q-btn flat round color="primary" icon="account_circle" size="sm"
+                            :to="`/customer/${props.row.customerId}`">
                             <q-tooltip>Müşteri Detayına Git</q-tooltip>
+                        </q-btn>
+                        <q-btn flat round color="primary" icon="visibility" size="sm">
+                            <q-tooltip>Poliçe Detayına Git</q-tooltip>
                         </q-btn>
                         <q-btn flat round color="secondary" icon="edit" size="sm" @click="editPolicy(props.row)" />
                     </q-td>
@@ -69,62 +82,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { api } from '../boot/axios';
+import type { Policy } from '../types/policy.types';
+import { policyColumns } from '../types/policy.types';
+import { policyTypeOptions } from '../types/policy.types';
+import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper'
+import { usePolicyStore } from '../stores/policy';
 
-// Poliçe Veri Tipi
-interface Policy {
-    policyId: string;
-    type: string;
-    startDate: string;
-    endDate: string;
-    premium: number | null;
-    customerId: string;
-}
-
-// Reaktif Değişkenler
-const policies = ref<Policy[]>([]);
-const isLoading = ref<boolean>(false);
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
+const policyStore = usePolicyStore();
 
-// Poliçe Türü Seçenekleri (Backend Enum Değerleri)
-const policyTypeOptions = [
-    { label: 'Trafik Sigortası', value: 'TRAFİK' },
-    { label: 'Kasko Sigortası', value: 'KASKO' }
-];
 
-// Tablo Sütun Yapısı
-const columns = [
-    { name: 'policyId', label: 'Poliçe No', field: 'policyId', align: 'left' as const, sortable: true },
-    { name: 'customerId', label: 'Müşteri ID', field: 'customerId', align: 'left' as const, sortable: true },
-    { name: 'type', label: 'Poliçe Türü', field: 'type', align: 'left' as const, sortable: true },
-    { name: 'startDate', label: 'Başlangıç Tarihi', field: 'startDate', align: 'center' as const, sortable: true },
-    { name: 'endDate', label: 'Bitiş Tarihi', field: 'endDate', align: 'center' as const },
-    { name: 'premium', label: 'Prim Tutarı', field: 'premium', align: 'right' as const, sortable: true },
-    { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const }
-];
-
-// Backend Esnek Sorgusunu Tetikleyen Metot
-const fetchPolicies = async (params: Record<string, string | null>) => {
-    isLoading.value = true;
-    try {
-        const response = await api.get('/rest/api/policy/with-params', { params });
-        if (response.data.success && response.data.data) {
-            policies.value = Array.isArray(response.data.data)
-                ? response.data.data
-                : [response.data.data];
-        } else {
-            policies.value = [];
-        }
-    } catch (error) {
-        console.error('Poliçeler yüklenirken hata oluştu:', error);
-        policies.value = [];
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-// Arama Mantığı (Müşteri arama sayfanla aynı esneklikte)
 const onSearch = () => {
     const query = searchQuery.value ? searchQuery.value.trim() : '';
     const searchParams: Record<string, string | null> = {
@@ -134,23 +102,20 @@ const onSearch = () => {
     };
 
     if (query) {
-        // Eğer girilen metin CST ile başlıyorsa customerId filtresine ata
         if (query.toUpperCase().startsWith('CST')) {
             searchParams.customerId = query;
         } else {
-            // Aksi durumda poliçe numarası olarak değerlendir
             searchParams.policyId = query;
         }
     }
 
-    void fetchPolicies(searchParams);
+    void policyStore.fetchPolicies(searchParams);
 };
 
-// Filtreleri Sıfırlama
 const resetFilters = () => {
     searchQuery.value = '';
     selectedType.value = null;
-    void fetchPolicies({});
+    void policyStore.fetchPolicies({});
 };
 
 watch(selectedType, () => {
@@ -158,15 +123,14 @@ watch(selectedType, () => {
 });
 
 const openCreateDialog = () => {
-    console.log('Yeni poliçe oluşturma modalı açılıyor...');
+    console.log('Yeni poliçe oluşturma modalı açılıyor.');
 };
 
 const editPolicy = (policy: Policy) => {
     console.log('Poliçe düzenleniyor:', policy.policyId);
 };
 
-// Sayfa ilk yüklendiğinde tüm listeyi getir
 onMounted(() => {
-    void fetchPolicies({});
+    void policyStore.fetchPolicies({});
 });
 </script>

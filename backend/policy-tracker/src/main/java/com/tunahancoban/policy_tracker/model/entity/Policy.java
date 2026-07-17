@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Policy {
     @Id
     private String id;
@@ -32,16 +32,19 @@ public class Policy {
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate startDate; 
+    private LocalDate startDate;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate endDate; //Policy end date
 
     @Positive
-    private double premium;
+    private Double premium;
 
     //Metadata
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
+    public String toString() {
+        return "Policy.PolicyBuilder(id=" + this.id + ", policyId=" + this.policyId + ", customerId=" + this.customerId + ", type=" + this.type + ", startDate=" + this.startDate + ", endDate=" + this.endDate + ", premium=" + this.premium + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt + ")";
+    }
 }

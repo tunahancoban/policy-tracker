@@ -48,7 +48,7 @@ public class JWTService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername()) // Email is added to subject
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Produce date
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hour lifecycle
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 day lifecycle
                 .signWith(secretKey, SignatureAlgorithm.HS256) // Signed with key
                 .compact();
     }

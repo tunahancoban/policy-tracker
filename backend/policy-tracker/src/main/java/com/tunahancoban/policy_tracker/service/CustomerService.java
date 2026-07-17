@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class CustomerService {
                                              String identityNumber, String email, String phoneNumber){
         //It creates a searchCriteria
         Customer searchCriteria = Customer.builder()
-                .customerID(customerId)
+                .customerId(customerId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .identityNumber(identityNumber)
@@ -55,7 +54,7 @@ public class CustomerService {
 
         //If it is not saves customer
         Customer customer = Customer.builder()
-                .customerID(idGeneratorService.generateCustomerId())
+                .customerId(idGeneratorService.generateCustomerId())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .identityNumber(request.getIdentityNumber())
@@ -79,59 +78,53 @@ public class CustomerService {
         if(!existById(id)){
             throw new RuntimeException("This customer does not exist");
         }
-        Customer customer = customerRepository.findByCustomerID(id);
-        Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
+        Customer customer = customerRepository.findByCustomerId(id);
+        Customer.CustomerBuilder customerBuilder = customer.toBuilder();
 
         updates.forEach((key, value) -> {
             switch (key) {
                 case "firstName":
-                    if(((String) value).isEmpty()){throw new RuntimeException("Invalid  first name: " + value);}
-                    customer.setFirstName((String) value);
+                    customerBuilder.firstName((String) value);
                     break;
 
                 case "lastName":
-                    if(((String) value).isEmpty()){ throw new RuntimeException("Invalid  last name: " + value);}
-                    customer.setLastName((String) value);
+                    customerBuilder.lastName((String) value);
                     break;
 
                 case "identityNumber":
-                    if(customerRepository.existsByIdentityNumber((String) value) || ((String) value).length()!=11){
-                        throw new RuntimeException("Invalid identity number: " + value);}
-                    customer.setIdentityNumber((String) value);
+                    customerBuilder.identityNumber((String) value);
                     break;
 
                 case "email":
-                    if (value != null && !emailPattern.matcher((String)value).matches()) {
-                        throw new RuntimeException("Invalid email format: " + value);
-                    }
-                    customer.setEmail((String) value);
+                    customerBuilder.email((String) value);
                     break;
 
                 case "phoneNumber":
-                    customer.setPhoneNumber((String) value);
+                    customerBuilder.phoneNumber((String) value);
                     break;
 
                 case "city":
-                    customer.setCity((String) value);
+                    customerBuilder.city((String) value);
                     break;
 
                 case "district":
-                    customer.setDistrict((String) value);
+                    customerBuilder.district((String) value);
                     break;
 
                 case "fullAddress":
-                    customer.setFullAddress((String) value);
+                    customerBuilder.fullAddress((String) value);
                     break;
 
                 case "active":
-                    customer.setActive((Boolean) value);
+                    customerBuilder.active((boolean) value);
                     break;
             }
 
         }
         );
-        customer.setUpdatedAt(LocalDateTime.now());
-        customerRepository.save(customer);
+        customerBuilder.updatedAt(LocalDateTime.now());
+        Customer saveCustomer = customerBuilder.build();
+        customerRepository.save(saveCustomer);
         return true;
     }
 
@@ -141,14 +134,14 @@ public class CustomerService {
         if(!existById(id)){
             throw new RuntimeException("This customer does not exist");
         }
-        Customer customer = customerRepository.findByCustomerID(id);
+        Customer customer = customerRepository.findByCustomerId(id);
 
         customerRepository.deleteById(customer.getId());
     }
 
     //Checks id does exist or not
     public boolean existById(String customerId){
-        return customerRepository.existsByCustomerID(customerId);
+        return customerRepository.existsByCustomerId(customerId);
     }
 
 }

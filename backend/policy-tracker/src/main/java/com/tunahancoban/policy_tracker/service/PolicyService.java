@@ -29,9 +29,16 @@ public class PolicyService {
                 .customerId(customerId)
                 .type(type).build();
 
-        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+        System.out.println(customerId);
+        System.out.println(searchCriteria.getCustomerId());
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
+        List<Policy> policyList = policyRepository.findAll(example);
         return policyRepository.findAll(example);
     }
     @LogActivity(type = "POLICE", detail = "Poliçe oluşturuldu")
@@ -61,11 +68,11 @@ public class PolicyService {
     }
 
     @LogActivity(type = "POLICE", detail = "Poliçe silindi")
-    public boolean deletePolicy(String policyID){
+    public void deletePolicy(String policyID){
         if(!policyRepository.existsByPolicyId(policyID)) {
             throw new RuntimeException("This policy does not exist: " + policyID);
         }
-        return policyRepository.deleteByPolicyId(policyID);
+        policyRepository.deleteByPolicyId(policyID);
     }
 
     @LogActivity(type = "POLICE", detail = "Poliçe güncellendi")
@@ -75,30 +82,32 @@ public class PolicyService {
         }
 
         Policy policy = policyRepository.findByPolicyId(policyID);
+        Policy.PolicyBuilder policyBuilder = policy.toBuilder();
 
         updates.forEach(( key,  value) -> {
            switch (key){
                case "customerId":
-                   policy.setCustomerId((String) value);
+                    policyBuilder.customerId((String) value);
                    break;
                case "type":
-                   policy.setType((PolicyType) value);
+                   policyBuilder.type(PolicyType.valueOf((String)value));
                    break;
                case "startDate":
-                   policy.setStartDate((LocalDate) value);
+                   policyBuilder.startDate(LocalDate.parse((String) value));
                    break;
                case "endDate":
-                   policy.setEndDate((LocalDate) value);
+                   policyBuilder.endDate(LocalDate.parse((String) value));
                    break;
                case "premium":
-                   policy.setPremium((Double) value);
+                   policyBuilder.premium(((Number) value).doubleValue());
                    break;
                default:
                    break;
            }
-
         });
-
+        policyBuilder.updatedAt(LocalDateTime.now());
+        Policy updatedPolicy = policyBuilder.build();
+        policyRepository.save(updatedPolicy);
         return true;
     }
 

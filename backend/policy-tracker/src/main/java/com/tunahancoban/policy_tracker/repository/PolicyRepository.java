@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public interface PolicyRepository extends MongoRepository<Policy, String> {
     boolean existsByPolicyId(String policyId);
-    boolean deleteByPolicyId(String policyId);
+    void deleteByPolicyId(String policyId);
     Policy findByPolicyId(String policyId);
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
     long countByEndDateLessThan(LocalDate date);

@@ -15,18 +15,17 @@
                 <q-input v-model="form.identityNumber" label="T.C *" outlined dense
                     :rules="[val => !!val || 'T.C. zorunludur']" />
                 <q-input v-model="form.email" label="E-posta" outlined dense type="email" />
-                <q-input v-model="form.phoneNumber" label="Telefon" outlined dense
-                    mask="(###) ### ## ##" unmasked-value />
+                <q-input v-model="form.phoneNumber" label="Telefon" outlined dense mask="(###) ### ## ##"
+                    unmasked-value />
                 <q-input v-model="form.city" label="Şehir" outlined dense />
                 <q-input v-model="form.district" label="İlçe" outlined dense />
-                <q-input v-model="form.fullAddress" label="Adres" outlined dense type="textarea"
-                    rows="2" />
+                <q-input v-model="form.fullAddress" label="Adres" outlined dense type="textarea" rows="2" />
             </q-card-section>
 
             <q-card-actions align="right" class="text-primary q-pt-none">
                 <q-btn flat label="Vazgeç" v-close-popup color="grey" />
-                <q-btn flat :label="isEditMode ? 'Güncelle' : 'Kaydet'" color="primary"
-                    @click="saveCustomer" :loading="customerStore.isLoading" />
+                <q-btn flat :label="isEditMode ? 'Güncelle' : 'Kaydet'" color="primary" @click="saveCustomer"
+                    :loading="customerStore.isLoading" />
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -36,24 +35,12 @@
 import { ref, watch } from 'vue';
 import { useCustomerStore } from '../stores/customer';
 import { useQuasar } from 'quasar';
-
-// Müşteri Tipi
-interface Customer {
-    customerId?: string;
-    firstName?: string;
-    lastName?: string;
-    identityNumber?: string;
-    email?: string;
-    phoneNumber?: string;
-    fullAddress?: string;
-    district?: string;
-    city?: string;
-    active?: boolean;
-}
+import type { Customer } from '../types/customer.types';
+import { initialForm } from '../types/customer.types';
 
 const props = defineProps<{
     modelValue: boolean;
-    customerData?: Customer | undefined;
+    customerData?: Customer | Partial<Customer> | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -66,20 +53,6 @@ const $q = useQuasar();
 
 const isEditMode = ref(false);
 
-const initialForm = {
-    customerId: '',
-    firstName: '',
-    lastName: '',
-    identityNumber: '',
-    email: '',
-    phoneNumber: '',
-    city: '',
-    district: '',
-    fullAddress: '',
-    active: true,
-    createdAt: '',
-    updatedAt: ''
-};
 const form = ref({ ...initialForm });
 
 // When the dialog opens, populate form from the passed customerData

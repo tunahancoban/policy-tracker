@@ -1,41 +1,21 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { api } from '../boot/axios';
-
-interface CustomerData {
-  customerId: string;
-  firstName: string;
-  lastName: string;
-  identityNumber: string;
-  email: string;
-  phoneNumber: string;
-  city: string;
-  district: string;
-  fullAddress: string;
-  createdAt: string;
-  updatedAt: string;
-  active: boolean;
-}
-
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
+import type { Customer } from '../types/customer.types';
+import type { ApiResponse } from '../types/api.types';
 
 export const useCustomerStore = defineStore('customer', () => {
-  const customerData = ref<CustomerData[]>([]);
+  const customerData = ref<Customer[]>([]);
   const isInitialized = ref<boolean>(false);
   const isLoading = ref<boolean>(false);
 
   const fetchCustomerData = async () => {
     try {
-      const response = await api.get<ApiResponse<CustomerData[]>>('/rest/api/customer/with-params');
+      const response = await api.get<ApiResponse<Customer[]>>('/rest/api/customer/with-params');
 
       const restResponse = response.data;
 
       if (restResponse.success && restResponse.data) {
-        // Gelen veri zaten liste (Array) olduğu için doğrudan eşitliyoruz
         customerData.value = Array.isArray(restResponse.data)
           ? restResponse.data
           : [restResponse.data];
@@ -52,11 +32,9 @@ export const useCustomerStore = defineStore('customer', () => {
   const searchCustomer = async (searchParams: Record<string, string>) => {
     isLoading.value = true;
     try {
-      // URL'i temiz tutup, nesneyi doğrudan config içindeki params'a paslıyoruz
-      const response = await api.get<ApiResponse<CustomerData[]>>(
-        '/rest/api/customer/with-params',
-        { params: searchParams },
-      );
+      const response = await api.get<ApiResponse<Customer[]>>('/rest/api/customer/with-params', {
+        params: searchParams,
+      });
 
       if (response.data.success && response.data.data) {
         customerData.value = Array.isArray(response.data.data)
@@ -73,15 +51,14 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
-  const addCustomer = async (newCustomer: CustomerData) => {
+  const addCustomer = async (newCustomer: Customer) => {
     isLoading.value = true;
     try {
-      const response = await api.post<ApiResponse<CustomerData[]>>(
+      const response = await api.post<ApiResponse<Customer[]>>(
         '/rest/api/customer/create-customer',
         newCustomer,
       );
       if (response.data.success && response.data.data) {
-        // Eğer customerData henüz bir dizi değilse boş bir dizi olarak başlat
         if (!Array.isArray(customerData.value)) {
           customerData.value = [];
         }
@@ -99,10 +76,10 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
-  const updateCustomer = async (updatedCustomer: CustomerData) => {
+  const updateCustomer = async (updatedCustomer: Customer) => {
     isLoading.value = true;
     try {
-      const response = await api.patch<ApiResponse<CustomerData[]>>(
+      const response = await api.patch<ApiResponse<Customer[]>>(
         `/rest/api/customer/update-customer/${updatedCustomer.customerId}`,
         updatedCustomer,
       );
@@ -111,16 +88,16 @@ export const useCustomerStore = defineStore('customer', () => {
           const resData = response.data.data as unknown;
 
           const targetID = Array.isArray(resData)
-            ? (resData as CustomerData[])[0]?.customerId
-            : (resData as CustomerData)?.customerId;
+            ? (resData as Customer[])[0]?.customerId
+            : (resData as Customer)?.customerId;
 
           const finalID = targetID ?? updatedCustomer.customerId;
 
           const index = customerData.value.findIndex((c) => c.customerId === finalID);
           if (index !== -1) {
             const incomingObj = Array.isArray(resData)
-              ? (resData as CustomerData[])[0]
-              : (resData as CustomerData);
+              ? (resData as Customer[])[0]
+              : (resData as Customer);
 
             customerData.value[index] = incomingObj ?? updatedCustomer;
           }
