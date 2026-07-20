@@ -7,12 +7,11 @@ import {
   createWebHistory,
 } from 'vue-router';
 
-import { useQuasar } from 'quasar';
+// useQuasar yerine direkt Notify eklentisini import ediyoruz (Bileşen dışı kullanım için doğrusu budur)
+import { Notify } from 'quasar';
 
 import routes from './routes';
 import { useAuthStore } from '../stores/auth';
-
-const $q = useQuasar();
 
 export default defineRouter(({ store }) => {
   const createHistory = import.meta.env.QUASAR_SERVER
@@ -28,39 +27,37 @@ export default defineRouter(({ store }) => {
   });
 
   Router.beforeEach(async (to, from, next) => {
-    //  KRİTİK DÜZELTME: Quasar'ın aktif Pinia store'unu parametre olarak içeri verdik.
-    // Bu sayede F5 anında Pinia'nın hazır olduğundan %100 emin oluyoruz.
     const authStore = useAuthStore(store);
 
-    // F5 atıldığında cookie kontrolü ile hafızayı tazele
     if (!authStore.isInitialized) {
       await authStore.checkAuth();
     }
 
-    // Giriş gerektiren sayfa kontrolü
-    if (to.meta.requiresAuth) {
-      if (authStore.isAuthenticated) {
-        next();
+    if (to.meta.requiresAdmin) {
+      if (authStore.isAuthenticated && authStore.userRole === 'ROLE_ADMIN') {
+        return next();
       } else {
-        // Eğer isAuthenticated false ise ve istek bittiyse logine atar
-        next({ name: 'login' });
+        Notify.create({
+          message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.',
+          color: 'negative',
+        });
+        return next({ name: 'dashboard' });
       }
-    } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-      next({ name: 'dashboard' });
-    } else {
-      next();
     }
 
-    if (to.meta.requiresAdmin) {
-      // Kullanıcı giriş yapmış mı VE rolü 'ADMIN' mi?
-      if (authStore.isAuthenticated && authStore.userRole === 'ADMIN') {
-        next();
+    if (to.meta.requiresAuth) {
+      if (authStore.isAuthenticated) {
+        return next();
       } else {
-        // Admin değilse yetkisiz sayfa uyarısı verebilir veya Dashboard'a fırlatabilirsin
-        $q.notify({ message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.', color: 'negative' });
-        next({ name: 'dashboard' });
+        return next({ name: 'login' });
       }
     }
+
+    if (to.meta.requiresGuest && authStore.isAuthenticated) {
+      return next({ name: 'dashboard' });
+    }
+
+    return next();
   });
 
   return Router;

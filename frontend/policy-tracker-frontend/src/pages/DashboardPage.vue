@@ -1,89 +1,101 @@
 <template>
     <q-page class="q-pa-md fade-in-up">
-                <q-card class="my-card">
-                    <q-card-section>
-                        <div class="text-h6">Dashboard</div>
+        <q-card class="my-card">
+            <q-card-section>
+                <div class="text-h6">Dashboard</div>
+            </q-card-section>
+
+            <q-separator />
+
+            <q-card-section>
+                <div class="row q-col-gutter-md">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <q-card class="my-card">
+                            <q-card-section>
+                                <div class="text-subtitle1">Toplam Müşteri</div>
+                                <div class="text-h5">{{ summary.totalCustomers }}</div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <q-card class="my-card">
+                            <q-card-section>
+                                <div class="text-subtitle1">Aktif Poliçe</div>
+                                <div class="text-h5">{{ summary.activePolicyNumber }}</div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <q-card class="my-card">
+                            <q-card-section>
+                                <div class="text-subtitle1">Yakında Sona Erecek Poliçeler</div>
+                                <div class="text-h5">{{ summary.expiringSoonPolicies }}</div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <q-card class="my-card">
+                            <q-card-section>
+                                <div class="text-subtitle1">Süresi Dolmuş Poliçeler</div>
+                                <div class="text-h5">{{ summary.expiredPolicies }}</div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                </div>
+            </q-card-section>
+
+
+            <q-card-section>
+                <div class="text-subtitle1 q-mb-md text-center">Sistem Analiz Grafikleri</div>
+                <div class="row q-col-gutter-md">
+
+                    <div class="col-12 col-md-6">
+                        <q-card flat bordered class="q-pa-sm">
+                            <q-card-section style="position: relative; height: 320px; width: 100%;">
+                                <canvas ref="myPieChartCanvas"></canvas>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <q-card flat bordered class="q-pa-sm">
+                            <q-card-section style="position: relative; height: 320px; width: 100%;">
+                                <canvas ref="myBarChartCanvas"></canvas>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+
+                </div>
+            </q-card-section>
+
+
+
+            <!-- 2. Grafik: Yeni Eklenen Poliçe Durum Dağılımı -->
+            <div class="col-12 col-md-4">
+                <q-card flat bordered class="q-pa-sm">
+                    <q-card-section style="position: relative; height: 320px; width: 100%;">
+                        <canvas ref="myStatusChartCanvas"></canvas>
                     </q-card-section>
-
-                    <q-separator />
-
-                    <q-card-section>
-                        <div class="row q-col-gutter-md">
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <q-card class="my-card">
-                                    <q-card-section>
-                                        <div class="text-subtitle1">Toplam Müşteri</div>
-                                        <div class="text-h5">{{ summary.totalCustomers }}</div>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <q-card class="my-card">
-                                    <q-card-section>
-                                        <div class="text-subtitle1">Aktif Poliçe</div>
-                                        <div class="text-h5">{{ summary.activePolicyNumber }}</div>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <q-card class="my-card">
-                                    <q-card-section>
-                                        <div class="text-subtitle1">Yakında Sona Erecek Poliçeler</div>
-                                        <div class="text-h5">{{ summary.expiringSoonPolicies }}</div>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <q-card class="my-card">
-                                    <q-card-section>
-                                        <div class="text-subtitle1">Süresi Dolmuş Poliçeler</div>
-                                        <div class="text-h5">{{ summary.expiredPolicies }}</div>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-                        </div>
-                    </q-card-section>
-
-
-                    <q-card-section>
-                        <div class="text-subtitle1 q-mb-md text-center">Sistem Analiz Grafikleri</div>
-                        <div class="row q-col-gutter-md">
-
-                            <div class="col-12 col-md-6">
-                                <q-card flat bordered class="q-pa-sm">
-                                    <q-card-section style="position: relative; height: 320px; width: 100%;">
-                                        <canvas ref="myPieChartCanvas"></canvas>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <q-card flat bordered class="q-pa-sm">
-                                    <q-card-section style="position: relative; height: 320px; width: 100%;">
-                                        <canvas ref="myBarChartCanvas"></canvas>
-                                    </q-card-section>
-                                </q-card>
-                            </div>
-
-                        </div>
-                    </q-card-section>
-
-                    <q-card-section class="q-pt-none">
-                        <div class="q-px-md q-py-sm scroll" style="max-height: 400px; overflow-y: auto;">
-                            <q-timeline color="secondary">
-                                <q-timeline-entry heading> Son İşlemler </q-timeline-entry>
-
-                                <q-timeline-entry v-for="(activity, index) in activities" :key="index"
-                                    :title="activity.type" :subtitle="formatDate(activity.dateTime)">
-                                    <div class="text-body2 text-grey-8">
-                                        {{ activity.detail }}
-                                    </div>
-                                </q-timeline-entry>
-                            </q-timeline>
-                        </div>
-                    </q-card-section>
-
                 </q-card>
+            </div>
+
+
+            <q-card-section class="q-pt-none">
+                <div class="q-px-md q-py-sm scroll" style="max-height: 400px; overflow-y: auto;">
+                    <q-timeline color="secondary">
+                        <q-timeline-entry heading> Son İşlemler </q-timeline-entry>
+
+                        <q-timeline-entry v-for="(activity, index) in activities" :key="index" :title="activity.type"
+                            :subtitle="formatDate(activity.dateTime)">
+                            <div class="text-body2 text-grey-8">
+                                {{ activity.detail }}
+                            </div>
+                        </q-timeline-entry>
+                    </q-timeline>
+                </div>
+            </q-card-section>
+
+        </q-card>
     </q-page>
 </template>
 
@@ -108,8 +120,8 @@ interface RecentActivity {
 }
 
 interface ChartResponseData {
-    typeLabels: Record<string, number>;    
-    monthlyPremium: Record<string, number>;   
+    typeLabels: Record<string, number>;
+    monthlyPremium: Record<string, number>;
 }
 
 const summary = ref<DashboardData>({
@@ -128,7 +140,25 @@ const chartDataFromApi = ref<ChartResponseData>({
 
 const myPieChartCanvas = ref<HTMLCanvasElement | null>(null);
 const myBarChartCanvas = ref<HTMLCanvasElement | null>(null);
+const myStatusChartCanvas = ref<HTMLCanvasElement | null>(null);
 
+
+const statusChartData = computed(() => {
+    return {
+        labels: ['Aktif Poliçe', 'Yakında Sona Erecek', 'Süresi Dolmuş'],
+        datasets: [
+            {
+                label: 'Poliçe Durumu',
+                backgroundColor: ['#21BA45', '#F2C037', '#C10015'], // Yeşil, Sarı, Kırmızı
+                data: [
+                    summary.value.activePolicyNumber,
+                    summary.value.expiringSoonPolicies,
+                    summary.value.expiredPolicies
+                ]
+            }
+        ]
+    };
+});
 
 const fetchDashboardData = async () => {
     try {
@@ -243,6 +273,41 @@ onMounted(async () => {
                 plugins: {
                     legend: { position: 'top' },
                     title: { display: true, text: 'Poliçe Türü Dağılımı' },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value, ctx) => {
+                            const datasets = ctx.chart.data?.datasets;
+                            const datapoints = (datasets && datasets[0]?.data ? datasets[0].data : []) as number[];
+                            const total = datapoints.reduce((total, num) => total + num, 0);
+                            return total > 0 ? `%${Math.round((value / total) * 100)}` : '%0';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (myStatusChartCanvas.value) {
+        new Chart(myStatusChartCanvas.value, {
+            type: 'doughnut',
+            data: statusChartData.value,
+            plugins: [ChartDataLabels],
+            options: {
+                responsive: true,
+                animation: {
+                    onComplete: () => { pieDelayed = true; },
+                    delay: (context) => {
+                        let delay = 0;
+                        if (context.type === 'data' && context.mode === 'default' && !pieDelayed) {
+                            delay = context.dataIndex * 300 + context.datasetIndex * 100;
+                        }
+                        return delay;
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Poliçe Durum Dağılımı' },
                     datalabels: {
                         color: '#fff',
                         font: { weight: 'bold', size: 12 },

@@ -103,6 +103,7 @@ export default defineConfig((/* ctx */) => {
 
       // Quasar plugins
       plugins: ['Dialog', 'Notify'],
+      lang: 'tr',
     },
 
     // animations: 'all', // --- includes all animations

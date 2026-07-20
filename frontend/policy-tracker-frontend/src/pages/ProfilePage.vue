@@ -50,40 +50,33 @@ const authStore = useAuthStore();
 const $q = useQuasar();
 
 const profileForm = ref({
-    id: '', // Backend'in tanıdığı, o an giriş yapmış kullanıcının ID'si buraya gelecek
+    id: '',
     firstName: '',
     lastName: '',
     email: '',
-    password: '' // Boş giderse backend şifreyi güncellemeyecek, dolu giderse ezecek
+    password: ''
 });
 
 const confirmPassword = ref('');
 
 onMounted(async () => {
     try {
-        // Önce backend'den güncel oturum/e-posta bilgisini doğrula
+        // 1. Önce oturumu tazele/doğrula
         await authStore.checkAuth();
 
-        if (authStore.isAuthenticated && authStore.userEmail) {
-            const currentMe = userStore.users.find(u => u.email === authStore.userEmail);
+        if (authStore.isAuthenticated) {
+            // 2. Profil bilgilerini getiren store metodunu çağır 
+            // (Metot ismini projene göre güncelleyebilirsin, örn: userStore.fetchProfile())
+            const currentMe = await userStore.fetchProfile();
 
-            if (currentMe) {
+            // 3. Backend'den nesne geldi mi kontrol et ve direkt forma bas
+            if (currentMe && currentMe.email) {
                 profileForm.value.id = currentMe.id;
                 profileForm.value.firstName = currentMe.firstName;
                 profileForm.value.lastName = currentMe.lastName;
                 profileForm.value.email = currentMe.email;
             } else {
-                await userStore.fetchUsers();
-                const retryMe = userStore.users.find(u => u.email === authStore.userEmail);
-
-                if (retryMe) {
-                    profileForm.value.id = retryMe.id;
-                    profileForm.value.firstName = retryMe.firstName;
-                    profileForm.value.lastName = retryMe.lastName;
-                    profileForm.value.email = retryMe.email;
-                } else {
-                    $q.notify({ message: 'Kullanıcı detay bilgileri sistemde bulunamadı.', color: 'warning' });
-                }
+                $q.notify({ message: 'Profil detay bilgileri okunamadı.', color: 'warning' });
             }
         } else {
             $q.notify({ message: 'Lütfen işlem yapabilmek için önce giriş yapın.', color: 'negative' });

@@ -1,5 +1,5 @@
 <template>
-    <q-dialog :model-value="modelValue" persistent @update:model-value="$emit('update:modelValue', $event)">
+    <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
         <q-card style="min-width: 450px;">
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6">{{ isEditMode ? 'Müşteri Güncelle' : 'Yeni Müşteri Ekle' }}</div>

@@ -24,6 +24,23 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const fetchProfile = async () => {
+    isLoading.value = true;
+    try {
+      const response = await api.get<ApiResponse<User>>('/rest/api/profile/get-profile');
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Profil getirilirken hata:', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const addUser = async (newUser: RegisterRequest) => {
     isLoading.value = true;
     try {
@@ -96,5 +113,14 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  return { users, isLoading, fetchUsers, updateUser, deleteUser, addUser, updateMyProfile };
+  return {
+    users,
+    isLoading,
+    fetchUsers,
+    updateUser,
+    deleteUser,
+    addUser,
+    updateMyProfile,
+    fetchProfile,
+  };
 });

@@ -9,7 +9,6 @@ export const usePolicyStore = defineStore('policy', () => {
   const policies = ref<Policy[]>([]);
   const isLoading = ref<boolean>(false);
 
-  // Genel poliçe listesini parametreli filtrelerle çeken fonksiyon
   const fetchPolicies = async (params: Record<string, string | null | undefined> = {}) => {
     isLoading.value = true;
     try {
@@ -35,12 +34,42 @@ export const usePolicyStore = defineStore('policy', () => {
   const addPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
     isLoading.value = true;
     try {
-      const response = await api.post<ApiResponse<Policy>>('/rest/api/policy/create', newPolicy);
+      const response = await api.post<ApiResponse<Policy>>(
+        '/rest/api/policy/create-policy',
+        newPolicy,
+      );
       if (response.data.success && response.data.data) {
         policies.value.push(response.data.data);
       }
     } catch (error) {
       console.error('Poliçe eklenirken hata oluştu:', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  const updatePolicy = async (id: string, updatedFields: Partial<Omit<Policy, 'policyId'>>) => {
+    isLoading.value = true;
+    try {
+      // Backend RestResponse<Void> döndüğü için buradaki tipi Void (veya any) olarak güncelliyoruz
+      const response = await api.patch<ApiResponse<void>>(
+        `/rest/api/policy/update-policy/${id}`,
+        updatedFields,
+      );
+
+      // Backend başarılı döndüyse (success: true)
+      if (response.data.success) {
+        // Local state'deki poliçeyi bulup, gönderdiğimiz güncel alanlarla manuel birleştiriyoruz
+        const index = policies.value.findIndex((p) => p.policyId === id);
+        if (index !== -1) {
+          policies.value[index] = {
+            ...policies.value[index],
+            ...updatedFields,
+          } as Policy;
+        }
+      }
+    } catch (error) {
+      console.error('Poliçe güncellenirken hata oluştu:', error);
       throw error;
     } finally {
       isLoading.value = false;
@@ -52,5 +81,6 @@ export const usePolicyStore = defineStore('policy', () => {
     isLoading,
     fetchPolicies,
     addPolicy,
+    updatePolicy,
   };
 });

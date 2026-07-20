@@ -118,7 +118,6 @@ const confirmDelete = (customer: Customer) => {
         message: `${customer.firstName} ${customer.lastName} isimli müşteriyi silmek istediğinize emin misiniz?`,
         cancel: { label: 'Vazgeç', flat: true, color: 'grey' },
         ok: { label: 'Evet, Sil', color: 'negative' },
-        persistent: true
     }).onOk(() => {
         const executeDelete = async () => {
             try {

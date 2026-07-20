@@ -44,7 +44,7 @@
         </q-card>
 
         <!-- Tek Parça İç Diyalog (Hem Ekleme Hem Güncelleme İçin) -->
-        <q-dialog v-model="showDialog" persistent>
+        <q-dialog v-model="showDialog">
             <q-card style="min-width: 400px;">
                 <q-card-section class="row items-center q-pb-none">
                     <div class="text-h6 text-weight-bold text-grey-8">
@@ -175,7 +175,6 @@ const confirmDelete = (user: User) => {
         message: `${user.firstName} ${user.lastName} adlı kullanıcıyı sistemden silmek istediğinize emin misiniz?`,
         cancel: { label: 'Vazgeç', flat: true, color: 'grey' },
         ok: { label: 'Sil', flat: true, color: 'negative' },
-        persistent: true
     }).onOk(() => {
         void (async () => {
             try {
