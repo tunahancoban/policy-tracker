@@ -26,3 +26,14 @@ export interface RegisterRequest {
   password?: string;
   role: 'ROLE_ADMIN' | 'ROLE_USER';
 }
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+// Şifre yenilemek için
+export interface ChangePasswordRequest {
+  newPassword: string;
+}

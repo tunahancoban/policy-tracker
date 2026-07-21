@@ -49,8 +49,7 @@ export const policyColumns = [
 ];
 
 export const policyTypeOptions = [
-  { label: 'Trafik Sigortası', value: 'TRAFİK' },
-  { label: 'Kasko Sigortası', value: 'KASKO' },
+  { label: 'Trafik Sigortası', value: 'TRAFIK' },
   { label: 'Afet Sigortası', value: 'DASK' },
   { label: 'KASKO Sigortası', value: 'KASKO' },
   { label: 'Sağlık Sigortası', value: 'SAGLIK' },

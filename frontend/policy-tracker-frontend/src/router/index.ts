@@ -7,7 +7,6 @@ import {
   createWebHistory,
 } from 'vue-router';
 
-// useQuasar yerine direkt Notify eklentisini import ediyoruz (Bileşen dışı kullanım için doğrusu budur)
 import { Notify } from 'quasar';
 
 import routes from './routes';
