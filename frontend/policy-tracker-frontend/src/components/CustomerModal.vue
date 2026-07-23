@@ -40,7 +40,7 @@ import { initialForm } from '../types/customer.types';
 
 const props = defineProps<{
     modelValue: boolean;
-    customerData?: Customer | Partial<Customer> | undefined;
+    customerData?: Customer | Partial<Customer>;
 }>();
 
 const emit = defineEmits<{

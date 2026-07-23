@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.model.DTO.response.ChartResponse;
+import com.tunahancoban.policy_tracker.model.DTO.response.CustomerSummaryResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
@@ -36,6 +37,21 @@ public class DashboardService {
 
         return new DashboardSummaryResponse(totalCustomer, activePolicyNumber, expiringSoonPolicies, expiredPolicies);
     }
+
+    public CustomerSummaryResponse getSummaryById(String customerId){
+        //It returns the summary of policy and customer data by id.
+        LocalDate today = LocalDate.now();
+        LocalDate end = today.plusDays(30); // 30 days later
+
+        List<Map<String, Object>> premium = policyRepository.sumPremiumByCustomerId(customerId);
+        long totalPremium = premium.isEmpty() ? 0L : ((Number) premium.get(0).get("totalPremium")).longValue();
+        long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqualAndCustomerId(today, today, customerId);
+        long expiringSoonPolicies = policyRepository.countByEndDateBetweenAndCustomerId(today, end, customerId);
+        long expiredPolicies = policyRepository.countByEndDateLessThanAndCustomerId(today, customerId);
+
+        return new CustomerSummaryResponse(totalPremium, activePolicyNumber, expiringSoonPolicies, expiredPolicies);
+    }
+
 
     
     public List<Log> getRecentActivities(int n){

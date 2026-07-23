@@ -88,11 +88,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import type { Policy, PolicyForm } from '../types/policy.types';
+import type { Policy } from '../types/policy.types';
 import { policyColumns, policyTypeOptions } from '../types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper';
 import { usePolicyStore } from '../stores/policy';
-import { Notify } from 'quasar';
 
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 import EditPolicyModal from '../components/EditPolicyModal.vue';
@@ -121,7 +120,7 @@ const onSearch = () => {
         }
     }
 
-    void policyStore.fetchPolicies(searchParams);
+    void policyStore.fetchPolicies();
 };
 
 const resetFilters = () => {
@@ -145,53 +144,14 @@ const openEditDialog = (policy: Policy) => {
     isEditModalOpen.value = true;
 };
 
-interface ModalTypePayload {
-    type: string | { label: string; value: string };
-}
-
-// 1. Yeni Poliçe Ekleme (POST)
-const handlePolicyCreate = async (event: { data: Omit<PolicyForm, 'type'> & ModalTypePayload }) => {
-    try {
-        const payload: PolicyForm = {
-            ...event.data,
-            type: typeof event.data.type === 'object' ? event.data.type.value : event.data.type,
-            // Slasları tireye çevirip zaman damgası ekliyoruz
-            startDate: event.data.startDate ? `${event.data.startDate.replace(/\//g, '-')}T00:00:00` : '',
-            endDate: event.data.endDate ? `${event.data.endDate.replace(/\//g, '-')}T00:00:00` : ''
-        };
-
-        await policyStore.addPolicy(payload);
-        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check' });
-        void policyStore.fetchPolicies({});
-    } catch (error) {
-        Notify.create({ message: 'Poliçe eklenirken bir hata oluştu.', color: 'negative' });
-        console.log(error);
-    }
+const handlePolicyCreate = () => {
+    console.log("test");
 };
 
 // 2. Poliçe Güncelleme (PATCH)
-const handlePolicyUpdate = async (event: { id: string; data: Partial<Omit<Policy, 'policyId' | 'type'>> & Partial<ModalTypePayload> }) => {
-    try {
-        const payload: Partial<Omit<Policy, 'policyId'>> = {};
+const handlePolicyUpdate = () => {
+    console.log("test");
 
-        if (event.data.customerId) payload.customerId = event.data.customerId;
-        if (event.data.premium !== undefined) payload.premium = event.data.premium;
-
-        // Slasları tireye çevirerek ekliyoruz
-        if (event.data.startDate) payload.startDate = `${event.data.startDate.replace(/\//g, '-')}T00:00:00`;
-        if (event.data.endDate) payload.endDate = `${event.data.endDate.replace(/\//g, '-')}T00:00:00`;
-
-        if (event.data.type) {
-            payload.type = typeof event.data.type === 'object' ? event.data.type.value : event.data.type;
-        }
-
-        await policyStore.updatePolicy(event.id, payload);
-        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check' });
-        void policyStore.fetchPolicies({});
-    } catch (error) {
-        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative' });
-        console.log(error);
-    }
 };
 onMounted(() => {
     void policyStore.fetchPolicies({});

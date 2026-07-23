@@ -5,11 +5,15 @@ export interface Policy {
   endDate: string;
   premium: number;
   customerId: string;
+  note: string;
+  installmentNumber: number;
 }
 
 export interface PolicyForm {
   customerId: string;
   type: string;
+  note: string;
+  installmentNumber: number;
   premium: number;
   startDate: string;
   endDate: string;

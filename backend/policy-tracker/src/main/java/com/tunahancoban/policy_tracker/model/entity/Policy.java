@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.model.entity;
 
+import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,12 @@ public class Policy {
 
     @NotBlank
     private String customerId;
+
+    private String previousPolicyId;      // For renewal
+
+    private String note;
+
+    private InstallmentOptions installment;
 
     @NotNull
     private PolicyType type;

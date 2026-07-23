@@ -54,9 +54,9 @@ public class RestUserController {
 
     // 4. UPDATE User
     @PatchMapping(path = "/update-user/{id}", consumes = "application/json")
-    public ResponseEntity<RestResponse<Void>> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<RestResponse<User>> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
 
-        userService.updateUser(id, updates);
-        return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi."));
+        User user = userService.updateUser(id, updates);
+        return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi.", user));
     }
 }

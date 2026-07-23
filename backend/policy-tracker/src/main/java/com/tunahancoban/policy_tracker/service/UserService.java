@@ -73,7 +73,7 @@ public class UserService {
     }
 
     //Update User
-    public boolean updateUser(String id , Map<String, Object> updates){
+    public User updateUser(String id , Map<String, Object> updates){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("This id does not exist. ID: " + id));
 
@@ -110,7 +110,7 @@ public class UserService {
         });
         User updatedUser = userBuilder.build();
         userRepository.save(updatedUser);
-        return true;
+        return updatedUser;
     }
 
 }

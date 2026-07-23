@@ -47,9 +47,9 @@ public class RestCustomerController {
     }
 
     @PatchMapping(path = "/update-customer/{id}", consumes = "application/json")
-    public ResponseEntity<RestResponse<Void>> updateCustomer(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
-        customerService.updateCustomer(id,updates);
-        return ResponseEntity.ok(RestResponse.success("Müşteri başarıyla güncellendi : " +id));
+    public ResponseEntity<RestResponse<Customer>> updateCustomer(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
+        Customer customer = customerService.updateCustomer(id,updates);
+        return ResponseEntity.ok(RestResponse.success("Müşteri başarıyla güncellendi : "+id, customer));
     }
 
 

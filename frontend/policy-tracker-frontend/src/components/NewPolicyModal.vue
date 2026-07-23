@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="isOpen" persistent @show="onModalShow">
+    <q-dialog v-model="isOpen" @show="onModalShow">
         <q-card style="min-width: 450px; max-width: 600px;">
 
             <!-- Modal Başlığı -->
@@ -34,6 +34,13 @@
                     <!-- Poliçe Türü -->
                     <q-select v-model="form.type" :options="policyTypeOptions" label="Poliçe Türü *" outlined dense
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
+
+
+                    <q-input v-model.number="form.installmentNumber" type="number" label="Taksit Sayısı(1-3-6) *"
+                        outlined dense :rules="[
+                            val => val !== null && val !== undefined || 'Taksit Sayısı Zorunludur',
+                            val => (val == 1 || val == 3 || val == 6) || ' 1-3-6 giriniz'
+                        ]" />
 
                     <!-- Prim Tutarı -->
                     <q-input v-model.number="form.premium" type="number" label="Prim Tutarı (TL) *" outlined dense
@@ -74,6 +81,8 @@
                             </q-icon>
                         </template>
                     </q-input>
+
+                    <q-input v-model="form.note" label="Not giriniz" outlined dense />
 
                 </q-card-section>
 
@@ -154,7 +163,9 @@ const initialFormState = (): PolicyForm => ({
     type: '',
     premium: 0,
     startDate: '',
-    endDate: ''
+    endDate: '',
+    note: '',
+    installmentNumber: 1,
 });
 
 const form = ref<PolicyForm>(initialFormState());
@@ -192,7 +203,7 @@ const filterFn = (val: string, update: (callback: () => void) => void) => {
 
 const onModalShow = async () => {
     if (!customerStore.customerData || customerStore.customerData.length === 0) {
-        await customerStore.fetchCustomerData();
+        await customerStore.fetchCustomerData({ customerId: "121" });
     }
 
     filteredCustomerOptions.value = [];

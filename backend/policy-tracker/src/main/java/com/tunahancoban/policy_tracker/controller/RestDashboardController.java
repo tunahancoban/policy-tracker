@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.response.ChartResponse;
+import com.tunahancoban.policy_tracker.model.DTO.response.CustomerSummaryResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;
@@ -21,9 +22,16 @@ public class RestDashboardController {
 
     @GetMapping(path = "/get-summary")
     public ResponseEntity<RestResponse<DashboardSummaryResponse>> getSummary(){
-
         DashboardSummaryResponse dashboardSummaryResponse = dashboardService.getSummary();
         return ResponseEntity.ok(RestResponse.success("Summary returned successfully", dashboardSummaryResponse));
+
+    }
+
+    @GetMapping(path= "/get-summary/{id}")
+    public ResponseEntity<RestResponse<CustomerSummaryResponse>> getSummaryById(@PathVariable(name = "id") String id){
+        System.out.println(id);
+        CustomerSummaryResponse customerSummaryResponse = dashboardService.getSummaryById(id);
+        return ResponseEntity.ok(RestResponse.success("Summary returned successfully", customerSummaryResponse));
 
     }
 

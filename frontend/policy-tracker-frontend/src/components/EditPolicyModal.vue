@@ -5,7 +5,7 @@
             <!-- Modal Başlığı -->
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6 text-weight-bold text-grey-8">
-                    Poliçe Düzenle (PATCH)
+                    Poliçe Düzenle
                 </div>
                 <q-space />
                 <q-btn icon="close" flat round dense v-close-popup />
@@ -49,11 +49,14 @@
                         <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer">
                                 <q-popup-proxy cover transition-show="scale" transition-hide="scale" no-parent-close>
-                                    <q-date v-model="form.startDate" mask="YYYY/MM/DD" v-close-popup />
+                                    <q-date v-model="form.endDate" mask="YYYY/MM/DD" v-close-popup />
                                 </q-popup-proxy>
                             </q-icon>
                         </template>
                     </q-input>
+
+                    <q-input v-model="form.note" label="Not giriniz" outlined dense />
+
                 </q-card-section>
 
                 <q-separator />
@@ -98,6 +101,8 @@ const form = ref<PolicyForm>({
     customerId: '',
     type: '',
     premium: 0,
+    note: '',
+    installmentNumber: 0,
     startDate: '',
     endDate: ''
 });
@@ -122,6 +127,8 @@ const onModalShow = () => {
         customerId: props.policyData.customerId || '',
         type: props.policyData.type || '',
         premium: props.policyData.premium || 0,
+        installmentNumber: props.policyData.installmentNumber || 0,
+        note: props.policyData.note || '',
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
         endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : ''
     };

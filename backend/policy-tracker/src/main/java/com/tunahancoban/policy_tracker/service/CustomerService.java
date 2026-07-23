@@ -73,7 +73,7 @@ public class CustomerService {
 
     @LogActivity(type = "MUSTERI"
             ,detail = " Müşteri güncellendi.")
-    public boolean updateCustomer(String id, Map<String, Object> updates){
+    public Customer updateCustomer(String id, Map<String, Object> updates){
 
         if(!existById(id)){
             throw new RuntimeException("This customer does not exist");
@@ -125,7 +125,7 @@ public class CustomerService {
         customerBuilder.updatedAt(LocalDateTime.now());
         Customer saveCustomer = customerBuilder.build();
         customerRepository.save(saveCustomer);
-        return true;
+        return saveCustomer;
     }
 
     @LogActivity(type = "MUSTERI"

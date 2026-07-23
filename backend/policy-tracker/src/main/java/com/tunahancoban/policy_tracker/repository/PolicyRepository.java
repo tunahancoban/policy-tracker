@@ -17,6 +17,16 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
     long countByEndDateLessThan(LocalDate date);
     long countByEndDateBetween(LocalDate start, LocalDate end);
+
+    @Aggregation(pipeline = {
+            "{ '$match': { 'customerId': ?0 } }",
+            "{ '$group': { '_id': '$customerId', 'totalPremium': { '$sum': '$premium' } } }"
+    })
+    List<Map<String, Object>> sumPremiumByCustomerId(String customerId);
+
+    long countByStartDateLessThanEqualAndEndDateGreaterThanEqualAndCustomerId(LocalDate startDate, LocalDate endDate, String customerId);
+    long countByEndDateLessThanAndCustomerId(LocalDate date, String customerId);
+    long countByEndDateBetweenAndCustomerId(LocalDate start, LocalDate end, String customerId);
     @Aggregation(pipeline = {
             "{ '$group': { '_id': '$type', 'totalCount': { '$sum': 1 } } }"
     })

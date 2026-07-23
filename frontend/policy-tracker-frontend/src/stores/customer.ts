@@ -1,51 +1,45 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { api } from '../boot/axios';
 import type { Customer } from '../types/customer.types';
-import type { ApiResponse } from '../types/api.types';
+import { customerService } from '@/restservices/customerService';
 
 export const useCustomerStore = defineStore('customer', () => {
   const customerData = ref<Customer[]>([]);
+  const selectedCustomer = ref<Customer | null>(null);
   const isInitialized = ref<boolean>(false);
   const isLoading = ref<boolean>(false);
 
-  const fetchCustomerData = async () => {
-    try {
-      const response = await api.get<ApiResponse<Customer[]>>('/rest/api/customer/with-params');
-
-      const restResponse = response.data;
-
-      if (restResponse.success && restResponse.data) {
-        customerData.value = Array.isArray(restResponse.data)
-          ? restResponse.data
-          : [restResponse.data];
-      } else {
-        customerData.value = [];
-      }
-    } catch (error) {
-      console.error('F5 anında fetchCustomerData başarısız oldu:', error);
-      customerData.value = [];
-    } finally {
-      isInitialized.value = true;
-    }
-  };
-  const searchCustomer = async (searchParams: Record<string, string>) => {
+  const fetchCustomerData = async (searchParams: Record<string, string> = {}) => {
     isLoading.value = true;
     try {
-      const response = await api.get<ApiResponse<Customer[]>>('/rest/api/customer/with-params', {
-        params: searchParams,
-      });
-
-      if (response.data.success && response.data.data) {
-        customerData.value = Array.isArray(response.data.data)
-          ? response.data.data
-          : [response.data.data];
-      } else {
-        customerData.value = [];
-      }
+      customerData.value = await customerService.getCustomer(searchParams);
     } catch (error) {
-      console.error('searchCustomer başarısız oldu:', error);
+      console.error('Müşteri verisi çekilemedi:', error);
       customerData.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const fetchAllCustomers = async () => {
+    isLoading.value = true;
+    try {
+      customerData.value = await customerService.getCustomer({});
+    } catch (error) {
+      console.error('Müşteri verisi çekilemedi:', error);
+      customerData.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const fetchCustomerDataById = async (customerId: string) => {
+    isLoading.value = true;
+    try {
+      const customer = await customerService.getCustomerById(customerId);
+      selectedCustomer.value = customer ?? null;
+    } catch (error) {
+      console.error('Müşteri bilgisi çekilemedi', error);
     } finally {
       isLoading.value = false;
     }
@@ -54,23 +48,10 @@ export const useCustomerStore = defineStore('customer', () => {
   const addCustomer = async (newCustomer: Customer) => {
     isLoading.value = true;
     try {
-      const response = await api.post<ApiResponse<Customer[]>>(
-        '/rest/api/customer/create-customer',
-        newCustomer,
-      );
-      if (response.data.success && response.data.data) {
-        if (!Array.isArray(customerData.value)) {
-          customerData.value = [];
-        }
-
-        if (Array.isArray(response.data.data)) {
-          customerData.value.push(...response.data.data);
-        } else {
-          customerData.value.push(response.data.data);
-        }
-      }
+      const addedCustomer: Customer = await customerService.addCustomer(newCustomer);
+      customerData.value.push(addedCustomer);
     } catch (error) {
-      console.error('addCustomer başarısız oldu:', error);
+      console.error('Müşteri eklenemedi: ', error);
     } finally {
       isLoading.value = false;
     }
@@ -79,33 +60,13 @@ export const useCustomerStore = defineStore('customer', () => {
   const updateCustomer = async (updatedCustomer: Customer) => {
     isLoading.value = true;
     try {
-      const response = await api.patch<ApiResponse<Customer[]>>(
-        `/rest/api/customer/update-customer/${updatedCustomer.customerId}`,
-        updatedCustomer,
-      );
-      if (response.data.success && response.data.data) {
-        if (Array.isArray(customerData.value)) {
-          const resData = response.data.data as unknown;
-
-          const targetID = Array.isArray(resData)
-            ? (resData as Customer[])[0]?.customerId
-            : (resData as Customer)?.customerId;
-
-          const finalID = targetID ?? updatedCustomer.customerId;
-
-          const index = customerData.value.findIndex((c) => c.customerId === finalID);
-          if (index !== -1) {
-            const incomingObj = Array.isArray(resData)
-              ? (resData as Customer[])[0]
-              : (resData as Customer);
-
-            customerData.value[index] = incomingObj ?? updatedCustomer;
-          }
-        }
+      const result = await customerService.updateCustomer(updatedCustomer);
+      const index = customerData.value.findIndex((c) => c.customerId === result.customerId);
+      if (index !== -1) {
+        customerData.value[index] = result;
       }
     } catch (error) {
-      console.error('updateCustomer başarısız oldu:', error);
-      throw error;
+      console.error('Müşteri güncellemesi başarısız oldu:', error);
     } finally {
       isLoading.value = false;
     }
@@ -113,13 +74,9 @@ export const useCustomerStore = defineStore('customer', () => {
 
   const deleteCustomer = async (customerId: string) => {
     try {
-      const response = await api.delete<ApiResponse<null>>(
-        `/rest/api/customer/delete-customer/${customerId}`,
-      );
-      if (response.data.success) {
-        customerData.value = [];
-      } else {
-        console.error('Müşteri silinemedi:', response.data.message);
+      const response = await customerService.deleteCustomer(customerId);
+      if (response) {
+        customerData.value = customerData.value.filter((c) => c.customerId !== customerId);
       }
     } catch (error) {
       console.error('deleteCustomer başarısız oldu:', error);
@@ -129,12 +86,14 @@ export const useCustomerStore = defineStore('customer', () => {
 
   return {
     customerData,
+    selectedCustomer,
     isInitialized,
     isLoading,
     fetchCustomerData,
     addCustomer,
     updateCustomer,
     deleteCustomer,
-    searchCustomer,
+    fetchCustomerDataById,
+    fetchAllCustomers,
   };
 });

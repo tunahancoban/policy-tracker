@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.model.DTO.request;
 
+import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,8 @@ public class CreatePolicyRequest {
     @NotNull
     private PolicyType type;
 
+    private String note;
+
     @NotNull
     private LocalDate startDate; //Policy start date
 
@@ -32,5 +35,6 @@ public class CreatePolicyRequest {
     @Positive
     private Double premium;
 
+    private InstallmentOptions installmentNumber;
 
 }

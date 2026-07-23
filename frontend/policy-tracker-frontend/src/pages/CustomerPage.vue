@@ -5,13 +5,6 @@
                 <div class="text-h6 text-weight-bold">Müşteri Yönetimi</div>
                 <q-space />
 
-                <q-input v-model="searchQuery" dense outlined placeholder="Müşteri Ara..." class="q-mr-sm"
-                    style="width: 250px;" @update:model-value="onSearch">
-                    <template v-slot:append>
-                        <q-icon name="search" />
-                    </template>
-                </q-input>
-
                 <q-btn color="primary" icon="add" label="Yeni Müşteri" @click="openAddModal" />
             </q-card-section>
 
@@ -39,7 +32,7 @@
         </q-card>
 
         <!-- Extracted Modal Component -->
-        <CustomerModal v-model="showModal" :customer-data="editingCustomer" @saved="onCustomerSaved" />
+        <!--<CustomerModal v-model="showModal" :customer-data="editingCustomer" @saved="onCustomerSaved" />-->
     </q-page>
 </template>
 
@@ -48,24 +41,24 @@ import { ref, onMounted } from 'vue';
 import { useCustomerStore } from '../stores/customer';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import CustomerModal from '../components/CustomerModal.vue';
+//import CustomerModal from '../components/CustomerModal.vue';
 
 // ── Extracted modules ──────────────────────────────────────────────
 import type { Customer } from '../types/customer.types';
 import { customerColumns } from '../types/customer.types';
-import { useCustomerSearch } from '../composables/useCustomerSearch';
+//import { useCustomerSearch } from '../composables/useCustomerSearch';
 
 // ── Core dependencies ──────────────────────────────────────────────
 const customerStore = useCustomerStore();
 const $q = useQuasar();
 const router = useRouter(); // Router nesnesini oluşturduk
-const searchQuery = ref<string>('');
+//const searchQuery = ref<string>('');
 
 const showModal = ref(false);
 const editingCustomer = ref<Customer | undefined>(undefined);
 
 // ── Search composable ──────────────────────────────────────────────
-const { onSearch } = useCustomerSearch(searchQuery, customerStore);
+//const { onSearch } = useCustomerSearch(searchQuery, customerStore);
 
 // Satıra tıklandığında detay sayfasına uçuran fonksiyon
 const goToCustomerDetail = (evt: unknown, row: Customer) => {
@@ -87,9 +80,9 @@ const openEditModal = (customer: unknown) => {
     showModal.value = true;
 };
 
-const onCustomerSaved = async () => {
-    await customerStore.fetchCustomerData();
-};
+//const onCustomerSaved = async () => {
+//    await customerStore.fetchCustomerData();
+//};
 
 const toggleActiveStatus = async (customer: Customer, newStatus: boolean) => {
     try {
