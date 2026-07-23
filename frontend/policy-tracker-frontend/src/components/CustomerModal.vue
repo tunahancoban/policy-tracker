@@ -14,6 +14,10 @@
                     :rules="[val => !!val || 'Soyad zorunludur']" />
                 <q-input v-model="form.identityNumber" label="T.C *" outlined dense
                     :rules="[val => !!val || 'T.C. zorunludur']" />
+
+                <q-select v-model="form.active" :options="stateOptions" label="Sistem Durumu" emit-value map-options
+                    outlined dense />
+
                 <q-input v-model="form.email" label="E-posta" outlined dense type="email" />
                 <q-input v-model="form.phoneNumber" label="Telefon" outlined dense mask="(###) ### ## ##"
                     unmasked-value />
@@ -37,10 +41,11 @@ import { useCustomerStore } from '../stores/customer';
 import { useQuasar } from 'quasar';
 import type { Customer } from '../types/customer.types';
 import { initialForm } from '../types/customer.types';
+import { stateOptions } from '@/types/policy.types';
 
 const props = defineProps<{
     modelValue: boolean;
-    customerData?: Customer | Partial<Customer>;
+    customerData?: Customer | Partial<Customer> | undefined;
 }>();
 
 const emit = defineEmits<{

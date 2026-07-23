@@ -4,70 +4,55 @@
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6 text-weight-bold">Müşteri Yönetimi</div>
                 <q-space />
-
                 <q-btn color="primary" icon="add" label="Yeni Müşteri" @click="openAddModal" />
             </q-card-section>
 
             <q-separator class="q-mt-md" />
 
             <q-card-section>
-                <q-table :rows="customerStore.customerData" :columns="customerColumns" row-key="customerId"
+                <q-table :rows="customers" :columns="customerColumns" :loading="isLoading" row-key="customerId"
                     no-data-label="Kayıtlı müşteri bulunamadı." loading-label="Veriler yükleniyor..."
                     @row-click="goToCustomerDetail" class="customer-table">
-                    <template v-slot:body-cell-active="props">
-                        <q-td :props="props" class="text-center" @click.stop> <q-toggle v-model="props.row.active"
-                                checked-icon="check" unchecked-icon="clear" color="green"
-                                @update:model-value="(val) => toggleActiveStatus(props.row, val)" />
-                        </q-td>
-                    </template>
 
                     <template v-slot:body-cell-actions="props">
-                        <q-td :props="props" class="q-gutter-xs" @click.stop> <q-btn flat round dense color="warning"
-                                icon="edit" @click="openEditModal(props.row)" />
+                        <q-td :props="props" class="q-gutter-xs" @click.stop>
+                            <q-btn flat round dense color="warning" icon="edit" @click="openEditModal(props.row)" />
                             <q-btn flat round dense color="negative" icon="delete" @click="confirmDelete(props.row)" />
                         </q-td>
+
                     </template>
                 </q-table>
             </q-card-section>
-        </q-card>
 
-        <!-- Extracted Modal Component -->
-        <!--<CustomerModal v-model="showModal" :customer-data="editingCustomer" @saved="onCustomerSaved" />-->
+        </q-card>
+        <CustomerModal v-model="showModal" :customer-data="editingCustomer" @saved="onCustomerSaved" />
     </q-page>
 </template>
 
+ts
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useCustomerStore } from '../stores/customer';
-import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-//import CustomerModal from '../components/CustomerModal.vue';
+import CustomerModal from '../components/CustomerModal.vue';
 
-// ── Extracted modules ──────────────────────────────────────────────
 import type { Customer } from '../types/customer.types';
 import { customerColumns } from '../types/customer.types';
-//import { useCustomerSearch } from '../composables/useCustomerSearch';
+import { useCustomerList } from '../composables/useCustomerList';
 
-// ── Core dependencies ──────────────────────────────────────────────
-const customerStore = useCustomerStore();
+import { useQuasar } from 'quasar';
+
 const $q = useQuasar();
-const router = useRouter(); // Router nesnesini oluşturduk
-//const searchQuery = ref<string>('');
+const { customers, isLoading, loadCustomers, deleteCustomer } = useCustomerList(); const router = useRouter();
 
 const showModal = ref(false);
 const editingCustomer = ref<Customer | undefined>(undefined);
 
-// ── Search composable ──────────────────────────────────────────────
-//const { onSearch } = useCustomerSearch(searchQuery, customerStore);
-
-// Satıra tıklandığında detay sayfasına uçuran fonksiyon
 const goToCustomerDetail = (evt: unknown, row: Customer) => {
-    // routes.ts dosyasındaki name: 'customer-detail' ile eşleşiyor
     void router.push({ name: 'customer-detail', params: { id: row.customerId } });
 };
 
 onMounted(async () => {
-    await customerStore.fetchCustomerData();
+    await loadCustomers();
 });
 
 const openAddModal = () => {
@@ -75,32 +60,13 @@ const openAddModal = () => {
     showModal.value = true;
 };
 
-const openEditModal = (customer: unknown) => {
-    editingCustomer.value = customer as Customer;
+const openEditModal = (customer: Customer) => {
+    editingCustomer.value = customer;
     showModal.value = true;
 };
 
-//const onCustomerSaved = async () => {
-//    await customerStore.fetchCustomerData();
-//};
-
-const toggleActiveStatus = async (customer: Customer, newStatus: boolean) => {
-    try {
-        await customerStore.updateCustomer({
-            ...customer,
-            active: newStatus
-        });
-
-        $q.notify({
-            message: `Müşteri ${newStatus ? 'aktif' : 'pasif'} duruma getirildi.`,
-            color: 'positive',
-            timeout: 2000
-        });
-    } catch (error) {
-        console.error('Aktiflik durumu değiştirilemedi:', error);
-        customer.active = !newStatus;
-        $q.notify({ message: 'Durum güncellenirken bir hata oluştu.', color: 'negative' });
-    }
+const onCustomerSaved = async () => {
+    await loadCustomers();
 };
 
 const confirmDelete = (customer: Customer) => {
@@ -112,24 +78,17 @@ const confirmDelete = (customer: Customer) => {
         cancel: { label: 'Vazgeç', flat: true, color: 'grey' },
         ok: { label: 'Evet, Sil', color: 'negative' },
     }).onOk(() => {
-        const executeDelete = async () => {
-            try {
-                await customerStore.deleteCustomer(customer.customerId);
-                $q.notify({ message: 'Müşteri başarıyla silindi.', color: 'positive' });
-                await customerStore.fetchCustomerData();
-            } catch (err) {
-                console.error('Silme esnasında hata oluştu:', err);
-                $q.notify({ message: 'Müşteri silinirken bir hata oluştu.', color: 'negative' });
-            }
-        };
-
-        void executeDelete();
+        void handleDelete(customer.customerId);
     });
 };
-</script>
 
-<style scoped>
-.customer-table :deep(.q-table tbody tr) {
-    cursor: pointer;
-}
-</style>
+const handleDelete = async (customerId: string) => {
+    try {
+        await deleteCustomer(customerId);
+        $q.notify({ message: 'Müşteri başarıyla silindi.', color: 'positive' });
+    } catch (err) {
+        console.error('Silme esnasında hata oluştu:', err);
+        $q.notify({ message: 'Müşteri silinirken bir hata oluştu.', color: 'negative' });
+    }
+};
+</script>
