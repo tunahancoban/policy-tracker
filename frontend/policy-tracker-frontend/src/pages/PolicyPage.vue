@@ -39,8 +39,8 @@
                 loading-label="Veriler getiriliyor...">
                 <template v-slot:body-cell-type="props">
                     <q-td :props="props">
-                        <q-chip :color="props.row.type === 'TRAFİK' ? 'teal-2' : 'purple-2'"
-                            :text-color="props.row.type === 'TRAFİK' ? 'teal-9' : 'purple-9'" dense square
+                        <q-chip :color="getPolicyTypeColor(props.row.type)"
+                            :text-color="getPolicyTypeTextColor(props.row.type)" dense square
                             class="text-weight-bold text-caption">
                             {{ props.row.type }}
                         </q-chip>
@@ -92,12 +92,16 @@ import type { Policy } from '../types/policy.types';
 import { policyColumns, policyTypeOptions } from '../types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper';
 import { usePolicyStore } from '../stores/policy';
+import { usePolicyList } from '@/composables/usePolicyList';
+import { getPolicyTypeColor, getPolicyTypeTextColor } from '@/utils/policyHelper';
 
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 import EditPolicyModal from '../components/EditPolicyModal.vue';
 
+const { loadPolicies } = usePolicyList();
+
 const searchQuery = ref<string>('');
-const selectedType = ref<string | null>(null);
+const selectedType = ref<string>('');
 const policyStore = usePolicyStore();
 
 const isCreateModalOpen = ref<boolean>(false);
@@ -105,27 +109,26 @@ const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
 
 const onSearch = () => {
-    const query = searchQuery.value ? searchQuery.value.trim() : '';
-    const searchParams: Record<string, string | null> = {
-        policyId: null,
-        customerId: null,
-        type: selectedType.value
-    };
+    const query = searchQuery.value?.trim() ?? '';
+    const params: Record<string, string> = {};
 
+    if (selectedType.value) {
+        params.type = selectedType.value;
+    }
     if (query) {
         if (query.toUpperCase().startsWith('CST')) {
-            searchParams.customerId = query;
+            params.customerId = query;
         } else {
-            searchParams.policyId = query;
+            params.policyId = query;
         }
     }
 
-    void policyStore.fetchPolicies();
+    void loadPolicies(params);
 };
 
 const resetFilters = () => {
     searchQuery.value = '';
-    selectedType.value = null;
+    selectedType.value = '';
     void policyStore.fetchPolicies({});
 };
 

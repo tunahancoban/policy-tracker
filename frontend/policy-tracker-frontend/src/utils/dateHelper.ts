@@ -62,3 +62,13 @@ export const getPolicyStatusGroup = (
   }
   return 'active'; // Aktif (30 günden fazla var)
 };
+
+export const formatDate = (dateString: string): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return (
+    date.toLocaleDateString('tr-TR') +
+    ' ' +
+    date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+  );
+};

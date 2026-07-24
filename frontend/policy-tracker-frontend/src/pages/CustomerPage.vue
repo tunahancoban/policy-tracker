@@ -19,7 +19,6 @@
                             <q-btn flat round dense color="warning" icon="edit" @click="openEditModal(props.row)" />
                             <q-btn flat round dense color="negative" icon="delete" @click="confirmDelete(props.row)" />
                         </q-td>
-
                     </template>
                 </q-table>
             </q-card-section>
@@ -42,7 +41,8 @@ import { useCustomerList } from '../composables/useCustomerList';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
-const { customers, isLoading, loadCustomers, deleteCustomer } = useCustomerList(); const router = useRouter();
+const { customers, isLoading, loadCustomers, deleteCustomer } = useCustomerList();
+const router = useRouter();
 
 const showModal = ref(false);
 const editingCustomer = ref<Customer | undefined>(undefined);

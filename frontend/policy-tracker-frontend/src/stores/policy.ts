@@ -9,12 +9,9 @@ import { dashboardService } from '@/restservices/dashboardService';
 export const usePolicyStore = defineStore('policy', () => {
   // --- STATE ---
   const policies = ref<Policy[]>([]);
-  const summary = ref<CustomerSummary | null>(null); // ➕ Özet verisini tutmak için eklendi
+  const summary = ref<CustomerSummary | null>(null);
   const isLoading = ref<boolean>(false);
 
-  // --- ACTIONS ---
-
-  // Tüm poliçeleri genel çekme
   const fetchPolicies = async (params: Record<string, string> = {}) => {
     isLoading.value = true;
     try {

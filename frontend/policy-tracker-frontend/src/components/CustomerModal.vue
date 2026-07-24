@@ -76,7 +76,6 @@ watch(() => props.modelValue, (newVal) => {
     }
 });
 
-// Kaydet/Güncelle fonksiyonu
 const saveCustomer = async () => {
     if (!form.value.firstName || !form.value.lastName || !form.value.identityNumber) {
         $q.notify({ message: 'Lütfen zorunlu alanları doldurun.', color: 'warning' });
