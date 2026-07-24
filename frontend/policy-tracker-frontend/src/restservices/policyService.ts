@@ -12,7 +12,7 @@ export const policyService = {
 
     return Array.isArray(resData) ? resData : [resData];
   },
-  async addPolicy(newPolicy: Policy): Promise<Policy> {
+  async addPolicy(newPolicy: Omit<Policy, 'policyId'>): Promise<Policy> {
     const response = await api.post<ApiResponse<Policy>>(
       `/rest/api/policy/create-policy `,
       newPolicy,

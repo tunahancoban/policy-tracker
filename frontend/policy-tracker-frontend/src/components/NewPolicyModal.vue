@@ -32,7 +32,8 @@
                     </q-select>
 
                     <!-- Poliçe Türü -->
-                    <q-select v-model="form.type" :options="policyTypeOptions" label="Poliçe Türü *" outlined dense
+                    <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
+                        emit-value map-options label="Poliçe Türü *" outlined dense
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
 
@@ -203,7 +204,7 @@ const filterFn = (val: string, update: (callback: () => void) => void) => {
 
 const onModalShow = async () => {
     if (!customerStore.customerData || customerStore.customerData.length === 0) {
-        await customerStore.fetchCustomerData({ customerId: "121" });
+        await customerStore.fetchCustomerData(); // parametre yok, tüm müşteri listesi çekiliyor
     }
 
     filteredCustomerOptions.value = [];
@@ -213,8 +214,13 @@ const onModalShow = async () => {
 const onSubmit = () => {
     loading.value = true;
     try {
-        emit('created', { data: { ...form.value } });
-        isOpen.value = false;
+        const payload = {
+            ...form.value,
+            startDate: form.value.startDate.replace(/\//g, '-'),
+            endDate: form.value.endDate.replace(/\//g, '-'),
+        };
+
+        emit('created', payload);
     } catch (error) {
         console.error('Poliçe kaydedilirken hata oluştu:', error);
     } finally {

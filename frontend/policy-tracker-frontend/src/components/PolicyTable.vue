@@ -29,12 +29,13 @@
                 </template>
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center">
-                        <q-btn v-if="showViewAction" flat round color="primary" icon="visibility" size="sm"
-                            @click="emit('view', props.row)">
-                            <q-tooltip>Poliçe Detayına Git</q-tooltip>
-                        </q-btn>
-                        <q-btn v-if="showEditAction" flat round color="secondary" icon="edit" size="sm"
-                            @click="emit('edit', props.row)" />
+                        <slot name="row-actions" :policy="props.row">
+                            <!-- varsayılan davranış: mevcut edit/view butonları -->
+                            <q-btn v-if="showViewAction" flat round color="primary" icon="visibility" size="sm"
+                                @click="emit('view', props.row)" />
+                            <q-btn v-if="showEditAction" flat round color="secondary" icon="edit" size="sm"
+                                @click="emit('edit', props.row)" />
+                        </slot>
                     </q-td>
                 </template>
             </q-table>

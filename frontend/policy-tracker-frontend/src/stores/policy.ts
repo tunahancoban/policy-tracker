@@ -24,7 +24,6 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  // ➕ YENİ: Müşteriye özel poliçeleri ve özet kart verilerini eşzamanlı çeken action
   const fetchCustomerPoliciesAndSummary = async (customerId: string) => {
     isLoading.value = true;
     try {
@@ -42,7 +41,7 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  const addPolicy = async (newPolicy: Policy) => {
+  const addPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
     isLoading.value = true;
     try {
       const addedPolicy = await policyService.addPolicy(newPolicy);

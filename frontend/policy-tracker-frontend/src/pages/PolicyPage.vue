@@ -33,49 +33,14 @@
             </q-card-section>
         </q-card>
 
-        <q-card flat bordered>
-            <q-table flat :rows="policyStore.policies" :columns="policyColumns" row-key="policyId"
-                :loading="policyStore.isLoading" no-data-label="Kriterlere uygun poliçe kaydı bulunamadı."
-                loading-label="Veriler getiriliyor...">
-                <template v-slot:body-cell-type="props">
-                    <q-td :props="props">
-                        <q-chip :color="getPolicyTypeColor(props.row.type)"
-                            :text-color="getPolicyTypeTextColor(props.row.type)" dense square
-                            class="text-weight-bold text-caption">
-                            {{ props.row.type }}
-                        </q-chip>
-                    </q-td>
-                </template>
-
-                <template v-slot:body-cell-premium="props">
-                    <q-td :props="props" class="text-weight-medium text-right text-subtitle2">
-                        {{ props.row.premium != null ? `${props.row.premium} TL` : '0.0 TL' }}
-                    </q-td>
-                </template>
-
-                <template v-slot:body-cell-statu="props">
-                    <q-td :props="props" class="text-center">
-                        <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
-                            class="text-weight-bold">
-                            {{ calculateRemainingDays(props.row.endDate) }}
-                        </q-chip>
-                    </q-td>
-                </template>
-
-                <template v-slot:body-cell-actions="props">
-                    <q-td :props="props" class="q-gutter-xs text-center">
-                        <q-btn flat round color="primary" icon="account_circle" size="sm"
-                            :to="`/customer/${props.row.customerId}`">
-                            <q-tooltip>Müşteri Detayına Git</q-tooltip>
-                        </q-btn>
-                        <q-btn flat round color="primary" icon="visibility" size="sm">
-                            <q-tooltip>Poliçe Detayına Git</q-tooltip>
-                        </q-btn>
-                        <q-btn flat round color="secondary" icon="edit" size="sm" @click="openEditDialog(props.row)" />
-                    </q-td>
-                </template>
-            </q-table>
-        </q-card>
+        <PolicyTable :policies="policies" :loading="isLoading" title="Genel Poliçe Yönetimi" :show-add-button="false">
+            <template v-slot:row-actions="{ policy }">
+                <q-btn flat round color="primary" icon="account_circle" size="sm"
+                    :to="`/customer/${policy.customerId}`" />
+                <q-btn flat round color="primary" icon="visibility" size="sm" />
+                <q-btn flat round color="secondary" icon="edit" size="sm" @click="openEditDialog(policy)" />
+            </template>
+        </PolicyTable>
 
         <!-- YENİ POLİÇE EKLEME MODALI -->
         <NewPolicyModal v-model="isCreateModalOpen" @created="handlePolicyCreate" />
@@ -89,21 +54,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import type { Policy } from '../types/policy.types';
-import { policyColumns, policyTypeOptions } from '../types/policy.types';
-import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper';
-import { usePolicyStore } from '../stores/policy';
+import { policyTypeOptions } from '../types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
-import { getPolicyTypeColor, getPolicyTypeTextColor } from '@/utils/policyHelper';
+import { Notify } from 'quasar';
+import PolicyTable from '@/components/PolicyTable.vue';
 
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 import EditPolicyModal from '../components/EditPolicyModal.vue';
 
-const { loadPolicies } = usePolicyList();
+const { policies, isLoading, loadPolicies, createPolicy, updatePolicy } = usePolicyList();
 
 const searchQuery = ref<string>('');
-const selectedType = ref<string>('');
-const policyStore = usePolicyStore();
-
+const selectedType = ref<string | null>(null);
 const isCreateModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
@@ -128,35 +90,45 @@ const onSearch = () => {
 
 const resetFilters = () => {
     searchQuery.value = '';
-    selectedType.value = '';
-    void policyStore.fetchPolicies({});
+    selectedType.value = null;
+    void loadPolicies({});
 };
 
 watch(selectedType, () => {
     onSearch();
 });
 
-// Ekleme Modalı Açma
 const openCreateDialog = () => {
     isCreateModalOpen.value = true;
 };
 
-// Düzenleme Modalı Açma
 const openEditDialog = (policy: Policy) => {
     selectedPolicy.value = policy;
     isEditModalOpen.value = true;
 };
 
-const handlePolicyCreate = () => {
-    console.log("test");
+const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
+    try {
+        await createPolicy(newPolicy);
+        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive' });
+        isCreateModalOpen.value = false;
+    } catch (err) {
+        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative' });
+        console.error('Policy Create Error:', err);
+    }
 };
 
-// 2. Poliçe Güncelleme (PATCH)
-const handlePolicyUpdate = () => {
-    console.log("test");
-
+const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
+    try {
+        await updatePolicy(event.id, event.data);
+        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive' });
+    } catch (err) {
+        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative' });
+        console.error('Policy Update Error:', err);
+    }
 };
+
 onMounted(() => {
-    void policyStore.fetchPolicies({});
+    void loadPolicies({});
 });
 </script>

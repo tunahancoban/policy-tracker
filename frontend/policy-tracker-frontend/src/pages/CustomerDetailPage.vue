@@ -17,7 +17,7 @@
 
                 <div class="col-12 col-md-8 column q-gutter-y-md">
                     <PolicySummaryCards :summary="summary" />
-                    <CustomerPolicyTable :policies="policies" title="Müşteriye Tanımlı Poliçeler"
+                    <PolicyTable :policies="policies" title="Müşteriye Tanımlı Poliçeler"
                         empty-state-text="Bu müşteriye ait henüz bir poliçe kaydı bulunamadı."
                         @edit="openEditPolicyDialog" @add="onAddPolicyRequested" />
                 </div>
@@ -48,7 +48,7 @@ import CustomerModal from '@/components/CustomerModal.vue';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
 import CustomerProfileCard from '@/components/CustomerProfileCard.vue';
 import PolicySummaryCards from '@/components/PolicySummaryCard.vue';
-import CustomerPolicyTable from '@/components/CustomerPolicyTable.vue';
+import PolicyTable from '@/components/PolicyTable.vue';
 
 const route = useRoute();
 const customerId = route.params.id as string;
