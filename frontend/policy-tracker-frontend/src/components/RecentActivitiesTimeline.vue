@@ -6,7 +6,6 @@
             </q-item-label>
 
             <q-item v-for="(activity, index) in activities" :key="index" class="q-py-md">
-                <!-- Orta Detay Alanı -->
                 <q-item-section>
                     <q-item-label class="text-weight-medium">{{ activity.type }}</q-item-label>
                     <q-item-label caption lines="2" class="text-grey-8">
@@ -17,7 +16,6 @@
                     </q-item-label>
                 </q-item-section>
 
-                <!-- Sağ Tarih Alanı -->
                 <q-item-section side top>
                     <q-badge outline color="primary" class="q-pa-xs">
                         {{ formatDate(activity.dateTime) }}

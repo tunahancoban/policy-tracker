@@ -1,5 +1,5 @@
 import { api } from '../boot/axios';
-import type { User } from '../types/user.types';
+import type { RegisterRequest, User, UpdateUserRequest } from '../types/user.types';
 import type { ApiResponse } from '../types/api.types';
 
 export const userService = {
@@ -12,7 +12,7 @@ export const userService = {
 
     return Array.isArray(resData) ? resData : [resData];
   },
-  async addUser(newUser: User): Promise<User> {
+  async addUser(newUser: RegisterRequest): Promise<User> {
     const response = api.post<ApiResponse<User>>(`/rest/api/user/create-user `, newUser);
     const resData = (await response).data.data;
     if (!(await response).data.success || !resData) return resData;
@@ -20,9 +20,9 @@ export const userService = {
     return resData;
   },
 
-  async updateUser(updatedUser: User) {
+  async updateUser(updatedUser: UpdateUserRequest, userId: string): Promise<User> {
     const response = api.patch<ApiResponse<User>>(
-      `/rest/api/user/update-user/${updatedUser.id}`,
+      `/rest/api/user/update-user/${userId}`,
       updatedUser,
     );
     const resData = (await response).data.data;
@@ -33,5 +33,18 @@ export const userService = {
   async deleteUser(userId: string): Promise<boolean> {
     const response = await api.delete<ApiResponse<null>>(`/rest/api/user/delete-user/${userId}`);
     return response.data.success;
+  },
+  async getProfile(): Promise<User | undefined> {
+    const response = await api.get<ApiResponse<User>>('/rest/api/profile/get-profile');
+    const resData = response.data.data;
+    if (!response.data.success || !resData) return undefined;
+    return resData;
+  },
+
+  async updateProfile(updates: Record<string, unknown>): Promise<User | undefined> {
+    const response = await api.put<ApiResponse<User>>('/rest/api/profile/update-profile', updates);
+    const resData = response.data.data;
+    if (!response.data.success || !resData) return undefined;
+    return resData;
   },
 };

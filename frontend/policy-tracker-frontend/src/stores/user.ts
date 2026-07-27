@@ -1,22 +1,17 @@
 // src/stores/user.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { api } from '../boot/axios';
-import type { User } from '../types/user.types';
-import type { RegisterRequest } from '../types/user.types';
-import type { ApiResponse } from '../types/api.types';
+import { userService } from '@/restservices/userService';
+import type { RegisterRequest, User, UpdateUserRequest } from '@/types/user.types';
 
 export const useUserStore = defineStore('user', () => {
   const users = ref<User[]>([]);
   const isLoading = ref<boolean>(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (params?: Record<string, string>) => {
     isLoading.value = true;
     try {
-      const response = await api.get<ApiResponse<User[]>>('/rest/api/user/with-params');
-      if (response.data.success && response.data.data) {
-        users.value = response.data.data;
-      }
+      users.value = await userService.getCustomer(params);
     } catch (error) {
       console.error('Kullanıcılar getirilirken hata:', error);
     } finally {
@@ -24,15 +19,11 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (): Promise<User | null> => {
     isLoading.value = true;
     try {
-      const response = await api.get<ApiResponse<User>>('/rest/api/profile/get-profile');
-
-      if (response.data.success && response.data.data) {
-        return response.data.data;
-      }
-      return null;
+      const profile = await userService.getProfile();
+      return profile ?? null;
     } catch (error) {
       console.error('Profil getirilirken hata:', error);
       throw error;
@@ -41,12 +32,12 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const addUser = async (newUser: RegisterRequest) => {
+  const addUser = async (payload: RegisterRequest) => {
     isLoading.value = true;
     try {
-      const response = await api.post<ApiResponse<User>>('/rest/api/user/create-user', newUser);
-      if (response.data.success && response.data.data) {
-        users.value.push(response.data.data);
+      const created = await userService.addUser(payload);
+      if (created) {
+        users.value.push(created);
       }
     } catch (error) {
       console.error('addUser başarısız oldu:', error);
@@ -56,25 +47,14 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const updateUser = async (updatedUser: User) => {
+  const updateUser = async (updatedUser: UpdateUserRequest, userId: string) => {
     isLoading.value = true;
     try {
-      const response = await api.patch<ApiResponse<User>>(
-        `/rest/api/user/update-user/${updatedUser.id}`,
-        updatedUser,
-      );
-
-      if (response.data.success && response.data.data) {
-        const responseData = response.data.data;
-
-        const incomingUser = Array.isArray(responseData) ? responseData[0] : responseData;
-
-        const finalID = incomingUser?.id ?? updatedUser.id;
-
-        const index = users.value.findIndex((u) => u.id === finalID);
-
+      const result = await userService.updateUser(updatedUser, userId);
+      if (result) {
+        const index = users.value.findIndex((u) => u.id === result.id);
         if (index !== -1) {
-          users.value[index] = incomingUser ?? updatedUser;
+          users.value[index] = result;
         }
       }
     } catch (error) {
@@ -84,27 +64,25 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = false;
     }
   };
+
   const deleteUser = async (id: string) => {
     try {
-      const response = await api.delete<ApiResponse<null>>(`/rest/api/user/delete-user/${id}`);
-      if (response.data.success) {
+      const success = await userService.deleteUser(id);
+      if (success) {
         users.value = users.value.filter((u) => u.id !== id);
       } else {
-        console.error('Kullanıcı silinemedi:', response.data.message);
+        console.error('Kullanıcı silinemedi.');
       }
     } catch (error) {
-      console.error('deleteUser başarısız oldu: ', error);
+      console.error('deleteUser başarısız oldu:', error);
       throw error;
     }
   };
-  const updateMyProfile = async (updates: Record<string, unknown>) => {
+
+  const updateMyProfile = async (updates: Record<string, unknown>): Promise<User | undefined> => {
     isLoading.value = true;
     try {
-      const response = await api.put<ApiResponse<void>>(
-        '/rest/api/profile/update-profile',
-        updates,
-      );
-      return response.data;
+      return await userService.updateProfile(updates);
     } catch (error) {
       console.error('updateMyProfile başarısız oldu:', error);
       throw error;

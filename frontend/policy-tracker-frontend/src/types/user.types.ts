@@ -3,7 +3,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'ROLE_ADMIN' | 'ROLE_USER';
+  role: UserRole;
   createdAt?: string;
 }
 
@@ -23,17 +23,30 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   email: string;
-  password?: string;
-  role: 'ROLE_ADMIN' | 'ROLE_USER';
+  password: string;
+  role: UserRole;
 }
 
-export interface UpdateProfileRequest {
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  role?: UserRole;
+}
+
+export interface UserForm {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
+  password?: string;
+  role: UserRole;
 }
 
-// Şifre yenilemek için
+export const userRoleOptions = ['ROLE_ADMIN', 'ROLE_USER'] as const;
+export type UserRole = (typeof userRoleOptions)[number];
+
 export interface ChangePasswordRequest {
   newPassword: string;
 }

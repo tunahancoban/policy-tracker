@@ -66,6 +66,7 @@ const { policies, isLoading, loadPolicies, createPolicy, updatePolicy } = usePol
 
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
+
 const isCreateModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
