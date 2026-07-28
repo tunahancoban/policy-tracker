@@ -7,6 +7,9 @@ import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.service.PolicyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +23,13 @@ public class RestPolicyController {
     private final PolicyService policyService;
 
     @GetMapping(path = "/with-params")
-    public ResponseEntity<RestResponse<List<Policy>>> getPolicyWithParams(@RequestParam(name = "policyId", required = false) String policyId,
+    public ResponseEntity<RestResponse<Page<Policy>>> getPolicyWithParams(@RequestParam(name = "policyId", required = false) String policyId,
                                                                           @RequestParam(name = "customerId", required = false) String customerId,
-                                                                          @RequestParam(name = "type", required = false) PolicyType type){
-        List<Policy> policyList = policyService.getPolicyWithParams(customerId,policyId,type);
+                                                                          @RequestParam(name = "type", required = false) PolicyType type,
+                                                                          @RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Policy> policyList = policyService.getPolicyWithParams(customerId,policyId,type,pageable);
         return ResponseEntity.ok(RestResponse.success("Poliçeler bulundu ", policyList));
     }
 

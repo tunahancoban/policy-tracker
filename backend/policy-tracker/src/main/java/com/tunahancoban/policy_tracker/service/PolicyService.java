@@ -11,6 +11,9 @@ import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +30,9 @@ public class PolicyService {
     private final CustomerService customerService;
     private final IdGeneratorService idGeneratorService;
     private final InstallmentRepository installmentRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public List<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type){
+    public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable){
         //We are creating a search criteria here then we are searching this in db
         Policy searchCriteria = Policy.builder()
                 .policyId(policyId)
@@ -41,8 +45,7 @@ public class PolicyService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
-        List<Policy> policyList = policyRepository.findAll(example);
-        return policyRepository.findAll(example);
+        return policyRepository.findAll(example,pageable);
     }
     @Transactional
     @LogActivity(type = "POLICE", detail = "Poliçe oluşturuldu")
@@ -70,7 +73,9 @@ public class PolicyService {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now()).build();
         createInstallment(policy, request.getInstallmentNumber().getValue());
-        return policyRepository.save(policy);
+        Policy savedPolicy = policyRepository.save(policy);
+        messagingTemplate.convertAndSend("/topic/dashboard-summary", "REFRESH_DASHBOARD");
+        return savedPolicy;
     }
 
     public void createInstallment(Policy policy, int installmentNumber){

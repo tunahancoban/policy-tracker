@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/rest/api/user/**").hasRole("ADMIN")
                         .requestMatchers("/rest/api/profile/**").authenticated()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/ws/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

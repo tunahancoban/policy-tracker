@@ -11,14 +11,20 @@
 
         <q-separator />
 
-        <q-card-section>
-            <div v-if="policies.length === 0" class="text-center q-pa-xl text-grey-6">
-                <q-icon name="folder_open" size="64px" color="grey-4" />
-                <div class="text-subtitle1 q-mt-md">{{ emptyStateText }}</div>
-            </div>
+        <q-card-section class="q-pa-none">
+            <q-table flat :rows="policies" :columns="policyColumns" row-key="policyId" :loading="loading"
+                v-model:pagination="internalPagination" @request="onRequest">
+                <!-- Özel Boş Durum (Empty State) Slot'u -->
+                <template v-slot:no-data>
+                    <div class="full-width row flex-center text-grey-6 q-pa-xl">
+                        <q-icon name="folder_open" size="64px" color="grey-4" />
+                        <div class="text-subtitle1 q-mt-md full-width text-center">
+                            {{ emptyStateText }}
+                        </div>
+                    </div>
+                </template>
 
-            <q-table v-else flat bordered :rows="policies" :columns="policyColumns" row-key="policyId"
-                no-data-label="Poliçe bulunamadı.">
+                <!-- Durum / Kalan Gün Hücresi -->
                 <template v-slot:body-cell-statu="props">
                     <q-td :props="props" class="text-center">
                         <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
@@ -27,14 +33,17 @@
                         </q-chip>
                     </q-td>
                 </template>
+
+                <!-- Aksiyon Butonları Hücresi -->
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center">
                         <slot name="row-actions" :policy="props.row">
-                            <!-- varsayılan davranış: mevcut edit/view butonları -->
                             <q-btn v-if="showViewAction" flat round color="primary" icon="visibility" size="sm"
                                 @click="emit('view', props.row)" />
                             <q-btn v-if="showEditAction" flat round color="secondary" icon="edit" size="sm"
                                 @click="emit('edit', props.row)" />
+                            <q-btn v-if="showDeleteAction" flat round color="red" icon="delete" size="sm"
+                                @click="emit('delete', props.row)" />
                         </slot>
                     </q-td>
                 </template>
@@ -44,31 +53,58 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import { policyColumns, type Policy } from '@/types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '@/utils/dateHelper';
 
 interface Props {
     policies: Policy[];
+    loading?: boolean;
+    rowsNumber?: number;
     title?: string;
     emptyStateText?: string;
     addButtonLabel?: string;
     showAddButton?: boolean;
     showEditAction?: boolean;
     showViewAction?: boolean;
+    showDeleteAction?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
+    loading: false,
+    rowsNumber: 0,
     title: 'Poliçeler',
     emptyStateText: 'Henüz bir poliçe kaydı bulunamadı.',
     addButtonLabel: 'Yeni Poliçe Ekle',
     showAddButton: true,
     showEditAction: true,
     showViewAction: true,
+    showDeleteAction: true,
 });
 
 const emit = defineEmits<{
     edit: [policy: Policy];
     view: [policy: Policy];
+    delete: [policy: Policy];
     add: [];
+    request: [payload: { pagination: { page: number; rowsPerPage: number } }];
 }>();
+
+// İç pagination state'i
+const internalPagination = ref({
+    page: 1,
+    rowsPerPage: 5,
+    rowsNumber: props.rowsNumber
+});
+
+// Dışarıdan gelen rowsNumber değiştikçe iç state'i güncelle
+watch(() => props.rowsNumber, (newVal) => {
+    internalPagination.value.rowsNumber = newVal;
+}, { immediate: true });
+
+const onRequest = (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
+    internalPagination.value.page = requestProp.pagination.page;
+    internalPagination.value.rowsPerPage = requestProp.pagination.rowsPerPage;
+    emit('request', requestProp);
+};
 </script>

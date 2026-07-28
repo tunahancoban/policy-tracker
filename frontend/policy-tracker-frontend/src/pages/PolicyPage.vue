@@ -1,7 +1,7 @@
 <template>
-    <q-page class="q-pa-md">
+    <q-page class="q-pa-md fade-in-up">
         <div class="row items-center justify-between q-mb-md">
-            <div class="text-h5 text-weight-bold text-grey-8 =row items-center">
+            <div class="text-h5 text-weight-bold text-grey-8 row items-center">
                 <q-icon name="description" color="primary" class="q-mr-sm" size="32px" />
                 Genel Poliçe Yönetimi
             </div>
@@ -33,19 +33,20 @@
             </q-card-section>
         </q-card>
 
-        <PolicyTable :policies="policies" :loading="isLoading" title="Genel Poliçe Yönetimi" :show-add-button="false">
+        <!-- POLICY TABLE -->
+        <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
+            title="Genel Poliçe Yönetimi" :show-add-button="false" @request="onRequest">
             <template v-slot:row-actions="{ policy }">
                 <q-btn flat round color="primary" icon="account_circle" size="sm"
                     :to="`/customer/${policy.customerId}`" />
                 <q-btn flat round color="primary" icon="visibility" size="sm" />
                 <q-btn flat round color="secondary" icon="edit" size="sm" @click="openEditDialog(policy)" />
+                <q-btn flat round color="red" icon="delete" size="sm" @click="handlePolicyDelete(policy)" />
             </template>
         </PolicyTable>
 
-        <!-- YENİ POLİÇE EKLEME MODALI -->
         <NewPolicyModal v-model="isCreateModalOpen" @created="handlePolicyCreate" />
 
-        <!-- POLİÇE DÜZENLEME (PATCH) MODALI -->
         <EditPolicyModal v-if="selectedPolicy" v-model="isEditModalOpen" :policyData="selectedPolicy"
             @updated="handlePolicyUpdate" />
     </q-page>
@@ -56,24 +57,40 @@ import { ref, onMounted, watch } from 'vue';
 import type { Policy } from '../types/policy.types';
 import { policyTypeOptions } from '../types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { Notify } from 'quasar';
 import PolicyTable from '@/components/PolicyTable.vue';
 
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 import EditPolicyModal from '../components/EditPolicyModal.vue';
 
-const { policies, isLoading, loadPolicies, createPolicy, updatePolicy } = usePolicyList();
+const {
+    policies,
+    isLoading,
+    totalElements,
+    currentPage,
+    pageSize,
+    loadPolicies,
+    createPolicy,
+    updatePolicy,
+    deletePolicy
+} = usePolicyList();
 
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
+const { confirm } = useConfirmDialog();
 
 const isCreateModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
 
-const onSearch = () => {
+const buildQueryParams = (overridePage?: number, overrideSize?: number) => {
     const query = searchQuery.value?.trim() ?? '';
-    const params: Record<string, string> = {};
+
+    const params: Record<string, string> = {
+        page: String(overridePage ?? currentPage.value),
+        size: String(overrideSize ?? pageSize.value),
+    };
 
     if (selectedType.value) {
         params.type = selectedType.value;
@@ -85,19 +102,33 @@ const onSearch = () => {
             params.policyId = query;
         }
     }
+    return params;
+};
 
-    void loadPolicies(params);
+const onSearch = () => {
+    currentPage.value = 0;
+    void loadPolicies(buildQueryParams(0));
 };
 
 const resetFilters = () => {
     searchQuery.value = '';
     selectedType.value = null;
-    void loadPolicies({});
+    currentPage.value = 0;
+    void loadPolicies(buildQueryParams(0));
 };
 
 watch(selectedType, () => {
     onSearch();
 });
+
+const onRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
+    const { page, rowsPerPage } = requestProp.pagination;
+
+    const targetBackendPage = page - 1;
+    currentPage.value = targetBackendPage;
+    pageSize.value = rowsPerPage;
+    await loadPolicies(buildQueryParams(targetBackendPage, rowsPerPage));
+};
 
 const openCreateDialog = () => {
     isCreateModalOpen.value = true;
@@ -113,6 +144,7 @@ const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
         await createPolicy(newPolicy);
         Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive' });
         isCreateModalOpen.value = false;
+        void loadPolicies(buildQueryParams());
     } catch (err) {
         Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative' });
         console.error('Policy Create Error:', err);
@@ -129,7 +161,30 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
     }
 };
 
+const handlePolicyDelete = async (policy: Policy) => {
+    if (!policy?.policyId) return;
+
+    const isConfirmed = await confirm({
+        title: 'Poliçe Silme Onayı',
+        message: `${policy.policyId} numaralı poliçeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+        okLabel: 'Evet, Sil',
+        cancelLabel: 'Vazgeç',
+        color: 'negative'
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+        await deletePolicy(policy.policyId);
+        Notify.create({ message: 'Poliçe başarıyla silindi.', color: 'positive', icon: 'check' });
+        void loadPolicies(buildQueryParams());
+    } catch (err) {
+        Notify.create({ message: 'Poliçe silinirken bir hata oluştu.', color: 'negative' });
+        console.error('Policy Delete Error:', err);
+    }
+};
+
 onMounted(() => {
-    void loadPolicies({});
+    void loadPolicies(buildQueryParams());
 });
 </script>

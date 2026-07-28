@@ -21,7 +21,7 @@
                 <div class="text-subtitle1 q-mb-md text-center text-weight-bold text-grey-8">
                     Yenilenmesi Gereken Poliçeler
                 </div>
-                <RenewalPoliciesTable :policies="renewalPolicies" :loading="renewalLoading" />
+                <PolicyTable :policies="renewalPolicies" :loading="renewalLoading" />
             </q-card-section>
 
             <q-card-section class="q-pt-none">
@@ -37,10 +37,11 @@ import { useDashboardData } from '@/composables/useDashboardData';
 
 import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
 import DashboardCharts from '@/components/DashboardCharts.vue';
-import RenewalPoliciesTable from '@/components/RenewalPoliciesTable.vue';
 import RecentActivitiesTimeline from '@/components/RecentActivitiesTimeline.vue';
 import type { ChartData } from 'chart.js';
 import { policyColorMap } from '@/utils/policyHelper';
+import { useWebSocket } from '@/composables/useWebSocket';
+import PolicyTable from '@/components/PolicyTable.vue';
 
 
 const {
@@ -48,6 +49,11 @@ const {
     loadDashboard, loadRenewalPolicies,
 } = useDashboardData();
 
+const { connect } = useWebSocket();
+
+const refreshAllData = async () => {
+    await Promise.all([loadDashboard(10), loadRenewalPolicies(1, 5)]);
+};
 
 const barChartData = computed<ChartData<'bar'>>(() => ({
     labels: Object.keys(chartDataFromApi.value.monthlyPremium),
@@ -111,6 +117,10 @@ const renewalChartData = computed<ChartData<'bar'>>(() => {
     };
 });
 onMounted(async () => {
-    await Promise.all([loadDashboard(10), loadRenewalPolicies()]);
+    await refreshAllData();
+    connect((_signal) => {
+        console.log(_signal);
+        void refreshAllData();
+    });
 });
 </script>

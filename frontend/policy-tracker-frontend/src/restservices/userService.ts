@@ -1,33 +1,27 @@
 import { api } from '../boot/axios';
 import type { RegisterRequest, User, UpdateUserRequest } from '../types/user.types';
 import type { ApiResponse } from '../types/api.types';
+import { unwrapList, unwrapSingle } from '@/utils/apiResponseHandler';
 
 export const userService = {
   async getCustomer(params?: Record<string, string>): Promise<User[]> {
-    const response = api.get<ApiResponse<User[] | User>>(`/rest/api/user/with-params`, {
+    const response = await api.get<ApiResponse<User[]>>(`/rest/api/user/with-params`, {
       params,
     });
-    const resData = (await response).data.data;
-    if (!(await response).data.success || !resData) return [];
 
-    return Array.isArray(resData) ? resData : [resData];
+    return unwrapList<User>(response);
   },
   async addUser(newUser: RegisterRequest): Promise<User> {
-    const response = api.post<ApiResponse<User>>(`/rest/api/user/create-user `, newUser);
-    const resData = (await response).data.data;
-    if (!(await response).data.success || !resData) return resData;
-
-    return resData;
+    const response = await api.post<ApiResponse<User>>(`/rest/api/user/create-user `, newUser);
+    return unwrapSingle<User>(response);
   },
 
   async updateUser(updatedUser: UpdateUserRequest, userId: string): Promise<User> {
-    const response = api.patch<ApiResponse<User>>(
+    const response = await api.patch<ApiResponse<User>>(
       `/rest/api/user/update-user/${userId}`,
       updatedUser,
     );
-    const resData = (await response).data.data;
-    if (!(await response).data.success || !resData) return resData;
-    return resData;
+    return unwrapSingle<User>(response);
   },
 
   async deleteUser(userId: string): Promise<boolean> {
@@ -36,15 +30,11 @@ export const userService = {
   },
   async getProfile(): Promise<User | undefined> {
     const response = await api.get<ApiResponse<User>>('/rest/api/profile/get-profile');
-    const resData = response.data.data;
-    if (!response.data.success || !resData) return undefined;
-    return resData;
+    return unwrapSingle<User>(response);
   },
 
-  async updateProfile(updates: Record<string, unknown>): Promise<User | undefined> {
+  async updateProfile(updates: Record<string, unknown>): Promise<User> {
     const response = await api.put<ApiResponse<User>>('/rest/api/profile/update-profile', updates);
-    const resData = response.data.data;
-    if (!response.data.success || !resData) return undefined;
-    return resData;
+    return unwrapSingle<User>(response);
   },
 };

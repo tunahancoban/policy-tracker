@@ -1,6 +1,9 @@
 package com.tunahancoban.policy_tracker.repository;
 
 import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -17,6 +20,9 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
     long countByEndDateLessThan(LocalDate date);
     long countByEndDateBetween(LocalDate start, LocalDate end);
+    Page<Policy> findByCustomerId(String customerId, Pageable pageable);
+    Page<Policy> findByType(PolicyType type, Pageable pageable);
+    Page<Policy> findAll(Pageable pageable);
 
     @Aggregation(pipeline = {
             "{ '$match': { 'customerId': ?0 } }",

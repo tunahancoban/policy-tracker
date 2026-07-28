@@ -58,8 +58,3 @@ export const policyTypeOptions = [
   { label: 'KASKO Sigortası', value: 'KASKO' },
   { label: 'Sağlık Sigortası', value: 'SAGLIK' },
 ];
-
-export const stateOptions = [
-  { label: 'Aktif', value: true },
-  { label: 'Pasif', value: false },
-];

@@ -52,7 +52,7 @@ defineProps<{
     loading: boolean;
 }>();
 
-const pagination = { rowsPerPage: 10 };
+const pagination = { rowsPerPage: 5 };
 
 const renewalColumns = [
     { name: 'policyId', label: 'Poliçe No', field: 'policyId', align: 'left' as const, sortable: true },

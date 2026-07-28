@@ -2,45 +2,88 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { Policy } from '../types/policy.types';
-import type { CustomerSummary } from '../types/dashboard.types'; // Summary tipinizin bulunduğu yer
+import type { CustomerSummary } from '../types/dashboard.types';
 import { policyService } from '@/restservices/policyService';
 import { dashboardService } from '@/restservices/dashboardService';
 
 export const usePolicyStore = defineStore('policy', () => {
-  // --- STATE ---
   const policies = ref<Policy[]>([]);
-  const summary = ref<CustomerSummary | null>(null);
   const isLoading = ref<boolean>(false);
+  const totalElements = ref(0);
+  const totalPages = ref(0);
+  const currentPage = ref(0);
+  const pageSize = ref(10);
+
+  const customerPolicies = ref<Policy[]>([]);
+  const customerPoliciesLoading = ref<boolean>(false);
+  const customerPoliciesTotal = ref(0);
+  const customerPoliciesTotalPages = ref(0);
+  const customerPoliciesPage = ref(0);
+  const customerPoliciesPageSize = ref(10);
+
+  const summary = ref<CustomerSummary | null>(null);
 
   const fetchPolicies = async (params: Record<string, string> = {}) => {
     isLoading.value = true;
     try {
-      policies.value = await policyService.getPolicy(params);
+      const result = await policyService.getPolicy(params);
+      policies.value = result.content;
+      totalElements.value = result.totalElements;
+      totalPages.value = result.totalPages;
     } catch (error) {
       console.error('Poliçeler yüklenirken hata oluştu:', error);
       policies.value = [];
+      totalElements.value = 0;
+      totalPages.value = 0;
     } finally {
       isLoading.value = false;
     }
   };
 
+  const goToPage = async (page: number, params: Record<string, string> = {}) => {
+    currentPage.value = page;
+    await fetchPolicies(params);
+  };
+
+  const changePageSize = async (size: number, params: Record<string, string> = {}) => {
+    pageSize.value = size;
+    currentPage.value = 0;
+    await fetchPolicies(params);
+  };
+
   const fetchCustomerPoliciesAndSummary = async (customerId: string) => {
+    customerPoliciesLoading.value = true;
     isLoading.value = true;
     try {
       const [policiesRes, summaryRes] = await Promise.all([
         policyService.getPolicy({ customerId }),
         dashboardService.getCustomerSummary(customerId),
       ]);
-      policies.value = policiesRes;
+      customerPolicies.value = policiesRes.content;
+      customerPoliciesTotal.value = policiesRes.totalElements;
+      customerPoliciesTotalPages.value = policiesRes.totalPages;
       summary.value = summaryRes;
     } catch (error) {
       console.error('Müşteri poliçeleri ve özeti yüklenirken hata oluştu:', error);
       throw error;
     } finally {
+      customerPoliciesLoading.value = false;
       isLoading.value = false;
     }
   };
 
+  const goToCustomerPoliciesPage = async (page: number, customerId: string) => {
+    customerPoliciesPage.value = page;
+    await fetchCustomerPoliciesAndSummary(customerId);
+  };
+
+  const changeCustomerPoliciesPageSize = async (size: number, customerId: string) => {
+    customerPoliciesPageSize.value = size;
+    customerPoliciesPage.value = 0;
+    await fetchCustomerPoliciesAndSummary(customerId);
+  };
+
+  // --- CRUD İŞLEMLERİ (Değişmedi) ---
   const addPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
     isLoading.value = true;
     try {
@@ -58,12 +101,13 @@ export const usePolicyStore = defineStore('policy', () => {
     isLoading.value = true;
     try {
       const result = await policyService.updatePolicy(policyId, updatedPolicy);
-      const targetId = result.policyId || policyId; // Bazen result içinden id gelmeyebilir garantisi
-      const index = policies.value.findIndex((c) => c.policyId === targetId);
+      const targetId = result.policyId || policyId;
 
-      if (index !== -1) {
-        policies.value[index] = result;
-      }
+      const index = policies.value.findIndex((c) => c.policyId === targetId);
+      if (index !== -1) policies.value[index] = result;
+
+      const customerIndex = customerPolicies.value.findIndex((c) => c.policyId === targetId);
+      if (customerIndex !== -1) customerPolicies.value[customerIndex] = result;
     } catch (error) {
       console.error('Poliçe güncellenirken hata oluştu:', error);
       throw error;
@@ -77,6 +121,7 @@ export const usePolicyStore = defineStore('policy', () => {
       const response = await policyService.deletePolicy(policyId);
       if (response) {
         policies.value = policies.value.filter((c) => c.policyId !== policyId);
+        customerPolicies.value = customerPolicies.value.filter((c) => c.policyId !== policyId);
       }
     } catch (error) {
       console.error('Poliçe silinemedi: ', error);
@@ -86,10 +131,26 @@ export const usePolicyStore = defineStore('policy', () => {
 
   return {
     policies,
-    summary, // ➕ dışarıya aktarıldı
     isLoading,
+    totalElements,
+    totalPages,
+    currentPage,
+    pageSize,
     fetchPolicies,
-    fetchCustomerPoliciesAndSummary, // ➕ dışarıya aktarıldı
+    goToPage,
+    changePageSize,
+
+    customerPolicies,
+    customerPoliciesLoading,
+    customerPoliciesTotal,
+    customerPoliciesTotalPages,
+    customerPoliciesPage,
+    customerPoliciesPageSize,
+    fetchCustomerPoliciesAndSummary,
+    goToCustomerPoliciesPage,
+    changeCustomerPoliciesPageSize,
+
+    summary,
     addPolicy,
     updatePolicy,
     deletePolicy,

@@ -43,6 +43,11 @@ export const customerColumns = [
   { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const },
 ];
 
+export const stateOptions = [
+  { label: 'Aktif', value: true },
+  { label: 'Pasif', value: false },
+];
+
 export const initialForm = {
   customerId: '',
   firstName: '',

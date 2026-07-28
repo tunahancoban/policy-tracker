@@ -14,7 +14,9 @@ export function useDashboardData() {
   });
   const activities = ref<Activity[]>([]);
   const chartDataFromApi = ref<ChartResponse>({ typeLabels: {}, monthlyPremium: {} });
+
   const renewalPolicies = ref<Policy[]>([]);
+  const renewalTotalRows = ref<number>(0);
   const renewalLoading = ref(false);
 
   const loadDashboard = async (listNumber: number) => {
@@ -33,22 +35,22 @@ export function useDashboardData() {
     }
   };
 
-  const loadRenewalPolicies = async () => {
+  const loadRenewalPolicies = async (page: number, size: number) => {
     renewalLoading.value = true;
     try {
-      const allPolicies = await policyService.getPolicy();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const thirtyDaysLater = new Date(today);
-      thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+      const params: Record<string, string> = {
+        page: page.toString(),
+        size: size.toString(),
+      };
 
-      renewalPolicies.value = allPolicies
-        .filter((p) => {
-          const end = new Date(p.endDate);
-          end.setHours(0, 0, 0, 0);
-          return end >= today && end <= thirtyDaysLater;
-        })
-        .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+      const pageData = await policyService.getPolicy(params);
+
+      renewalPolicies.value = pageData.content || [];
+      renewalTotalRows.value = pageData.totalElements || 0;
+    } catch (error) {
+      console.error('Yenileme poliçeleri yüklenirken hata:', error);
+      renewalPolicies.value = [];
+      renewalTotalRows.value = 0;
     } finally {
       renewalLoading.value = false;
     }
@@ -59,6 +61,7 @@ export function useDashboardData() {
     activities,
     chartDataFromApi,
     renewalPolicies,
+    renewalTotalRows,
     renewalLoading,
     loadDashboard,
     loadRenewalPolicies,

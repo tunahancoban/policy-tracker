@@ -41,7 +41,7 @@ import { useCustomerStore } from '../stores/customer';
 import { useQuasar } from 'quasar';
 import type { Customer } from '../types/customer.types';
 import { initialForm } from '../types/customer.types';
-import { stateOptions } from '@/types/policy.types';
+import { stateOptions } from '@/types/customer.types';
 
 const props = defineProps<{
     modelValue: boolean;

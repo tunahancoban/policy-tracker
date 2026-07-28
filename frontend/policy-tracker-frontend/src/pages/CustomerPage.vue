@@ -17,7 +17,7 @@
                     <template v-slot:body-cell-actions="props">
                         <q-td :props="props" class="q-gutter-xs" @click.stop>
                             <q-btn flat round dense color="warning" icon="edit" @click="openEditModal(props.row)" />
-                            <q-btn flat round dense color="negative" icon="delete" @click="confirmDelete(props.row)" />
+                            <q-btn flat round dense color="negative" icon="delete" @click="handleDelete(props.row)" />
                         </q-td>
                     </template>
                 </q-table>
@@ -33,6 +33,7 @@ ts
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import CustomerModal from '../components/CustomerModal.vue';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 
 import type { Customer } from '../types/customer.types';
 import { customerColumns } from '../types/customer.types';
@@ -40,6 +41,7 @@ import { useCustomerList } from '../composables/useCustomerList';
 
 import { useQuasar } from 'quasar';
 
+const { confirm } = useConfirmDialog();
 const $q = useQuasar();
 const { customers, isLoading, loadCustomers, deleteCustomer } = useCustomerList();
 const router = useRouter();
@@ -69,22 +71,22 @@ const onCustomerSaved = async () => {
     await loadCustomers();
 };
 
-const confirmDelete = (customer: Customer) => {
-    if (!customer.customerId) return;
 
-    $q.dialog({
-        title: 'Müşteri Silme',
-        message: `${customer.firstName} ${customer.lastName} isimli müşteriyi silmek istediğinize emin misiniz?`,
-        cancel: { label: 'Vazgeç', flat: true, color: 'grey' },
-        ok: { label: 'Evet, Sil', color: 'negative' },
-    }).onOk(() => {
-        void handleDelete(customer.customerId);
+const handleDelete = async (customer: Customer) => {
+    if (!customer?.customerId) return;
+
+    const isConfirmed = await confirm({
+        title: 'Poliçe Silme Onayı',
+        message: `${customer.firstName}, ${customer.lastName} isimli kişiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+        okLabel: 'Evet, Sil',
+        cancelLabel: 'Vazgeç',
+        color: 'negative'
     });
-};
 
-const handleDelete = async (customerId: string) => {
+    if (!isConfirmed) return;
+
     try {
-        await deleteCustomer(customerId);
+        await deleteCustomer(customer.customerId);
         $q.notify({ message: 'Müşteri başarıyla silindi.', color: 'positive' });
     } catch (err) {
         console.error('Silme esnasında hata oluştu:', err);
