@@ -1,20 +1,21 @@
 import { api } from '../boot/axios';
 import type { Customer } from '@/types/customer.types';
 import type { ApiResponse } from '@/types/api.types';
-import { unwrapList, unwrapListToSingle, unwrapSingle } from '@/utils/apiResponseHandler';
+import type { Page } from '@/types/api.types';
+import { unwrapPaged, unwrapSingle } from '@/utils/apiResponseHandler';
 export const customerService = {
-  async getCustomer(params?: Record<string, string>): Promise<Customer[]> {
-    const response = await api.get<ApiResponse<Customer[]>>(`/rest/api/customer/with-params`, {
+  async getCustomer(params?: Record<string, string>): Promise<Page<Customer>> {
+    const response = await api.get<ApiResponse<Page<Customer>>>('/rest/api/customer/with-params', {
       params,
     });
-    return unwrapList<Customer>(response);
+    return unwrapPaged<Customer>(response);
   },
 
   async getCustomerById(customerId: string): Promise<Customer> {
-    const response = await api.get<ApiResponse<Customer[]>>('/rest/api/customer/with-params', {
-      params: { customerId },
-    });
-    return unwrapListToSingle<Customer>(response);
+    const response = await api.get<ApiResponse<Customer>>(
+      `/rest/api/customer/get-customer/${customerId}`,
+    );
+    return unwrapSingle<Customer>(response);
   },
 
   async addCustomer(newCustomer: Customer): Promise<Customer> {

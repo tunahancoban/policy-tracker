@@ -1,6 +1,7 @@
 <template>
     <q-page class="q-pa-md">
-        <div v-if="isLoading" class="row justify-center items-center q-pa-xl">
+        <!-- Sadece ilk açılışta tüm sayfa yükleniyor gösterilir -->
+        <div v-if="isInitialLoading" class="row justify-center items-center q-pa-xl">
             <q-spinner-dots color="primary" size="60px" />
         </div>
 
@@ -17,9 +18,11 @@
 
                 <div class="col-12 col-md-8 column q-gutter-y-md">
                     <PolicySummaryCards :summary="summary" />
-                    <PolicyTable :policies="policies" title="Müşteriye Tanımlı Poliçeler"
+                    <!-- Tablo DOM'dan kaybolmaz, sadece isPoliciesLoading ile kendi spinner'ını çıkarır -->
+                    <PolicyTable :policies="policies" :loading="isPoliciesLoading" :rows-number="totalElements"
+                        :page="currentPage + 1" :rows-per-page="pageSize" title="Müşteriye Tanımlı Poliçeler"
                         empty-state-text="Bu müşteriye ait henüz bir poliçe kaydı bulunamadı."
-                        @edit="openEditPolicyDialog" @add="onAddPolicyRequested" />
+                        @edit="openEditPolicyDialog" @add="onAddPolicyRequested" @request="onPolicyTableRequest" />
                 </div>
             </div>
 
@@ -34,13 +37,13 @@
         </div>
     </q-page>
 </template>
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Notify } from 'quasar';
 
 import { useCustomerDetail } from '@/composables/useCustomerDetail';
-
 import type { Policy } from '@/types/policy.types';
 import { formatPolicyPayload } from '@/utils/policyHelper';
 
@@ -53,9 +56,19 @@ import PolicyTable from '@/components/PolicyTable.vue';
 const route = useRoute();
 const customerId = route.params.id as string;
 
-// Composable artık store state'ini expose ediyor (single source of truth)
-const { customer, policies, summary, isLoading, loadAllData, updatePolicy } = useCustomerDetail(customerId);
-// Poliçe güncelleme işlemi için store'a ihtiyaç var — composable bunu expose etmiyor
+const {
+    customer,
+    policies,
+    summary,
+    isInitialLoading,
+    isPoliciesLoading,
+    totalElements,
+    loadAllData,
+    fetchPoliciesOnly,
+    updatePolicy,
+    currentPage,
+    pageSize
+} = useCustomerDetail(customerId);
 
 const showModal = ref(false);
 const isEditModalOpen = ref(false);
@@ -74,12 +87,21 @@ const onCustomerSaved = async () => {
     await loadAllData();
 };
 
+const onPolicyTableRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
+    const { page, rowsPerPage } = requestProp.pagination;
+    const targetBackendPage = page - 1;
+    currentPage.value = targetBackendPage;
+    pageSize.value = rowsPerPage;
+
+    // Tüm sayfayı reload etmek yerine sadece poliçeleri çekiyoruz
+    await fetchPoliciesOnly();
+};
+
 const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
     try {
         const payload = formatPolicyPayload(event.data);
         await updatePolicy(event.id, payload);
         Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive' });
-        await loadAllData();
     } catch (err) {
         Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative' });
         console.error('Policy Update Error:', err);

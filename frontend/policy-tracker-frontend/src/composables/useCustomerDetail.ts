@@ -10,7 +10,15 @@ export function useCustomerDetail(customerId: string) {
   const policyStore = usePolicyStore();
 
   const { selectedCustomer: customer, isLoading: isCustomerLoading } = storeToRefs(customerStore);
-  const { policies, summary: rawSummary, isLoading: isPolicyLoading } = storeToRefs(policyStore);
+
+  const {
+    customerPolicies: policies,
+    summary: rawSummary,
+    customerPoliciesLoading: isPoliciesLoading,
+    customerPoliciesTotal: totalElements,
+    customerPoliciesPage: currentPage,
+    customerPoliciesPageSize: pageSize,
+  } = storeToRefs(policyStore);
 
   const summary = computed(() => {
     return (
@@ -23,30 +31,49 @@ export function useCustomerDetail(customerId: string) {
     );
   });
 
-  const isLoading = computed(() => isCustomerLoading.value || isPolicyLoading.value);
+  // Sadece ilk açılış ekranında büyük spinner göstermek için (Müşteri bilgisi yüklenirken)
+  const isInitialLoading = computed(() => isCustomerLoading.value && !customer.value);
 
+  // İlk açılışta hem müşteri hem poliçe verilerini çeker
   const loadAllData = async () => {
     try {
-      await Promise.all([
-        customerStore.fetchCustomerDataById(customerId),
-        policyStore.fetchCustomerPoliciesAndSummary(customerId),
-      ]);
+      await Promise.all([customerStore.fetchCustomerById(customerId), fetchPoliciesOnly()]);
     } catch (error) {
       console.error('Müşteri detay verileri yüklenirken hata oluştu:', error);
       throw error;
     }
   };
+
+  // Sadece tablo sayfa/boyut değiştirdiğinde poliçeleri çeker
+  const fetchPoliciesOnly = async () => {
+    try {
+      await policyStore.fetchCustomerPoliciesAndSummary(
+        customerId,
+        currentPage.value.toString(),
+        pageSize.value.toString(),
+      );
+    } catch (error) {
+      console.error('Poliçeler yüklenirken hata oluştu:', error);
+      throw error;
+    }
+  };
+
   const updatePolicy = async (policyId: string, patchData: Partial<Policy>) => {
     await policyStore.updatePolicy(policyId, patchData);
-    await loadAllData();
+    await fetchPoliciesOnly();
   };
 
   return {
-    customer, // artık Customer | null
+    customer,
     policies,
     summary,
-    isLoading,
+    isInitialLoading,
+    isPoliciesLoading,
+    totalElements,
+    currentPage,
+    pageSize,
     loadAllData,
+    fetchPoliciesOnly,
     updatePolicy,
   };
 }

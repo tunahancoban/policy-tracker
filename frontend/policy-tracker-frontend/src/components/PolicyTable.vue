@@ -14,7 +14,6 @@
         <q-card-section class="q-pa-none">
             <q-table flat :rows="policies" :columns="policyColumns" row-key="policyId" :loading="loading"
                 v-model:pagination="internalPagination" @request="onRequest">
-                <!-- Özel Boş Durum (Empty State) Slot'u -->
                 <template v-slot:no-data>
                     <div class="full-width row flex-center text-grey-6 q-pa-xl">
                         <q-icon name="folder_open" size="64px" color="grey-4" />
@@ -24,7 +23,6 @@
                     </div>
                 </template>
 
-                <!-- Durum / Kalan Gün Hücresi -->
                 <template v-slot:body-cell-statu="props">
                     <q-td :props="props" class="text-center">
                         <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
@@ -34,7 +32,6 @@
                     </q-td>
                 </template>
 
-                <!-- Aksiyon Butonları Hücresi -->
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center">
                         <slot name="row-actions" :policy="props.row">
@@ -90,14 +87,12 @@ const emit = defineEmits<{
     request: [payload: { pagination: { page: number; rowsPerPage: number } }];
 }>();
 
-// İç pagination state'i
 const internalPagination = ref({
     page: 1,
     rowsPerPage: 5,
     rowsNumber: props.rowsNumber
 });
 
-// Dışarıdan gelen rowsNumber değiştikçe iç state'i güncelle
 watch(() => props.rowsNumber, (newVal) => {
     internalPagination.value.rowsNumber = newVal;
 }, { immediate: true });

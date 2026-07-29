@@ -18,6 +18,8 @@ export function useDashboardData() {
   const renewalPolicies = ref<Policy[]>([]);
   const renewalTotalRows = ref<number>(0);
   const renewalLoading = ref(false);
+  const renewalCurrentPage = ref(0);
+  const renewalPageSize = ref(5);
 
   const loadDashboard = async (listNumber: number) => {
     try {
@@ -38,6 +40,9 @@ export function useDashboardData() {
   const loadRenewalPolicies = async (page: number, size: number) => {
     renewalLoading.value = true;
     try {
+      renewalCurrentPage.value = page;
+      renewalPageSize.value = size;
+
       const params: Record<string, string> = {
         page: page.toString(),
         size: size.toString(),
@@ -63,6 +68,8 @@ export function useDashboardData() {
     renewalPolicies,
     renewalTotalRows,
     renewalLoading,
+    renewalCurrentPage,
+    renewalPageSize,
     loadDashboard,
     loadRenewalPolicies,
   };

@@ -7,6 +7,8 @@ import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,8 +21,8 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final IdGeneratorService idGeneratorService;
 
-    public List<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
-                                             String identityNumber, String email, String phoneNumber){
+    public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
+                                             String identityNumber, String email, String phoneNumber, Pageable pageable){
         //It creates a searchCriteria
         Customer searchCriteria = Customer.builder()
                 .customerId(customerId)
@@ -39,7 +41,11 @@ public class CustomerService {
 
         Example<Customer> example = Example.of(searchCriteria, matcher);
 
-        return customerRepository.findAll(example);
+        return customerRepository.findAll(example, pageable);
+    }
+
+    public Customer getCustomerByCustomerId(String customerId){
+        return  customerRepository.findByCustomerId(customerId);
     }
 
     @LogActivity(

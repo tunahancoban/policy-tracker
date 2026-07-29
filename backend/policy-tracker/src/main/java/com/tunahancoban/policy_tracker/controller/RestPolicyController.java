@@ -21,7 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RestPolicyController {
     private final PolicyService policyService;
-
     @GetMapping(path = "/with-params")
     public ResponseEntity<RestResponse<Page<Policy>>> getPolicyWithParams(@RequestParam(name = "policyId", required = false) String policyId,
                                                                           @RequestParam(name = "customerId", required = false) String customerId,

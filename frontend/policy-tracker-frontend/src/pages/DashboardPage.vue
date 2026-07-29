@@ -21,7 +21,16 @@
                 <div class="text-subtitle1 q-mb-md text-center text-weight-bold text-grey-8">
                     Yenilenmesi Gereken Poliçeler
                 </div>
-                <PolicyTable :policies="renewalPolicies" :loading="renewalLoading" />
+                <PolicyTable :policies="renewalPolicies" :loading="renewalLoading" :rows-number="renewalTotalRows"
+                    title="Yenilenmesi Gereken Poliçeler" :show-add-button="false" :show-edit-action="false"
+                    :show-delete-action="false" @request="onRenewalTableRequest">
+                    <template v-slot:row-actions="{ policy }">
+                        <q-btn flat round color="primary" icon="account_circle" size="sm"
+                            :to="`/customer/${policy.customerId}`">
+                            <q-tooltip>Müşteri Detayına Git</q-tooltip>
+                        </q-btn>
+                    </template>
+                </PolicyTable>
             </q-card-section>
 
             <q-card-section class="q-pt-none">
@@ -34,7 +43,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
 import { useDashboardData } from '@/composables/useDashboardData';
-
 import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
 import DashboardCharts from '@/components/DashboardCharts.vue';
 import RecentActivitiesTimeline from '@/components/RecentActivitiesTimeline.vue';
@@ -43,16 +51,24 @@ import { policyColorMap } from '@/utils/policyHelper';
 import { useWebSocket } from '@/composables/useWebSocket';
 import PolicyTable from '@/components/PolicyTable.vue';
 
-
 const {
-    summary, activities, chartDataFromApi, renewalPolicies, renewalLoading,
+    summary, activities, chartDataFromApi,
+    renewalPolicies, renewalLoading, renewalTotalRows, renewalCurrentPage, renewalPageSize,
     loadDashboard, loadRenewalPolicies,
 } = useDashboardData();
 
 const { connect } = useWebSocket();
 
 const refreshAllData = async () => {
-    await Promise.all([loadDashboard(10), loadRenewalPolicies(1, 5)]);
+    await Promise.all([
+        loadDashboard(10),
+        loadRenewalPolicies(renewalCurrentPage.value, renewalPageSize.value),
+    ]);
+};
+
+const onRenewalTableRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
+    const { page, rowsPerPage } = requestProp.pagination;
+    await loadRenewalPolicies(page - 1, rowsPerPage);
 };
 
 const barChartData = computed<ChartData<'bar'>>(() => ({
@@ -116,6 +132,7 @@ const renewalChartData = computed<ChartData<'bar'>>(() => {
         }],
     };
 });
+
 onMounted(async () => {
     await refreshAllData();
     connect((_signal) => {

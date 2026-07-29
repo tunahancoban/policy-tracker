@@ -12,14 +12,14 @@ export const usePolicyStore = defineStore('policy', () => {
   const totalElements = ref(0);
   const totalPages = ref(0);
   const currentPage = ref(0);
-  const pageSize = ref(10);
+  const pageSize = ref(5);
 
   const customerPolicies = ref<Policy[]>([]);
   const customerPoliciesLoading = ref<boolean>(false);
   const customerPoliciesTotal = ref(0);
   const customerPoliciesTotalPages = ref(0);
   const customerPoliciesPage = ref(0);
-  const customerPoliciesPageSize = ref(10);
+  const customerPoliciesPageSize = ref(5);
 
   const summary = ref<CustomerSummary | null>(null);
 
@@ -50,13 +50,20 @@ export const usePolicyStore = defineStore('policy', () => {
     currentPage.value = 0;
     await fetchPolicies(params);
   };
-
-  const fetchCustomerPoliciesAndSummary = async (customerId: string) => {
+  const fetchCustomerPoliciesAndSummary = async (
+    customerId: string,
+    page: string,
+    size: string,
+  ) => {
     customerPoliciesLoading.value = true;
     isLoading.value = true;
     try {
       const [policiesRes, summaryRes] = await Promise.all([
-        policyService.getPolicy({ customerId }),
+        policyService.getPolicy({
+          customerId,
+          page,
+          size,
+        }),
         dashboardService.getCustomerSummary(customerId),
       ]);
       customerPolicies.value = policiesRes.content;
@@ -72,18 +79,6 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  const goToCustomerPoliciesPage = async (page: number, customerId: string) => {
-    customerPoliciesPage.value = page;
-    await fetchCustomerPoliciesAndSummary(customerId);
-  };
-
-  const changeCustomerPoliciesPageSize = async (size: number, customerId: string) => {
-    customerPoliciesPageSize.value = size;
-    customerPoliciesPage.value = 0;
-    await fetchCustomerPoliciesAndSummary(customerId);
-  };
-
-  // --- CRUD İŞLEMLERİ (Değişmedi) ---
   const addPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
     isLoading.value = true;
     try {
@@ -147,9 +142,6 @@ export const usePolicyStore = defineStore('policy', () => {
     customerPoliciesPage,
     customerPoliciesPageSize,
     fetchCustomerPoliciesAndSummary,
-    goToCustomerPoliciesPage,
-    changeCustomerPoliciesPageSize,
-
     summary,
     addPolicy,
     updatePolicy,
