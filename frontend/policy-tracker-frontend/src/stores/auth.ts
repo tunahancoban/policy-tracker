@@ -1,12 +1,8 @@
 // src/stores/auth.ts
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { api } from '../boot/axios';
-import type { ApiResponse } from '../types/api.types';
-interface UserData {
-  role: string;
-  userEmail: string;
-}
+import { authService } from '@/restservices/authService';
+import type { UserData } from '@/types/user.types';
 
 export const useAuthStore = defineStore('auth', () => {
   const userRole = ref<string | null>(null);
@@ -21,23 +17,42 @@ export const useAuthStore = defineStore('auth', () => {
     userEmail.value = userData.userEmail;
   };
 
-  const checkAuth = async () => {
+  const clearAuthData = () => {
+    userRole.value = null;
+    userEmail.value = null;
+  };
+
+  const login = async (email: string, password: string) => {
     try {
-      const response = await api.get<ApiResponse<UserData>>('/rest/api/profile/me');
+      const restResponse = await authService.login(email, password);
 
-      const restResponse = response.data;
-
-      if (restResponse.success && restResponse.data) {
-        userRole.value = restResponse.data.role;
-        userEmail.value = restResponse.data.userEmail;
-      } else {
-        userRole.value = null;
-        userEmail.value = null;
+      if (restResponse) {
+        const { role, userEmail } = restResponse;
+        saveLoginData({ role, userEmail });
+        isInitialized.value = true;
       }
     } catch (error) {
-      console.error('F5 anında checkAuth başarısız oldu:', error);
-      userRole.value = null;
-      userEmail.value = null;
+      console.error('Giriş yapılırken hata oluştu:', error);
+      clearAuthData();
+      throw error;
+    }
+  };
+
+  const checkAuth = async () => {
+    try {
+      const userData = await authService.checkAuth();
+
+      if (userData && userData.userEmail) {
+        saveLoginData({
+          role: userData.role,
+          userEmail: userData.userEmail,
+        });
+      } else {
+        clearAuthData();
+      }
+    } catch (error) {
+      console.error('checkAuth başarısız oldu:', error);
+      clearAuthData();
     } finally {
       isInitialized.value = true;
     }
@@ -45,12 +60,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      await api.post<ApiResponse<void>>('/rest/api/auth/logout');
+      await authService.logout();
     } catch (error) {
       console.error('Logout isteği sırasında hata oluştu:', error);
     } finally {
-      userRole.value = null;
-      userEmail.value = null;
+      clearAuthData();
       isInitialized.value = false;
     }
   };
@@ -64,5 +78,6 @@ export const useAuthStore = defineStore('auth', () => {
     saveLoginData,
     checkAuth,
     logout,
+    login,
   };
 });

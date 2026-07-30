@@ -18,7 +18,6 @@
 
                 <div class="col-12 col-md-8 column q-gutter-y-md">
                     <PolicySummaryCards :summary="summary" />
-                    <!-- Tablo DOM'dan kaybolmaz, sadece isPoliciesLoading ile kendi spinner'ını çıkarır -->
                     <PolicyTable :policies="policies" :loading="isPoliciesLoading" :rows-number="totalElements"
                         :page="currentPage + 1" :rows-per-page="pageSize" title="Müşteriye Tanımlı Poliçeler"
                         empty-state-text="Bu müşteriye ait henüz bir poliçe kaydı bulunamadı."

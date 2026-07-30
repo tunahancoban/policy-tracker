@@ -1,3 +1,5 @@
+import type { UserRole } from './user.types';
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -31,4 +33,9 @@ export interface Page<T> {
   first: boolean;
   numberOfElements: number;
   empty: boolean;
+}
+
+export interface LoginResponse {
+  role: UserRole;
+  userEmail: string;
 }

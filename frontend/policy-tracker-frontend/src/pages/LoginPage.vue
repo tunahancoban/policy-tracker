@@ -61,10 +61,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import { api } from '../boot/axios';
 import { useAuthStore } from '../stores/auth';
 import { Notify } from 'quasar';
-import type { AxiosError } from 'axios';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -76,49 +74,14 @@ const router = useRouter();
 
 const handleLogin = async () => {
     try {
-        isLoading.value = true;
-
-        const response = await api.post('/rest/api/auth/login-request', {
-            email: email.value,
-            password: password.value
-        });
-
-        const restResponse = response.data;
-
-        if (restResponse.success && restResponse.data) {
-            const { role, userEmail } = restResponse.data;
-
-            authStore.saveLoginData({ role, userEmail });
-
-            authStore.isInitialized = true;
-
-            await router.push({ name: 'dashboard' });
-
-        } else {
-            Notify.create({
-                actions: [{ label: 'Kapat', color: 'white' }],
-                message: 'Giriş başarısız: ' + (restResponse.message || 'Bilinmeyen hata'),
-                color: 'red',
-                position: 'bottom'
-            });
-        }
+        await authStore.login(email.value, password.value);
+        await router.push({ name: 'dashboard' });
 
     } catch (error) {
-        console.error('An unexpected error occurred:', error);
-
-        const axiosError = error as AxiosError;
-        const apiError = axiosError.response?.data as { success: boolean; message: string; data: unknown } | undefined;
-        const errorMessage = apiError?.message || 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.';
-
-        Notify.create({
-            actions: [{ label: 'Kapat', color: 'white' }],
-            message: errorMessage,
-            color: 'red',
-            position: 'bottom'
-        });
-    } finally {
-        isLoading.value = false;
+        Notify.create({ message: "Giris yaparken bir hata olustu", color: 'negative' });
+        console.log(error)
     }
+
 };
 </script>
 

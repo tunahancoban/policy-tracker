@@ -31,10 +31,8 @@ export function useCustomerDetail(customerId: string) {
     );
   });
 
-  // Sadece ilk açılış ekranında büyük spinner göstermek için (Müşteri bilgisi yüklenirken)
   const isInitialLoading = computed(() => isCustomerLoading.value && !customer.value);
 
-  // İlk açılışta hem müşteri hem poliçe verilerini çeker
   const loadAllData = async () => {
     try {
       await Promise.all([customerStore.fetchCustomerById(customerId), fetchPoliciesOnly()]);

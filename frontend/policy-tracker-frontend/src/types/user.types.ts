@@ -7,6 +7,11 @@ export interface User {
   createdAt?: string;
 }
 
+export interface UserData {
+  role: string;
+  userEmail: string;
+}
+
 export const userColumns = [
   {
     name: 'fullName',
