@@ -13,7 +13,7 @@
 
         <q-card-section class="q-pa-none">
             <q-table flat :rows="policies" :columns="policyColumns" row-key="policyId" :loading="loading"
-                v-model:pagination="internalPagination" @request="onRequest">
+                v-model:pagination="internalPagination" @request="onRequest" @row-click="onRowClick">
                 <template v-slot:no-data>
                     <div class="full-width row flex-center text-grey-6 q-pa-xl">
                         <q-icon name="folder_open" size="64px" color="grey-4" />
@@ -85,7 +85,12 @@ const emit = defineEmits<{
     delete: [policy: Policy];
     add: [];
     request: [payload: { pagination: { page: number; rowsPerPage: number } }];
+    'row-click': [evt: Event, row: Policy]; // eklendi
 }>();
+
+const onRowClick = (evt: Event, row: Policy) => {
+    emit('row-click', evt, row);
+};
 
 const internalPagination = ref({
     page: 1,

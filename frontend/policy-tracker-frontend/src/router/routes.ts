@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
         name: 'profile',
         component: () => import('../pages/ProfilePage.vue'),
       },
+      {
+        path: 'policy/:id',
+        name: 'policy-detail',
+        component: () => import('../pages/PolicyDetailPage.vue'),
+      },
     ],
   },
 

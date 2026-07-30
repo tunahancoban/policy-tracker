@@ -22,11 +22,12 @@
                     <PolicyTable :policies="policies" :loading="isPoliciesLoading" :rows-number="totalElements"
                         :page="currentPage + 1" :rows-per-page="pageSize" title="Müşteriye Tanımlı Poliçeler"
                         empty-state-text="Bu müşteriye ait henüz bir poliçe kaydı bulunamadı."
-                        @edit="openEditPolicyDialog" @add="onAddPolicyRequested" @request="onPolicyTableRequest" />
+                        @edit="openEditPolicyDialog" @add="openCreateDialog" @request="onPolicyTableRequest" />
                 </div>
             </div>
 
             <CustomerModal v-model="showModal" :customer-data="customer" @saved="onCustomerSaved" />
+            <NewPolicyModal v-model="isCreateModalOpen" @created="handlePolicyCreate" />
             <EditPolicyModal v-if="selectedPolicy" v-model="isEditModalOpen" :policy-data="selectedPolicy"
                 @updated="handlePolicyUpdate" />
         </template>
@@ -52,6 +53,9 @@ import EditPolicyModal from '@/components/EditPolicyModal.vue';
 import CustomerProfileCard from '@/components/CustomerProfileCard.vue';
 import PolicySummaryCards from '@/components/PolicySummaryCard.vue';
 import PolicyTable from '@/components/PolicyTable.vue';
+import { usePolicyList } from '@/composables/usePolicyList';
+import NewPolicyModal from '../components/NewPolicyModal.vue';
+
 
 const route = useRoute();
 const customerId = route.params.id as string;
@@ -70,18 +74,23 @@ const {
     pageSize
 } = useCustomerDetail(customerId);
 
+const { createPolicy } = usePolicyList();
+
 const showModal = ref(false);
 const isEditModalOpen = ref(false);
 const selectedPolicy = ref<Policy | null>(null);
+const isCreateModalOpen = ref(false);
 
 const openEditPolicyDialog = (policy: Policy) => {
     selectedPolicy.value = policy;
     isEditModalOpen.value = true;
 };
 
-const onAddPolicyRequested = () => {
-    // TODO: yeni poliçe ekleme akışı
+const openCreateDialog = () => {
+    isCreateModalOpen.value = true;
 };
+
+
 
 const onCustomerSaved = async () => {
     await loadAllData();
@@ -93,7 +102,6 @@ const onPolicyTableRequest = async (requestProp: { pagination: { page: number; r
     currentPage.value = targetBackendPage;
     pageSize.value = rowsPerPage;
 
-    // Tüm sayfayı reload etmek yerine sadece poliçeleri çekiyoruz
     await fetchPoliciesOnly();
 };
 
@@ -107,6 +115,21 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
         console.error('Policy Update Error:', err);
     }
 };
+const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
+    try {
+        await createPolicy(newPolicy);
+        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive' });
+        isCreateModalOpen.value = false;
+        await loadAllData();
+    } catch (err) {
+        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative' });
+        console.error('Policy Create Error:', err);
+    }
+};
+
+
+
+
 
 onMounted(() => {
     void loadAllData();

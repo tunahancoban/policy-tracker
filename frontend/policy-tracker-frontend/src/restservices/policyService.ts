@@ -10,6 +10,12 @@ export const policyService = {
     });
     return unwrapPaged<Policy>(response);
   },
+
+  async getPolicyById(policyId: string): Promise<Policy> {
+    const response = await api.get<ApiResponse<Policy>>(`/rest/api/policy/get-policy/${policyId}`);
+    return unwrapSingle<Policy>(response);
+  },
+
   async addPolicy(newPolicy: Omit<Policy, 'policyId'>): Promise<Policy> {
     const response = await api.post<ApiResponse<Policy>>(
       `/rest/api/policy/create-policy `,

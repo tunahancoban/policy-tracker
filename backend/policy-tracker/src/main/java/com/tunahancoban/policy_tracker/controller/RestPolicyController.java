@@ -2,6 +2,7 @@ package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
+import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.service.PolicyService;
@@ -26,10 +27,16 @@ public class RestPolicyController {
                                                                           @RequestParam(name = "customerId", required = false) String customerId,
                                                                           @RequestParam(name = "type", required = false) PolicyType type,
                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                          @RequestParam(defaultValue = "10") int size){
+                                                                          @RequestParam(defaultValue = "5") int size){
         Pageable pageable = PageRequest.of(page, size);
         Page<Policy> policyList = policyService.getPolicyWithParams(customerId,policyId,type,pageable);
         return ResponseEntity.ok(RestResponse.success("Poliçeler bulundu ", policyList));
+    }
+
+    @GetMapping(path = "/get-policy/{id}")
+    public ResponseEntity<RestResponse<Policy>> getPolicyById(@PathVariable(name = "id") String id){
+        Policy policy = policyService.getPolicyById(id);
+        return ResponseEntity.ok(RestResponse.success("Poliçe bulundu ", policy));
     }
 
     @PostMapping(path = "/create-policy")
@@ -53,5 +60,4 @@ public class RestPolicyController {
         Policy policy = policyService.updatePolicy(id, updates);
         return ResponseEntity.ok(RestResponse.success("Poliçe başarıyla güncellendi: "+ id, policy));
     }
-
 }

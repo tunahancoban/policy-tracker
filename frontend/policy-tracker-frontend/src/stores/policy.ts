@@ -14,6 +14,8 @@ export const usePolicyStore = defineStore('policy', () => {
   const currentPage = ref(0);
   const pageSize = ref(5);
 
+  const selectedPolicy = ref<Policy | null>();
+
   const customerPolicies = ref<Policy[]>([]);
   const customerPoliciesLoading = ref<boolean>(false);
   const customerPoliciesTotal = ref(0);
@@ -40,16 +42,19 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  const goToPage = async (page: number, params: Record<string, string> = {}) => {
-    currentPage.value = page;
-    await fetchPolicies(params);
+  const fetchPolicyById = async (policyId: string) => {
+    isLoading.value = true;
+    try {
+      const policy = await policyService.getPolicyById(policyId);
+      selectedPolicy.value = policy;
+    } catch (error) {
+      console.error('Poliçe bilgisi çekilemedi', error);
+      selectedPolicy.value = null;
+    } finally {
+      isLoading.value = false;
+    }
   };
 
-  const changePageSize = async (size: number, params: Record<string, string> = {}) => {
-    pageSize.value = size;
-    currentPage.value = 0;
-    await fetchPolicies(params);
-  };
   const fetchCustomerPoliciesAndSummary = async (
     customerId: string,
     page: string,
@@ -132,8 +137,9 @@ export const usePolicyStore = defineStore('policy', () => {
     currentPage,
     pageSize,
     fetchPolicies,
-    goToPage,
-    changePageSize,
+
+    selectedPolicy,
+    fetchPolicyById,
 
     customerPolicies,
     customerPoliciesLoading,

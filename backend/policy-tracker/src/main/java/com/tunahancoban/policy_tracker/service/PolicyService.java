@@ -2,11 +2,8 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
-import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
-import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
-import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -19,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Map;
 
 @Service
@@ -29,7 +25,7 @@ public class PolicyService {
     private final PolicyRepository policyRepository;
     private final CustomerService customerService;
     private final IdGeneratorService idGeneratorService;
-    private final InstallmentRepository installmentRepository;
+    private final InstallmentService installmentService;
     private final SimpMessagingTemplate messagingTemplate;
 
     public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable){
@@ -46,6 +42,13 @@ public class PolicyService {
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
         return policyRepository.findAll(example,pageable);
+    }
+
+    public Policy getPolicyById(String policyId){
+        if (!policyRepository.existsByPolicyId(policyId)){
+            throw new RuntimeException("Police ID bulunamadı: " + policyId);
+        }
+        return policyRepository.findByPolicyId(policyId);
     }
     @Transactional
     @LogActivity(type = "POLICE", detail = "Poliçe oluşturuldu")
@@ -72,28 +75,12 @@ public class PolicyService {
                 .premium(request.getPremium())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now()).build();
-        createInstallment(policy, request.getInstallmentNumber().getValue());
+        installmentService.createInstallment(policy, request.getInstallmentNumber().getValue());
         Policy savedPolicy = policyRepository.save(policy);
         messagingTemplate.convertAndSend("/topic/dashboard-summary", "REFRESH_DASHBOARD");
         return savedPolicy;
     }
 
-    public void createInstallment(Policy policy, int installmentNumber){
-        List<Installment> installments = new ArrayList<>();
-        double rawAmount = policy.getPremium() / installmentNumber;
-        double installmentAmount = Math.round(rawAmount * 100.0) / 100.0;
-        for(int i=0; i<installmentNumber; i++){
-            Installment installment = Installment.builder()
-                    .policyId(policy.getPolicyId())
-                    .installmentNo(i+1)
-                    .amount(installmentAmount)
-                    .status(PaymentStatus.UNPAID)
-                    .dueDate(policy.getStartDate().plusMonths(i))
-                    .build();
-            installments.add(installment);
-        }
-        installmentRepository.saveAll(installments);
-    }
 
     @LogActivity(type = "POLICE", detail = "Poliçe silindi")
     public void deletePolicy(String policyID){

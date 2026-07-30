@@ -44,6 +44,14 @@ export const policyColumns = [
   },
   { name: 'statu', label: 'Kalan Gün', field: 'endDate', align: 'center' as const, sortable: true },
   {
+    name: 'installmentNumber',
+    label: 'Ödeme Sayısı',
+    field: 'installmentNumber',
+    align: 'center' as const,
+    sortable: true,
+  },
+
+  {
     name: 'premium',
     label: 'Prim Tutarı',
     field: (row: Policy) => `${row.premium} TL`,

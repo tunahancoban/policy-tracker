@@ -19,6 +19,7 @@ public class Installment {
     private String id;
 
     private String policyId;
+    private String customerId;
     private Integer installmentNo;
     private Double amount;
     private PaymentStatus status;

@@ -35,7 +35,7 @@
 
         <!-- POLICY TABLE -->
         <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
-            title="Genel Poliçe Yönetimi" :show-add-button="false" @request="onRequest">
+            title="Genel Poliçe Yönetimi" :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest">
             <template v-slot:row-actions="{ policy }">
                 <q-btn flat round color="primary" icon="account_circle" size="sm"
                     :to="`/customer/${policy.customerId}`" />
@@ -60,6 +60,7 @@ import { usePolicyList } from '@/composables/usePolicyList';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { Notify } from 'quasar';
 import PolicyTable from '@/components/PolicyTable.vue';
+import { useRouter } from 'vue-router';
 
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 import EditPolicyModal from '../components/EditPolicyModal.vue';
@@ -76,6 +77,7 @@ const {
     deletePolicy
 } = usePolicyList();
 
+const router = useRouter();
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
 const { confirm } = useConfirmDialog();
@@ -183,6 +185,12 @@ const handlePolicyDelete = async (policy: Policy) => {
         console.error('Policy Delete Error:', err);
     }
 };
+
+const goToPolicyDetail = (evt: unknown, row: Policy) => {
+    void router.push({ name: 'policy-detail', params: { id: row.policyId } });
+};
+
+
 
 onMounted(() => {
     void loadPolicies(buildQueryParams());
