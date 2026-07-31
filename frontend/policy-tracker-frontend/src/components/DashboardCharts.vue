@@ -70,7 +70,7 @@ const initCharts = () => {
             data: props.barChartData,
             options: {
                 scales: { y: { beginAtZero: true } },
-                plugins: { legend: { position: 'top' }, title: { display: true, text: 'Aylık Prim Gelişimi' } },
+                plugins: { legend: { position: 'top' }, title: { display: true, text: 'Aylık  Beklenen Gelir' } },
             },
         }));
     }

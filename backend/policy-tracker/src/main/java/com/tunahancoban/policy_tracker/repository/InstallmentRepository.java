@@ -8,5 +8,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface InstallmentRepository extends MongoRepository<Installment, String> {
+public interface InstallmentRepository extends MongoRepository<Installment, String>, InstallmentRepositoryCustom {
+
 }

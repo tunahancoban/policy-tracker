@@ -20,4 +20,7 @@ export interface Activity {
 export interface ChartResponse {
   typeLabels: Record<string, number>;
   monthlyPremium: Record<string, number>;
+  numberOfCriticalPolicies: number;
+  numberOfWarningPolicies: number;
+  numberOfNormalPolicies: number;
 }

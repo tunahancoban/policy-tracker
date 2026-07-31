@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +21,7 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
     Policy findByPolicyId(String policyId);
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
     long countByEndDateLessThan(LocalDate date);
-    long countByEndDateBetween(LocalDate start, LocalDate end);
+    long countByEndDateBetween(Instant start, Instant end);
     Page<Policy> findByCustomerId(String customerId, Pageable pageable);
     Page<Policy> findByType(PolicyType type, Pageable pageable);
     Page<Policy> findAll(Pageable pageable);
@@ -29,7 +31,6 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
             "{ '$group': { '_id': '$customerId', 'totalPremium': { '$sum': '$premium' } } }"
     })
     List<Map<String, Object>> sumPremiumByCustomerId(String customerId);
-
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqualAndCustomerId(LocalDate startDate, LocalDate endDate, String customerId);
     long countByEndDateLessThanAndCustomerId(LocalDate date, String customerId);
     long countByEndDateBetweenAndCustomerId(LocalDate start, LocalDate end, String customerId);

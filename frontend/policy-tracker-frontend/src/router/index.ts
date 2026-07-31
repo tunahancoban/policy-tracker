@@ -29,31 +29,30 @@ export default defineRouter(({ store }) => {
     const authStore = useAuthStore(store);
 
     if (!authStore.isInitialized) {
-      await authStore.checkAuth();
-    }
-
-    if (to.meta.requiresAdmin) {
-      if (authStore.isAuthenticated && authStore.userRole === 'ROLE_ADMIN') {
-        return next();
-      } else {
-        Notify.create({
-          message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.',
-          color: 'negative',
-        });
-        return next({ name: 'dashboard' });
-      }
-    }
-
-    if (to.meta.requiresAuth) {
-      if (authStore.isAuthenticated) {
-        return next();
-      } else {
-        return next({ name: 'login' });
+      try {
+        await authStore.checkAuth();
+      } catch (error) {
+        console.error('CheckAuth hatası:', error);
       }
     }
 
     if (to.meta.requiresGuest && authStore.isAuthenticated) {
       return next({ name: 'dashboard' });
+    }
+
+    if ((to.meta.requiresAuth || to.meta.requiresAdmin) && !authStore.isAuthenticated) {
+      return next({ name: 'login' });
+    }
+
+    if (to.meta.requiresAdmin && authStore.userRole !== 'ROLE_ADMIN') {
+      Notify.create({
+        message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.',
+        color: 'negative',
+      });
+
+      if (to.name !== 'dashboard') {
+        return next({ name: 'dashboard' });
+      }
     }
 
     return next();

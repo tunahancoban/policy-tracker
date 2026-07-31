@@ -9,5 +9,9 @@ import java.util.Map;
 public class ChartResponse {
     private Map<String, Long> typeLabels;
     private Map<String, Double> monthlyPremium;
+    private long numberOfCriticalPolicies;
+    private long numberOfWarningPolicies;
+    private long numberOfNormalPolicies;
+
     //Add new data
 }

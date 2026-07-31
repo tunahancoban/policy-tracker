@@ -5,6 +5,7 @@ import com.tunahancoban.policy_tracker.model.DTO.response.CustomerSummaryRespons
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
+import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.repository.LogRepository;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +25,19 @@ public class DashboardService {
     private final PolicyRepository policyRepository;
     private final CustomerRepository customerRepository;
     private final LogRepository logRepository;
+    private final InstallmentRepository installmentRepository;
 
     public DashboardSummaryResponse getSummary(){
         //It returns the summary of policy and customer data.
-        LocalDate today = LocalDate.now();
-        LocalDate end = today.plusDays(30); // 30 days later
+        LocalDateTime today = LocalDateTime.now();
+        LocalDateTime end = today.plusDays(30); // 30 days later
+
+        LocalDate today2 = LocalDate.now();
 
         long totalCustomer = customerRepository.count();
-        long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqual(today, today);
-        long expiringSoonPolicies = policyRepository.countByEndDateBetween(today, end);
-        long expiredPolicies = policyRepository.countByEndDateLessThan(today);
+        long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqual(today2, today2);
+        long expiringSoonPolicies = 0;//policyRepository.countByEndDateBetween(today, end);
+        long expiredPolicies = policyRepository.countByEndDateLessThan(today2);
 
         return new DashboardSummaryResponse(totalCustomer, activePolicyNumber, expiringSoonPolicies, expiredPolicies);
     }
@@ -61,9 +65,8 @@ public class DashboardService {
         return logRepository.findAll(pageRequest).getContent();
     }
 
-    public ChartResponse getCharts(){
-        LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6);
-
+    public ChartResponse getCharts(int year){
+        year = 2026;
         Map<String, Long> typeLabelsMap = new LinkedHashMap<>();
         try {
             List<Map<String, Object>> typeResults = policyRepository.countPoliciesGroupedByType();
@@ -81,26 +84,56 @@ public class DashboardService {
             System.err.println("Type Labels Map doldurulurken hata oluştu: " + e.getMessage());
         }
 
-        Map<String, Double> monthlyPremiumMap = new LinkedHashMap<>();
+
+        Map<String, Double> expectedMonthlyIncomeMap = new LinkedHashMap<>();
         try {
-            List<Map<String, Object>> premiumResults = policyRepository.findMonthlyPremiumEarnings(sixMonthsAgo);
-            if (premiumResults != null) {
-                for (Map<String, Object> row : premiumResults) {
-                    if (row.get("_id") != null) {
-                        String id = String.valueOf(row.get("_id"));
-                        Object totalPremium = row.get("totalPremium");
-                        double premium = totalPremium != null ? ((Number) totalPremium).doubleValue() : 0.0;
-                        monthlyPremiumMap.put(id, premium);
+            List<Map<String, Object>> expectedResults = installmentRepository.getExpectedMonthlyIncome(year);
+            if (expectedResults != null) {
+                for (Map<String, Object> row : expectedResults) {
+                    Object yearObj = row.get("year");
+                    Object monthObj = row.get("month");
+                    if (yearObj != null && monthObj != null) {
+                        String key = yearObj + "-" + String.format("%02d", ((Number) monthObj).intValue());
+                        Object totalExpected = row.get("totalExpected");
+                        double amount = totalExpected != null ? ((Number) totalExpected).doubleValue() : 0.0;
+                        expectedMonthlyIncomeMap.put(key, amount);
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println("Monthly Premium Map doldurulurken hata oluştu: " + e.getMessage());
+            System.err.println("Expected Monthly Income Map doldurulurken hata oluştu: " + e.getMessage());
+        }
+
+
+        Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        Instant day7  = todayStart.atZone(ZoneOffset.UTC).plusDays(7).toInstant();
+        Instant day15 = todayStart.atZone(ZoneOffset.UTC).plusDays(15).toInstant();
+        Instant day30 = todayStart.atZone(ZoneOffset.UTC).plusDays(30).toInstant();
+
+        long critical=0;
+        long warning=0;
+        long normal=0;
+
+        try {
+            critical = policyRepository.countByEndDateBetween(todayStart, day7);
+            warning  = policyRepository.countByEndDateBetween(day7, day15);
+            normal   = policyRepository.countByEndDateBetween(day15, day30);
+             System.out.println(todayStart);
+             System.out.println(warning);
+             System.out.println(normal);
+
+        } catch (Exception e) {
+            System.err.println("Remaining Days Distribution hesaplanırken hata oluştu: " + e.getMessage());
+
         }
 
         return ChartResponse.builder()
                 .typeLabels(typeLabelsMap)
-                .monthlyPremium(monthlyPremiumMap)
+                .monthlyPremium(expectedMonthlyIncomeMap)
+                .numberOfWarningPolicies(warning)
+                .numberOfNormalPolicies(normal)
+                .numberOfCriticalPolicies(critical)
                 .build();
     }
 }

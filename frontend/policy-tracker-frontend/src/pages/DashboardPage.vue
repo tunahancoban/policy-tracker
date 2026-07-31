@@ -74,7 +74,7 @@ const onRenewalTableRequest = async (requestProp: { pagination: { page: number; 
 const barChartData = computed<ChartData<'bar'>>(() => ({
     labels: Object.keys(chartDataFromApi.value.monthlyPremium),
     datasets: [{
-        label: 'Aylık Toplam Prim (TL)',
+        label: 'Aylık Beklenen Gelir (TL)',
         backgroundColor: '#26A69A',
         data: Object.values(chartDataFromApi.value.monthlyPremium),
     }],
@@ -107,25 +107,13 @@ const statusChartData = computed<ChartData<'doughnut'>>(() => ({
 }));
 
 const renewalChartData = computed<ChartData<'bar'>>(() => {
-    let critical = 0, warning = 0, normal = 0;
 
-    renewalPolicies.value.forEach((p) => {
-        const end = new Date(p.endDate);
-        const today = new Date();
-        end.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (diff <= 7) critical++;
-        else if (diff <= 15) warning++;
-        else normal++;
-    });
 
     return {
         labels: ['0-7 Gün (Kritik)', '8-15 Gün (Uyarı)', '16-30 Gün (Normal)'],
         datasets: [{
             label: 'Poliçe Sayısı',
-            data: [critical, warning, normal],
+            data: [chartDataFromApi.value.numberOfCriticalPolicies, chartDataFromApi.value.numberOfWarningPolicies, chartDataFromApi.value.numberOfNormalPolicies],
             backgroundColor: ['#C10015', '#F2C037', '#26A69A'],
             borderRadius: 6,
             barThickness: 28,

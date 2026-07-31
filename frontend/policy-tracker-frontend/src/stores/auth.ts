@@ -53,6 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       console.error('checkAuth başarısız oldu:', error);
       clearAuthData();
+      throw error;
     } finally {
       isInitialized.value = true;
     }
@@ -63,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
       await authService.logout();
     } catch (error) {
       console.error('Logout isteği sırasında hata oluştu:', error);
+      throw error;
     } finally {
       clearAuthData();
       isInitialized.value = false;

@@ -1,36 +1,32 @@
 <template>
     <q-layout view="lHh Lpr lFf">
         <q-page-container>
-
             <q-page class="login-bg flex flex-center q-pa-md">
-
                 <q-card class="login-card shadow-24 q-pa-lg">
-
                     <q-card-section class="text-center q-pb-none">
-
-                        <q-img src="../assets/quasar-logo-vertical.svg" class="q-mb-md "
-                            style="width: 120px; height: 120px;" />
-                        <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">Sigorta Poliçe Takip</div>
-
-                        <div class="text-caption text-grey-6 q-mt-xs">Devam etmek için lütfen giriş yapın</div>
+                        <q-img src="../assets/quasar-logo-vertical.svg" class="q-mb-md"
+                            style="width: 120px; height: 120px" />
+                        <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">
+                            Sigorta Poliçe Takip
+                        </div>
+                        <div class="text-caption text-grey-6 q-mt-xs">
+                            Devam etmek için lütfen giriş yapın
+                        </div>
                     </q-card-section>
-
-
 
                     <q-card-section>
                         <q-form @submit.prevent="handleLogin" class="q-gutter-y-md">
-
                             <q-input v-model="email" label="E-posta Adresi" type="email" outlined lazy-rules :rules="[
-                                val => val && val.length > 0 || 'E-posta alanı boş bırakılamaz',
-                                val => /.+@.+\..+/.test(val) || 'Geçerli bir e-posta adresi giriniz']" color="primary"
-                                :disable="isLoading">
+                                (val) => (val && val.length > 0) || 'E-posta alanı boş bırakılamaz',
+                                (val) => /.+@.+\..+/.test(val) || 'Geçerli bir e-posta adresi giriniz',
+                            ]" color="primary" :disable="isLoading">
                                 <template v-slot:prepend>
                                     <q-icon name="email" color="primary" />
                                 </template>
                             </q-input>
 
                             <q-input v-model="password" :type="isPwd ? 'password' : 'text'" label="Şifre" outlined
-                                lazy-rules :rules="[val => val && val.length > 0 || 'Şifre alanı boş bırakılamaz']"
+                                lazy-rules :rules="[(val) => (val && val.length > 0) || 'Şifre alanı boş bırakılamaz']"
                                 color="primary" :disable="isLoading">
                                 <template v-slot:prepend>
                                     <q-icon name="lock" color="primary" />
@@ -42,21 +38,18 @@
                             </q-input>
 
                             <div class="q-mt-xl">
+                                <!-- unevaluated -> unelevated olarak düzeltildi -->
                                 <q-btn label="Giriş Yap" type="submit" color="primary"
-                                    class="full-width text-weight-bold q-py-sm shadow-2" rounded unevaluated
+                                    class="full-width text-weight-bold q-py-sm shadow-2" rounded unelevated
                                     :loading="isLoading" />
                             </div>
-
                         </q-form>
                     </q-card-section>
-
                 </q-card>
             </q-page>
-
         </q-page-container>
     </q-layout>
 </template>
-
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
@@ -73,15 +66,21 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const handleLogin = async () => {
+    isLoading.value = true; // Yükleniyor durumunu başlat
     try {
         await authStore.login(email.value, password.value);
         await router.push({ name: 'dashboard' });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
 
-    } catch (error) {
-        Notify.create({ message: "Giris yaparken bir hata olustu", color: 'negative' });
-        console.log(error)
+        Notify.create({
+            message: `Giriş yaparken bir hata oluştu: ${errorMessage}`,
+            color: 'negative',
+        });
+        console.error(error);
+    } finally {
+        isLoading.value = false;
     }
-
 };
 </script>
 
@@ -93,7 +92,8 @@ const handleLogin = async () => {
 }
 
 .login-card {
-    width: 200%;
+    width: 100%;
+    /* 200% yerine 100% yapıldı */
     max-width: 400px;
     background-image: linear-gradient(to bottom right, #d8d8d8, #ffffff);
     outline: 3px solid #c2c2c2;

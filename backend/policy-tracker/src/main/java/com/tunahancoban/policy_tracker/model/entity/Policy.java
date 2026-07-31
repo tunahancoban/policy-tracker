@@ -38,11 +38,9 @@ public class Policy {
     private PolicyType type;
 
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate startDate;
 
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate endDate; //Policy end date
 
     @Positive

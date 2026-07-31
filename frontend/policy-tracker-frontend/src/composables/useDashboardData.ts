@@ -13,7 +13,13 @@ export function useDashboardData() {
     expiredPolicies: 0,
   });
   const activities = ref<Activity[]>([]);
-  const chartDataFromApi = ref<ChartResponse>({ typeLabels: {}, monthlyPremium: {} });
+  const chartDataFromApi = ref<ChartResponse>({
+    typeLabels: {},
+    monthlyPremium: {},
+    numberOfCriticalPolicies: 0,
+    numberOfNormalPolicies: 0,
+    numberOfWarningPolicies: 0,
+  });
 
   const renewalPolicies = ref<Policy[]>([]);
   const renewalTotalRows = ref<number>(0);
@@ -26,7 +32,7 @@ export function useDashboardData() {
       const [summaryResult, activitiesResult, chartsResult] = await Promise.all([
         dashboardService.getSummary(),
         dashboardService.getRecentActivities(listNumber),
-        dashboardService.getCharts(),
+        dashboardService.getCharts(2026),
       ]);
       summary.value = summaryResult;
       activities.value = activitiesResult;

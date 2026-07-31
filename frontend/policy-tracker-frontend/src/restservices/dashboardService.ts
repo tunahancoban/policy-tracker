@@ -22,9 +22,9 @@ export const dashboardService = {
     );
     return unwrapList<Activity>(activityResponse);
   },
-  async getCharts(): Promise<ChartResponse> {
+  async getCharts(year: number): Promise<ChartResponse> {
     const chartResponse = await api.get<ApiResponse<ChartResponse>>(
-      `/rest/api/dashboard/get-charts`,
+      `/rest/api/dashboard/get-charts/${year}`,
     );
     return unwrapSingle<ChartResponse>(chartResponse);
   },

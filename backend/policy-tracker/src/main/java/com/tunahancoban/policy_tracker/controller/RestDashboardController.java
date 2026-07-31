@@ -41,9 +41,9 @@ public class RestDashboardController {
         return ResponseEntity.ok(RestResponse.success("Logs are returned successfully", logList));
     }
 
-    @GetMapping(path="/get-charts")
-    public ResponseEntity<RestResponse<ChartResponse>> getCharts(){
-        ChartResponse chartResponse = dashboardService.getCharts();
+    @GetMapping(path="/get-charts/{year}")
+    public ResponseEntity<RestResponse<ChartResponse>> getCharts(@PathVariable(name="year") int year){
+        ChartResponse chartResponse = dashboardService.getCharts(year);
         return ResponseEntity.ok(RestResponse.success("Charts infos returned successfully", chartResponse ));
     }
     

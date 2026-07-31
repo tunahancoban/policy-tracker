@@ -75,6 +75,7 @@ public class PolicyService {
                 .premium(request.getPremium())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now()).build();
+
         installmentService.createInstallment(policy, request.getInstallmentNumber().getValue());
         Policy savedPolicy = policyRepository.save(policy);
         messagingTemplate.convertAndSend("/topic/dashboard-summary", "REFRESH_DASHBOARD");
