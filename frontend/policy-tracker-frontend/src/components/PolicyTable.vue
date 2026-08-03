@@ -23,7 +23,7 @@
                     </div>
                 </template>
 
-                <template v-slot:body-cell-statu="props">
+                <template v-slot:body-cell-remainingDays="props">
                     <q-td :props="props" class="text-center">
                         <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
                             class="text-weight-bold">
@@ -33,14 +33,14 @@
                 </template>
 
                 <template v-slot:body-cell-actions="props">
-                    <q-td :props="props" class="q-gutter-xs text-center">
+                    <q-td :props="props" class="q-gutter-xs text-center" @click.stop>
                         <slot name="row-actions" :policy="props.row">
                             <q-btn v-if="showViewAction" flat round color="primary" icon="visibility" size="sm"
-                                @click="emit('view', props.row)" />
+                                @click.stop="emit('view', props.row)" />
                             <q-btn v-if="showEditAction" flat round color="secondary" icon="edit" size="sm"
-                                @click="emit('edit', props.row)" />
+                                @click.stop="emit('edit', props.row)" />
                             <q-btn v-if="showDeleteAction" flat round color="red" icon="delete" size="sm"
-                                @click="emit('delete', props.row)" />
+                                @click.stop="emit('delete', props.row)" />
                         </slot>
                     </q-td>
                 </template>
@@ -84,7 +84,14 @@ const emit = defineEmits<{
     view: [policy: Policy];
     delete: [policy: Policy];
     add: [];
-    request: [payload: { pagination: { page: number; rowsPerPage: number } }];
+    request: [payload: {
+        pagination: {
+            page: number;
+            rowsPerPage: number;
+            sortBy: string | null;
+            descending: boolean;
+        }
+    }];
     'row-click': [evt: Event, row: Policy]; // eklendi
 }>();
 
@@ -92,19 +99,34 @@ const onRowClick = (evt: Event, row: Policy) => {
     emit('row-click', evt, row);
 };
 
+
 const internalPagination = ref({
     page: 1,
     rowsPerPage: 5,
-    rowsNumber: props.rowsNumber
+    rowsNumber: props.rowsNumber,
+    sortBy: null as string | null,
+    descending: false,
 });
 
 watch(() => props.rowsNumber, (newVal) => {
     internalPagination.value.rowsNumber = newVal;
 }, { immediate: true });
 
-const onRequest = (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
-    internalPagination.value.page = requestProp.pagination.page;
-    internalPagination.value.rowsPerPage = requestProp.pagination.rowsPerPage;
+const onRequest = (requestProp: {
+    pagination: {
+        page: number;
+        rowsPerPage: number;
+        sortBy: string | null;
+        descending: boolean;
+    }
+}) => {
+    internalPagination.value = {
+        ...internalPagination.value,
+        page: requestProp.pagination.page,
+        rowsPerPage: requestProp.pagination.rowsPerPage,
+        sortBy: requestProp.pagination.sortBy,
+        descending: requestProp.pagination.descending,
+    };
     emit('request', requestProp);
 };
 </script>

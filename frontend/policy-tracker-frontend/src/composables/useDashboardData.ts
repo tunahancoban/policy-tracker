@@ -43,7 +43,7 @@ export function useDashboardData() {
     }
   };
 
-  const loadRenewalPolicies = async (page: number, size: number) => {
+  const loadRenewalPolicies = async (page: number, size: number, sort?: string) => {
     renewalLoading.value = true;
     try {
       renewalCurrentPage.value = page;
@@ -53,6 +53,10 @@ export function useDashboardData() {
         page: page.toString(),
         size: size.toString(),
       };
+
+      if (sort) {
+        params.sort = sort;
+      }
 
       const pageData = await policyService.getPolicy(params);
 

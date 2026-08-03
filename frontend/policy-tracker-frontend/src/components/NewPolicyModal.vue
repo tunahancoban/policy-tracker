@@ -37,8 +37,8 @@
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
 
-                    <q-input v-model.number="form.installmentNumber" type="number" label="Taksit Sayısı(1-3-6) *"
-                        outlined dense :rules="[
+                    <q-input v-model.number="form.installment" type="number" label="Taksit Sayısı(1-3-6) *" outlined
+                        dense :rules="[
                             val => val !== null && val !== undefined || 'Taksit Sayısı Zorunludur',
                             val => (val == 1 || val == 3 || val == 6) || ' 1-3-6 giriniz'
                         ]" />
@@ -166,7 +166,7 @@ const initialFormState = (): PolicyForm => ({
     startDate: '',
     endDate: '',
     note: '',
-    installmentNumber: 1,
+    installment: 1,
 });
 
 const form = ref<PolicyForm>(initialFormState());

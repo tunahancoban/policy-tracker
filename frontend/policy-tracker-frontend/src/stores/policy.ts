@@ -59,6 +59,7 @@ export const usePolicyStore = defineStore('policy', () => {
     customerId: string,
     page: string,
     size: string,
+    sort?: string,
   ) => {
     customerPoliciesLoading.value = true;
     isLoading.value = true;
@@ -68,6 +69,7 @@ export const usePolicyStore = defineStore('policy', () => {
           customerId,
           page,
           size,
+          ...(sort ? { sort } : {}),
         }),
         dashboardService.getCustomerSummary(customerId),
       ]);

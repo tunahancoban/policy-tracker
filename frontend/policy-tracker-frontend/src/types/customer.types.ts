@@ -19,6 +19,14 @@ export interface Customer {
   active: boolean;
 }
 
+export const CUSTOMER_SORT_FIELD_MAP: Record<string, string> = {
+  firstName: 'firstName',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  customerId: 'customerId',
+  city: 'city',
+};
+
 /** QTable column definitions for the customer list. */
 export const customerColumns = [
   {
@@ -29,7 +37,7 @@ export const customerColumns = [
     sortable: true,
   },
   {
-    name: 'fullName',
+    name: 'firstName',
     label: 'Ad Soyad',
     field: (row: Customer) => `${row.firstName} ${row.lastName}`,
     align: 'left' as const,

@@ -6,18 +6,27 @@ export interface Policy {
   premium: number;
   customerId: string;
   note: string;
-  installmentNumber: number;
+  installment: number;
 }
 
 export interface PolicyForm {
   customerId: string;
   type: string;
   note: string;
-  installmentNumber: number;
+  installment: number;
   premium: number;
   startDate: string;
   endDate: string;
 }
+
+export const SORT_FIELD_MAP: Record<string, string> = {
+  policyId: 'policyId',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  remainingDays: 'endDate',
+  premium: 'premium',
+  installment: 'installment',
+};
 
 export const policyColumns = [
   {
@@ -42,11 +51,17 @@ export const policyColumns = [
     align: 'center' as const,
     sortable: true,
   },
-  { name: 'statu', label: 'Kalan Gün', field: 'endDate', align: 'center' as const, sortable: true },
   {
-    name: 'installmentNumber',
+    name: 'remainingDays',
+    label: 'Kalan Gün',
+    field: 'endDate',
+    align: 'center' as const,
+    sortable: true,
+  },
+  {
+    name: 'installment',
     label: 'Ödeme Sayısı',
-    field: 'installmentNumber',
+    field: (row: Policy) => `${row.installment} `,
     align: 'center' as const,
     sortable: true,
   },
@@ -55,7 +70,8 @@ export const policyColumns = [
     name: 'premium',
     label: 'Prim Tutarı',
     field: (row: Policy) => `${row.premium} TL`,
-    align: 'right' as const,
+    align: 'center' as const,
+    sortable: true,
   },
   { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const },
 ];

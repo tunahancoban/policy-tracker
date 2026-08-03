@@ -22,7 +22,7 @@ public class CustomerService {
     private final IdGeneratorService idGeneratorService;
 
     public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
-                                             String identityNumber, String email, String phoneNumber, Pageable pageable){
+                                             String identityNumber, String email, String phoneNumber, Boolean active,Pageable pageable){
         //It creates a searchCriteria
         Customer searchCriteria = Customer.builder()
                 .customerId(customerId)
@@ -30,13 +30,14 @@ public class CustomerService {
                 .lastName(lastName)
                 .identityNumber(identityNumber)
                 .email(email)
-                .phoneNumber(phoneNumber).build();
+                .phoneNumber(phoneNumber)
+                .active(active).build();
 
         //And it is searching according to criteria. It ignores null values and it is not case-sensitive. If it contains the word it also finds it.
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
                 .withIgnoreCase()
-                .withIgnorePaths("createdAt", "updatedAt", "active")
+                .withIgnorePaths("createdAt", "updatedAt")
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
         Example<Customer> example = Example.of(searchCriteria, matcher);

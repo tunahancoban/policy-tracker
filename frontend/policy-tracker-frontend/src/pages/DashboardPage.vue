@@ -26,7 +26,7 @@
                     :show-delete-action="false" @request="onRenewalTableRequest">
                     <template v-slot:row-actions="{ policy }">
                         <q-btn flat round color="primary" icon="account_circle" size="sm"
-                            :to="`/customer/${policy.customerId}`">
+                            :to="`/customer/${policy.customerId}`" @click.stop>
                             <q-tooltip>Müşteri Detayına Git</q-tooltip>
                         </q-btn>
                     </template>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useDashboardData } from '@/composables/useDashboardData';
 import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
 import DashboardCharts from '@/components/DashboardCharts.vue';
@@ -50,6 +50,7 @@ import type { ChartData } from 'chart.js';
 import { policyColorMap } from '@/utils/policyHelper';
 import { useWebSocket } from '@/composables/useWebSocket';
 import PolicyTable from '@/components/PolicyTable.vue';
+import { SORT_FIELD_MAP } from '@/types/policy.types';
 
 const {
     summary, activities, chartDataFromApi,
@@ -59,16 +60,42 @@ const {
 
 const { connect } = useWebSocket();
 
+// Yenilenmesi gereken poliçeler tablosu için sıralama state'i.
+// Varsayılan: bitiş tarihine göre artan (en yakın tarihli poliçe en üstte).
+const renewalSortBy = ref<string | null>('endDate');
+const renewalDescending = ref<boolean>(false);
+
+const buildRenewalSortParam = (): string | undefined => {
+    if (renewalSortBy.value && SORT_FIELD_MAP[renewalSortBy.value]) {
+        const direction = renewalDescending.value ? 'desc' : 'asc';
+        return `${SORT_FIELD_MAP[renewalSortBy.value]},${direction}`;
+    }
+    return undefined;
+};
+
 const refreshAllData = async () => {
     await Promise.all([
         loadDashboard(10),
-        loadRenewalPolicies(renewalCurrentPage.value, renewalPageSize.value),
+        loadRenewalPolicies(renewalCurrentPage.value, renewalPageSize.value, buildRenewalSortParam()),
     ]);
 };
 
-const onRenewalTableRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
-    const { page, rowsPerPage } = requestProp.pagination;
-    await loadRenewalPolicies(page - 1, rowsPerPage);
+const onRenewalTableRequest = async (requestProp: {
+    pagination: {
+        page: number;
+        rowsPerPage: number;
+        sortBy?: string | null;
+        descending?: boolean;
+    }
+}) => {
+    const { page, rowsPerPage, sortBy, descending } = requestProp.pagination;
+
+    if (sortBy !== undefined) {
+        renewalSortBy.value = sortBy;
+        renewalDescending.value = descending ?? false;
+    }
+
+    await loadRenewalPolicies(page - 1, rowsPerPage, buildRenewalSortParam());
 };
 
 const barChartData = computed<ChartData<'bar'>>(() => ({
@@ -107,8 +134,6 @@ const statusChartData = computed<ChartData<'doughnut'>>(() => ({
 }));
 
 const renewalChartData = computed<ChartData<'bar'>>(() => {
-
-
     return {
         labels: ['0-7 Gün (Kritik)', '8-15 Gün (Uyarı)', '16-30 Gün (Normal)'],
         datasets: [{

@@ -13,7 +13,7 @@
                 <div class="text-subtitle2 text-grey-7 q-mb-sm">Esnek Filtreleme Seçenekleri</div>
                 <div class="row q-col-gutter-sm items-center">
                     <div class="col-12 col-md-5">
-                        <q-input v-model="searchQuery" outlined dense label="Poliçe No veya Müşteri ID ile Ara..."
+                        <q-input v-model="searchQuery" outlined dense label="Poliçe No veya Müşteri ID ile Ara"
                             placeholder="Örn: TRF2026... veya CST-000002" clearable @keyup.enter="onSearch">
                             <template v-slot:append>
                                 <q-icon name="search" />
@@ -37,11 +37,11 @@
         <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
             title="Genel Poliçe Yönetimi" :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest">
             <template v-slot:row-actions="{ policy }">
-                <q-btn flat round color="primary" icon="account_circle" size="sm"
-                    :to="`/customer/${policy.customerId}`" />
-                <q-btn flat round color="primary" icon="visibility" size="sm" />
-                <q-btn flat round color="secondary" icon="edit" size="sm" @click="openEditDialog(policy)" />
-                <q-btn flat round color="red" icon="delete" size="sm" @click="handlePolicyDelete(policy)" />
+                <q-btn flat round color="primary" icon="account_circle" size="sm" :to="`/customer/${policy.customerId}`"
+                    @click.stop />
+                <q-btn flat round color="primary" icon="visibility" size="sm" @click.stop />
+                <q-btn flat round color="secondary" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
+                <q-btn flat round color="red" icon="delete" size="sm" @click.stop="handlePolicyDelete(policy)" />
             </template>
         </PolicyTable>
 
@@ -54,16 +54,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import type { Policy } from '../types/policy.types';
-import { policyTypeOptions } from '../types/policy.types';
+import type { Policy } from '@/types/policy.types';
+import { policyTypeOptions, SORT_FIELD_MAP } from '@/types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { Notify } from 'quasar';
 import PolicyTable from '@/components/PolicyTable.vue';
 import { useRouter } from 'vue-router';
 
-import NewPolicyModal from '../components/NewPolicyModal.vue';
-import EditPolicyModal from '../components/EditPolicyModal.vue';
+import NewPolicyModal from '@/components/NewPolicyModal.vue';
+import EditPolicyModal from '@/components/EditPolicyModal.vue';
 
 const {
     policies,
@@ -86,7 +86,16 @@ const isCreateModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
 
-const buildQueryParams = (overridePage?: number, overrideSize?: number) => {
+
+const sortByColumn = ref<string | null>('endDate');
+const sortDescending = ref<boolean>(false);
+
+const buildQueryParams = (
+    overridePage?: number,
+    overrideSize?: number,
+    sortBy?: string | null,
+    descending?: boolean
+) => {
     const query = searchQuery.value?.trim() ?? '';
 
     const params: Record<string, string> = {
@@ -104,6 +113,15 @@ const buildQueryParams = (overridePage?: number, overrideSize?: number) => {
             params.policyId = query;
         }
     }
+
+    const effectiveSortBy = sortBy ?? sortByColumn.value;
+    const effectiveDescending = descending ?? sortDescending.value;
+
+    if (effectiveSortBy && SORT_FIELD_MAP[effectiveSortBy]) {
+        const direction = effectiveDescending ? 'desc' : 'asc';
+        params.sort = `${SORT_FIELD_MAP[effectiveSortBy]},${direction}`;
+    }
+
     return params;
 };
 
@@ -123,13 +141,28 @@ watch(selectedType, () => {
     onSearch();
 });
 
-const onRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
-    const { page, rowsPerPage } = requestProp.pagination;
+const onRequest = async (requestProp: {
+    pagination: {
+        page: number;
+        rowsPerPage: number;
+        sortBy: string | null;
+        descending: boolean;
+    }
+}) => {
+    const { page, rowsPerPage, sortBy, descending } = requestProp.pagination;
 
     const targetBackendPage = page - 1;
     currentPage.value = targetBackendPage;
     pageSize.value = rowsPerPage;
-    await loadPolicies(buildQueryParams(targetBackendPage, rowsPerPage));
+
+    if (sortBy !== undefined) {
+        sortByColumn.value = sortBy;
+        sortDescending.value = descending;
+    }
+
+    await loadPolicies(
+        buildQueryParams(targetBackendPage, rowsPerPage, sortByColumn.value, sortDescending.value)
+    );
 };
 
 const openCreateDialog = () => {

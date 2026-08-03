@@ -102,7 +102,7 @@ const form = ref<PolicyForm>({
     type: '',
     premium: 0,
     note: '',
-    installmentNumber: 0,
+    installment: 0,
     startDate: '',
     endDate: ''
 });
@@ -127,7 +127,7 @@ const onModalShow = () => {
         customerId: props.policyData.customerId || '',
         type: props.policyData.type || '',
         premium: props.policyData.premium || 0,
-        installmentNumber: props.policyData.installmentNumber || 0,
+        installment: props.policyData.installment || 0,
         note: props.policyData.note || '',
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
         endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : ''

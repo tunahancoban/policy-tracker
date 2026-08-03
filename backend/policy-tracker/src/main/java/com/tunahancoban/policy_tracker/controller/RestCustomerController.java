@@ -9,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -23,19 +26,42 @@ public class RestCustomerController {
 
     private final CustomerService customerService;
 
-    @GetMapping(path = "/with-params")
-    public ResponseEntity<RestResponse<Page<Customer>>> getCustomerWithParam(@RequestParam(name="customerId", required=false) String customerId,
-                                                                             @RequestParam(name="firstName", required=false) String firstName,
-                                                                             @RequestParam(name="lastName", required=false) String lastName,
-                                                                             @RequestParam(name="identityNumber", required=false) String identityNumber,
-                                                                             @RequestParam(name="email", required=false) String email,
-                                                                             @RequestParam(name="phoneNumber", required=false) String phoneNumber,
-                                                                             @RequestParam(defaultValue = "0") int page,
-                                                                             @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Customer> customerList = customerService.getCustomerByParam(customerId,firstName,lastName,identityNumber,email,phoneNumber,pageable);
-        return ResponseEntity.ok(RestResponse.success("Müşteriler bulundu." , customerList));
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "firstName",
+            "lastName",
+            "email",
+            "phoneNumber",
+            "city",
+            "customerId"
+    );
 
+    @GetMapping(path = "/with-params")
+    public ResponseEntity<RestResponse<Page<Customer>>> getCustomerWithParam(
+            @RequestParam(name = "customerId", required = false) String customerId,
+            @RequestParam(name = "firstName", required = false) String firstName,
+            @RequestParam(name = "lastName", required = false) String lastName,
+            @RequestParam(name = "identityNumber", required = false) String identityNumber,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
+            @RequestParam(name = "active", required = false) Boolean active,
+            @PageableDefault(size = 5, sort = "customerId", direction = Sort.Direction.ASC)
+            Pageable pageable) {
+
+        validateSort(pageable);
+        System.out.println(active);
+
+        Page<Customer> customerList = customerService.getCustomerByParam(
+                customerId, firstName, lastName, identityNumber, email, phoneNumber, active, pageable);
+
+        return ResponseEntity.ok(RestResponse.success("Müşteriler bulundu.", customerList));
+    }
+
+    private void validateSort(Pageable pageable) {
+        pageable.getSort().forEach(order -> {
+            if (!ALLOWED_SORT_FIELDS.contains(order.getProperty())) {
+                throw new IllegalArgumentException("Geçersiz sıralama alanı: " + order.getProperty());
+            }
+        });
     }
     @GetMapping(path ="/get-customer/{id}")
     public  ResponseEntity<RestResponse<Customer>> getCustomerById(@PathVariable(name="id") String id){

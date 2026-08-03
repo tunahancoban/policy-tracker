@@ -80,6 +80,9 @@ const isEditModalOpen = ref(false);
 const selectedPolicy = ref<Policy | null>(null);
 const isCreateModalOpen = ref(false);
 
+const sortByColumn = ref<string | null>();
+const sortDescending = ref<boolean>(false);
+
 const openEditPolicyDialog = (policy: Policy) => {
     selectedPolicy.value = policy;
     isEditModalOpen.value = true;
@@ -90,18 +93,30 @@ const openCreateDialog = () => {
 };
 
 
-
 const onCustomerSaved = async () => {
     await loadAllData();
 };
 
-const onPolicyTableRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
-    const { page, rowsPerPage } = requestProp.pagination;
+const onPolicyTableRequest = async (requestProp: {
+    pagination: {
+        page: number;
+        rowsPerPage: number;
+        sortBy: string | null;
+        descending: boolean;
+    }
+}) => {
+    const { page, rowsPerPage, sortBy, descending } = requestProp.pagination;
+
     const targetBackendPage = page - 1;
     currentPage.value = targetBackendPage;
     pageSize.value = rowsPerPage;
 
-    await fetchPoliciesOnly();
+    if (sortBy !== undefined) {
+        sortByColumn.value = sortBy;
+        sortDescending.value = descending;
+    }
+
+    await fetchPoliciesOnly(sortByColumn.value, sortDescending.value);
 };
 
 const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
@@ -125,10 +140,6 @@ const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
         console.error('Policy Create Error:', err);
     }
 };
-
-
-
-
 
 onMounted(() => {
     void loadAllData();
