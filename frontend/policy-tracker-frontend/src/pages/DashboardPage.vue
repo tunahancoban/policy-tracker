@@ -12,9 +12,9 @@
             </q-card-section>
 
             <q-card-section>
-                <DashboardCharts :chart-data-from-api="chartDataFromApi" :summary="summary"
+                <DashboardCharts v-model:selected-year="year" :chart-data-from-api="chartDataFromApi" :summary="summary"
                     :renewal-chart-data="renewalChartData" :bar-chart-data="barChartData" :pie-chart-data="pieChartData"
-                    :status-chart-data="statusChartData" />
+                    :status-chart-data="statusChartData" @year-changed="refreshAllData" />
             </q-card-section>
 
             <q-card-section>
@@ -60,10 +60,10 @@ const {
 
 const { connect } = useWebSocket();
 
-// Yenilenmesi gereken poliçeler tablosu için sıralama state'i.
-// Varsayılan: bitiş tarihine göre artan (en yakın tarihli poliçe en üstte).
+
 const renewalSortBy = ref<string | null>('endDate');
 const renewalDescending = ref<boolean>(false);
+const year = ref<number>(new Date().getFullYear());
 
 const buildRenewalSortParam = (): string | undefined => {
     if (renewalSortBy.value && SORT_FIELD_MAP[renewalSortBy.value]) {
@@ -75,7 +75,7 @@ const buildRenewalSortParam = (): string | undefined => {
 
 const refreshAllData = async () => {
     await Promise.all([
-        loadDashboard(10),
+        loadDashboard(10, year.value),
         loadRenewalPolicies(renewalCurrentPage.value, renewalPageSize.value, buildRenewalSortParam()),
     ]);
 };

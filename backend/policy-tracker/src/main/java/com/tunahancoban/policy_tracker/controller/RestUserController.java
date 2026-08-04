@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -53,10 +53,10 @@ public class RestUserController {
     }
 
     // 4. UPDATE User
-    @PatchMapping(path = "/update-user/{id}", consumes = "application/json")
-    public ResponseEntity<RestResponse<User>> updateUser(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
+    @PatchMapping(path = "/update-user/{id}")
+    public ResponseEntity<RestResponse<User>> updateUser(@PathVariable(name = "id") String id, @RequestBody UpdateUserRequest updateUserRequest) {
 
-        User user = userService.updateUser(id, updates);
+        User user = userService.updateUser(id, updateUserRequest);
         return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi.", user));
     }
 }

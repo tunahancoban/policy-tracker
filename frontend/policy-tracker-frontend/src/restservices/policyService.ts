@@ -18,7 +18,7 @@ export const policyService = {
 
   async addPolicy(newPolicy: Omit<Policy, 'policyId'>): Promise<Policy> {
     const response = await api.post<ApiResponse<Policy>>(
-      `/rest/api/policy/create-policy `,
+      `/rest/api/policy/create-policy`,
       newPolicy,
     );
     return unwrapSingle<Policy>(response);

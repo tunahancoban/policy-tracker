@@ -48,7 +48,6 @@ public class RestCustomerController {
             Pageable pageable) {
 
         validateSort(pageable);
-        System.out.println(active);
 
         Page<Customer> customerList = customerService.getCustomerByParam(
                 customerId, firstName, lastName, identityNumber, email, phoneNumber, active, pageable);

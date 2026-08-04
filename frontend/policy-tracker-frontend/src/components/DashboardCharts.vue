@@ -4,11 +4,24 @@
         <div class="text-subtitle1 q-mb-md text-center text-weight-bold text-grey-8">Sistem Analiz Grafikleri</div>
 
         <div class="chart-grid-row">
+            <!-- Gelir Grafiği ve Yıl Seçimi -->
             <q-card flat bordered class="q-pa-sm">
-                <div class="chart-container">
-                    <canvas ref="myBarChartCanvas"></canvas>
-                </div>
+                <q-card-section class="row items-center justify-between q-pa-xs q-pb-none">
+                    <div class="text-subtitle2 text-weight-bold text-grey-9">Aylık Beklenen Gelir</div>
+                    <q-select v-model="selectedYear" :options="yearOptions" dense outlined options-dense
+                        style="min-width: 100px;" @update:model-value="emit('year-changed', $event)">
+                        <template v-slot:prepend>
+                            <q-icon name="event" size="xs" />
+                        </template>
+                    </q-select>
+                </q-card-section>
+                <q-card-section class="q-pa-none">
+                    <div class="chart-container">
+                        <canvas ref="myBarChartCanvas"></canvas>
+                    </div>
+                </q-card-section>
             </q-card>
+
             <q-card flat bordered class="q-pa-sm">
                 <div class="chart-container">
                     <canvas ref="renewalBarChartCanvas"></canvas>
@@ -34,11 +47,17 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { createStaggeredChart } from '@/composables/useStaggeredChart';
-import type { ChartResponse } from '@/types/dashboard.types';
-import type { DashboardSummary } from '@/types/dashboard.types';
-
+import type { ChartResponse, DashboardSummary } from '@/types/dashboard.types';
 import type { ChartData, Chart } from 'chart.js';
 
+// v-model binding için selectedYear ve emit tanımı
+const selectedYear = defineModel<number>('selectedYear', { default: new Date().getFullYear() });
+const emit = defineEmits<{
+    (e: 'year-changed', year: number): void;
+}>();
+
+const currentYear = new Date().getFullYear() + 1;
+const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const chartInstances: Chart[] = [];
 
@@ -70,7 +89,10 @@ const initCharts = () => {
             data: props.barChartData,
             options: {
                 scales: { y: { beginAtZero: true } },
-                plugins: { legend: { position: 'top' }, title: { display: true, text: 'Aylık  Beklenen Gelir' } },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: false } // Kart üst kısmına kendi başlığımızı eklediğimiz için başlığı gizledik
+                },
             },
         }));
     }
@@ -149,8 +171,7 @@ watch(
 
 onBeforeUnmount(() => {
     destroyCharts();
-},
-);
+});
 </script>
 
 <style scoped>

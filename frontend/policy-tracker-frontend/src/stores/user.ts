@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const fetchUsers = async (params?: Record<string, string>) => {
     isLoading.value = true;
     try {
-      users.value = await userService.getCustomer(params);
+      users.value = await userService.getUsers(params);
     } catch (error) {
       console.error('Kullanıcılar getirilirken hata:', error);
     } finally {

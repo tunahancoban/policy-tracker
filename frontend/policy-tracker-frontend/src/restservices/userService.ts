@@ -4,7 +4,7 @@ import type { ApiResponse } from '../types/api.types';
 import { unwrapList, unwrapSingle } from '@/utils/apiResponseHandler';
 
 export const userService = {
-  async getCustomer(params?: Record<string, string>): Promise<User[]> {
+  async getUsers(params?: Record<string, string>): Promise<User[]> {
     const response = await api.get<ApiResponse<User[]>>(`/rest/api/user/with-params`, {
       params,
     });
@@ -12,7 +12,7 @@ export const userService = {
     return unwrapList<User>(response);
   },
   async addUser(newUser: RegisterRequest): Promise<User> {
-    const response = await api.post<ApiResponse<User>>(`/rest/api/user/create-user `, newUser);
+    const response = await api.post<ApiResponse<User>>(`/rest/api/user/create-user`, newUser);
     return unwrapSingle<User>(response);
   },
 

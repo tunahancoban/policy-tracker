@@ -1,0 +1,27 @@
+package com.tunahancoban.policy_tracker.model.DTO.request;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import lombok.*;
+import org.openapitools.jackson.nullable.JsonNullable;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdatePolicyRequest {
+
+    private JsonNullable<String> customerId = JsonNullable.undefined();
+
+    private JsonNullable<PolicyType> type = JsonNullable.undefined();
+
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    private JsonNullable<LocalDate> startDate = JsonNullable.undefined();
+    @JsonFormat(pattern = "yyyy/MM/dd")
+    private JsonNullable<LocalDate> endDate = JsonNullable.undefined();
+
+    private JsonNullable<Double> premium = JsonNullable.undefined();
+}

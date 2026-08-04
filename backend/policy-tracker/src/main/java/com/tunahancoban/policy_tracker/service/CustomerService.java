@@ -5,16 +5,19 @@ import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -22,8 +25,11 @@ public class CustomerService {
     private final IdGeneratorService idGeneratorService;
 
     public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
-                                             String identityNumber, String email, String phoneNumber, Boolean active,Pageable pageable){
-        //It creates a searchCriteria
+                                             String identityNumber, String email, String phoneNumber,
+                                             Boolean active, Pageable pageable) {
+        log.debug("Customer search initiated - customerId: {}, firstName: {}, lastName: {}, active: {}, page: {}",
+                customerId, firstName, lastName, active, pageable);
+
         Customer searchCriteria = Customer.builder()
                 .customerId(customerId)
                 .firstName(firstName)
@@ -33,7 +39,6 @@ public class CustomerService {
                 .phoneNumber(phoneNumber)
                 .active(active).build();
 
-        //And it is searching according to criteria. It ignores null values and it is not case-sensitive. If it contains the word it also finds it.
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
                 .withIgnoreCase()
@@ -42,24 +47,34 @@ public class CustomerService {
 
         Example<Customer> example = Example.of(searchCriteria, matcher);
 
-        return customerRepository.findAll(example, pageable);
+        Page<Customer> result = customerRepository.findAll(example, pageable);
+        log.debug("Customer search completed - total records found: {}", result.getTotalElements());
+
+        return result;
     }
 
-    public Customer getCustomerByCustomerId(String customerId){
-        return  customerRepository.findByCustomerId(customerId);
+    public Customer getCustomerByCustomerId(String customerId) {
+        log.debug("Fetching customer - customerId: {}", customerId);
+
+        Customer customer = customerRepository.findByCustomerId(customerId);
+        if (customer == null) {
+            log.warn("Customer not found - customerId: {}", customerId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + customerId);
+        }
+        return customer;
     }
 
-    @LogActivity(
-            type = "MUSTERI",
-            detail = "Yeni müşteri eklendi."
-    )
-    public Customer createCustomer(CreateCustomerRequest request){
-        //Identity number is unique so it checks this customer is exist or not
-        if(customerRepository.existsByIdentityNumber(request.getIdentityNumber())){
-            throw new RuntimeException("This identity number exist");
+    @LogActivity( type = "MUSTERI", detail = "Yeni müşteri eklendi.")
+    public Customer createCustomer(CreateCustomerRequest request) {
+        log.info("Create customer request received - identityNumber: {}, email: {}",
+                request.getIdentityNumber(), request.getEmail());
+
+        if (customerRepository.existsByIdentityNumber(request.getIdentityNumber())) {
+            log.warn("Customer creation failed - identity number already registered: {}", request.getIdentityNumber());
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "A customer with this identity number already exists: " + request.getIdentityNumber());
         }
 
-        //If it is not saves customer
         Customer customer = Customer.builder()
                 .customerId(idGeneratorService.generateCustomerId())
                 .firstName(request.getFirstName())
@@ -75,15 +90,18 @@ public class CustomerService {
                 .active(true).build();
 
         customerRepository.save(customer);
+        log.info("Customer successfully created - customerId: {}", customer.getCustomerId());
+
         return customer;
     }
 
-    @LogActivity(type = "MUSTERI"
-            ,detail = " Müşteri güncellendi.")
-    public Customer updateCustomer(String id, Map<String, Object> updates){
+    @LogActivity(type = "MUSTERI", detail = " Müşteri güncellendi.")
+    public Customer updateCustomer(String id, Map<String, Object> updates) {
+        log.info("Update customer request received - customerId: {}, updated fields: {}", id, updates.keySet());
 
-        if(!existById(id)){
-            throw new RuntimeException("This customer does not exist");
+        if (!existById(id)) {
+            log.warn("Customer update failed - customer not found: {}", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
         }
         Customer customer = customerRepository.findByCustomerId(id);
         Customer.CustomerBuilder customerBuilder = customer.toBuilder();
@@ -93,62 +111,58 @@ public class CustomerService {
                 case "firstName":
                     customerBuilder.firstName((String) value);
                     break;
-
                 case "lastName":
                     customerBuilder.lastName((String) value);
                     break;
-
                 case "identityNumber":
                     customerBuilder.identityNumber((String) value);
                     break;
-
                 case "email":
                     customerBuilder.email((String) value);
                     break;
-
                 case "phoneNumber":
                     customerBuilder.phoneNumber((String) value);
                     break;
-
                 case "city":
                     customerBuilder.city((String) value);
                     break;
-
                 case "district":
                     customerBuilder.district((String) value);
                     break;
-
                 case "fullAddress":
                     customerBuilder.fullAddress((String) value);
                     break;
-
                 case "active":
                     customerBuilder.active((boolean) value);
                     break;
+                default:
+                    log.warn("Unknown update field ignored - field: {}", key);
+                    break;
             }
+        });
 
-        }
-        );
         customerBuilder.updatedAt(LocalDateTime.now());
         Customer saveCustomer = customerBuilder.build();
         customerRepository.save(saveCustomer);
+        log.info("Customer successfully updated - customerId: {}", id);
+
         return saveCustomer;
     }
 
-    @LogActivity(type = "MUSTERI"
-            ,detail = " Müşteri silindi.")
-    public void deleteCustomer(String id){
-        if(!existById(id)){
-            throw new RuntimeException("This customer does not exist");
+    @LogActivity(type = "MUSTERI", detail = " Müşteri silindi.")
+    public void deleteCustomer(String id) {
+        log.info("Delete customer request received - customerId: {}", id);
+
+        if (!existById(id)) {
+            log.warn("Customer deletion failed - customer not found: {}", id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
         }
         Customer customer = customerRepository.findByCustomerId(id);
-
         customerRepository.deleteById(customer.getId());
+        log.info("Customer successfully deleted - customerId: {}", id);
     }
 
-    //Checks id does exist or not
-    public boolean existById(String customerId){
+    public boolean existById(String customerId) {
         return customerRepository.existsByCustomerId(customerId);
     }
-
 }

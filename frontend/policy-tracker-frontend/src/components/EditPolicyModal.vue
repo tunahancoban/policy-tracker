@@ -17,12 +17,14 @@
             <q-form @submit="onSubmit">
                 <q-card-section class="q-gutter-md">
 
-                    <!-- Müşteri Seçimi (Kilitli - Değiştirilemez) -->
+                    <!-- Müşteri Seçimi (Artık Aktif) -->
                     <q-select v-model="form.customerId" :options="filteredCustomerOptions" option-value="customerId"
-                        option-label="fullName" emit-value map-options disable label="Müşteri" outlined dense />
+                        option-label="fullName" emit-value map-options label="Müşteri *" outlined dense
+                        :rules="[val => !!val || 'Müşteri seçimi zorunludur']" />
 
                     <!-- Poliçe Türü -->
-                    <q-select v-model="form.type" :options="policyTypeOptions" label="Poliçe Türü *" outlined dense
+                    <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
+                        emit-value map-options label="Poliçe Türü *" outlined dense
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
                     <!-- Prim Tutarı -->
@@ -64,7 +66,7 @@
                 <!-- Aksiyon Butonları -->
                 <q-card-actions align="right" class="q-pa-md">
                     <q-btn flat label="İptal" color="grey-7" v-close-popup :disable="loading" />
-                    <q-btn type="submit" label="Güncelle" color="primary" :loading="loading" />
+                    <q-btn type="submit" label="Güncelle" color="primary" :loading="loading" :disable="!hasChanges" />
                 </q-card-actions>
             </q-form>
         </q-card>
@@ -107,20 +109,46 @@ const form = ref<PolicyForm>({
     endDate: ''
 });
 
+const originalForm = ref<PolicyForm>({ ...form.value });
+
 const filteredCustomerOptions = computed<CustomerOption[]>(() => {
     const data = Array.isArray(customerStore.customerData) ? customerStore.customerData : [];
-    const currentCustomer = data.find(c => c.customerId === props.policyData.customerId);
 
-    if (!currentCustomer) return [];
+    return data.map(customer => {
+        const namePart = `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'İsimsiz Müşteri';
+        const identityPart = customer.identityNumber ? `(TC: ${customer.identityNumber})` : `(ID: ${customer.customerId})`;
 
-    const namePart = `${currentCustomer.firstName || ''} ${currentCustomer.lastName || ''}`.trim() || currentCustomer.email || 'İsimsiz Müşteri';
-    const identityPart = currentCustomer.identityNumber ? `(TC: ${currentCustomer.identityNumber})` : `(ID: ${currentCustomer.customerId})`;
-
-    return [{
-        customerId: currentCustomer.customerId,
-        fullName: `${namePart} ${identityPart}`
-    }];
+        return {
+            customerId: customer.customerId,
+            fullName: `${namePart} ${identityPart}`
+        };
+    });
 });
+
+const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', 'startDate', 'endDate'];
+
+function assignIfChanged<K extends keyof PolicyForm>(
+    target: Partial<PolicyForm>,
+    key: K,
+    current: PolicyForm,
+    original: PolicyForm
+) {
+    if (current[key] !== original[key]) {
+        target[key] = current[key];
+    }
+}
+
+const getChangedFields = (): Partial<PolicyForm> => {
+    const changed: Partial<PolicyForm> = {};
+
+    trackedFields.forEach((key) => {
+        assignIfChanged(changed, key, form.value, originalForm.value);
+    });
+
+    return changed;
+};
+
+const hasChanges = computed(() => Object.keys(getChangedFields()).length > 0);
 
 const onModalShow = () => {
     form.value = {
@@ -132,18 +160,20 @@ const onModalShow = () => {
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
         endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : ''
     };
+
+    originalForm.value = { ...form.value };
 };
+
 const onSubmit = () => {
+    const patchData = getChangedFields();
+
+    if (Object.keys(patchData).length === 0) {
+        isOpen.value = false;
+        return;
+    }
+
     loading.value = true;
     try {
-        // PATCH işlemi için sadece değişmesi beklenen/izin verilen alanları ayıklayıp emit ediyoruz
-        const patchData = {
-            type: form.value.type,
-            premium: form.value.premium,
-            startDate: form.value.startDate,
-            endDate: form.value.endDate
-        };
-
         emit('updated', {
             id: props.policyData.policyId,
             data: patchData

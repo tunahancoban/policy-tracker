@@ -39,7 +39,6 @@
             <template v-slot:row-actions="{ policy }">
                 <q-btn flat round color="primary" icon="account_circle" size="sm" :to="`/customer/${policy.customerId}`"
                     @click.stop />
-                <q-btn flat round color="primary" icon="visibility" size="sm" @click.stop />
                 <q-btn flat round color="secondary" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
                 <q-btn flat round color="red" icon="delete" size="sm" @click.stop="handlePolicyDelete(policy)" />
             </template>

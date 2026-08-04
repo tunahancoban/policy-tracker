@@ -27,12 +27,12 @@ export function useDashboardData() {
   const renewalCurrentPage = ref(0);
   const renewalPageSize = ref(5);
 
-  const loadDashboard = async (listNumber: number) => {
+  const loadDashboard = async (listNumber: number, year: number) => {
     try {
       const [summaryResult, activitiesResult, chartsResult] = await Promise.all([
         dashboardService.getSummary(),
         dashboardService.getRecentActivities(listNumber),
-        dashboardService.getCharts(2026),
+        dashboardService.getCharts(year),
       ]);
       summary.value = summaryResult;
       activities.value = activitiesResult;

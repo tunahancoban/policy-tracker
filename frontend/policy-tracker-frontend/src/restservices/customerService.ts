@@ -20,7 +20,7 @@ export const customerService = {
 
   async addCustomer(newCustomer: Customer): Promise<Customer> {
     const response = await api.post<ApiResponse<Customer>>(
-      `/rest/api/customer/create-customer `,
+      `/rest/api/customer/create-customer`,
       newCustomer,
     );
     return unwrapSingle<Customer>(response);

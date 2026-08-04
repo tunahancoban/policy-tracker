@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
@@ -76,9 +77,9 @@ public class RestPolicyController {
     }
 
     // 4. UPDATE policy
-    @PatchMapping(path = "/update-policy/{id}", consumes = "application/json")
-    public ResponseEntity<RestResponse<Policy>> updatePolicy(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
-        Policy policy = policyService.updatePolicy(id, updates);
+    @PatchMapping(path = "/update-policy/{id}")
+    public ResponseEntity<RestResponse<Policy>> updatePolicy(@PathVariable(name = "id") String id, @RequestBody UpdatePolicyRequest updatePolicyRequest) {
+        Policy policy = policyService.updatePolicy(id, updatePolicyRequest);
         return ResponseEntity.ok(RestResponse.success("Poliçe başarıyla güncellendi: "+ id, policy));
     }
 }

@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.controller;
 
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
@@ -11,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/rest/api/profile")
@@ -22,7 +22,7 @@ public class RestProfileController {
     private final AuthService authService;
 
     @PutMapping(path = "/update-profile")
-    public ResponseEntity<RestResponse<Void>> updateProfile(Authentication authentication, @RequestBody Map<String, Object> updates){
+    public ResponseEntity<RestResponse<Void>> updateProfile(Authentication authentication, @RequestBody UpdateUserRequest updateUserRequest){
         String email = authentication.getName();
 
         List<User> userList = userService.getUserWithParam(null, null, null, email, null);
@@ -31,7 +31,7 @@ public class RestProfileController {
         }
         String userId = userList.getFirst().getId();
 
-        userService.updateUser(userId, updates);
+        userService.updateUser(userId, updateUserRequest);
         return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi."));
     }
 
