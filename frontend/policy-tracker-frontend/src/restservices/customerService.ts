@@ -1,44 +1,34 @@
 import { api } from '../boot/axios';
 import type { Customer } from '@/types/customer.types';
-import type { ApiResponse } from '@/types/api.types';
 import type { Page } from '@/types/api.types';
-import { unwrapPaged, unwrapSingle } from '@/utils/apiResponseHandler';
 export const customerService = {
   async getCustomer(params?: Record<string, string>): Promise<Page<Customer>> {
-    const response = await api.get<ApiResponse<Page<Customer>>>('/rest/api/customer/with-params', {
+    const response = await api.get<Page<Customer>>('/rest/api/customer/with-params', {
       params,
     });
-    return unwrapPaged<Customer>(response);
+    return response.data;
   },
 
   async getCustomerById(customerId: string): Promise<Customer> {
-    const response = await api.get<ApiResponse<Customer>>(
-      `/rest/api/customer/get-customer/${customerId}`,
-    );
-    return unwrapSingle<Customer>(response);
+    const response = await api.get<Customer>(`/rest/api/customer/get-customer/${customerId}`);
+    return response.data;
   },
 
   async addCustomer(newCustomer: Customer): Promise<Customer> {
-    const response = await api.post<ApiResponse<Customer>>(
-      `/rest/api/customer/create-customer`,
-      newCustomer,
-    );
-    return unwrapSingle<Customer>(response);
+    const response = await api.post<Customer>(`/rest/api/customer/create-customer`, newCustomer);
+    return response.data;
   },
 
   async updateCustomer(updatedCustomer: Customer) {
-    const response = await api.patch<ApiResponse<Customer>>(
+    const response = await api.patch<Customer>(
       `/rest/api/customer/update-customer/${updatedCustomer.customerId}`,
       updatedCustomer,
     );
 
-    return unwrapSingle<Customer>(response);
+    return response.data;
   },
 
-  async deleteCustomer(customerId: string): Promise<boolean> {
-    const response = await api.delete<ApiResponse<null>>(
-      `/rest/api/customer/delete-customer/${customerId}`,
-    );
-    return response.data.success;
+  async deleteCustomer(customerId: string) {
+    await api.delete<void>(`/rest/api/customer/delete-customer/${customerId}`);
   },
 };

@@ -48,7 +48,7 @@ public class IdGeneratorService {
     }
 
     public String generatePolicyId(PolicyType type) {
-        String prefix = getPolicyPrefix(type);
+        String prefix = type.getPrefix();
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
         int currentMonth = now.getMonthValue();
@@ -61,17 +61,5 @@ public class IdGeneratorService {
         return policyId;
     }
 
-    private String getPolicyPrefix(PolicyType type) {
-        return switch (type) {
-            case TRAFIK -> "TRF";
-            case KASKO -> "KSK";
-            case DASK -> "DSK";
-            case KONUT -> "KNT";
-            case SAGLIK -> "SGL";
-            default -> {
-                log.warn("Unknown policy type encountered, falling back to default prefix 'POL': {}", type);
-                yield "POL";
-            }
-        };
-    }
+
 }

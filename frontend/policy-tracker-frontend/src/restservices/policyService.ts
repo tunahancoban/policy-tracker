@@ -1,41 +1,34 @@
 import { api } from '../boot/axios';
 import type { Policy } from '../types/policy.types';
-import type { ApiResponse, Page } from '../types/api.types';
-import { unwrapPaged, unwrapSingle } from '@/utils/apiResponseHandler';
+import type { Page } from '../types/api.types';
 
 export const policyService = {
   async getPolicy(params?: Record<string, string>): Promise<Page<Policy>> {
-    const response = await api.get<ApiResponse<Page<Policy>>>(`/rest/api/policy/with-params`, {
+    const response = await api.get<Page<Policy>>(`/rest/api/policy/with-params`, {
       params,
     });
-    return unwrapPaged<Policy>(response);
+    return response.data;
   },
 
   async getPolicyById(policyId: string): Promise<Policy> {
-    const response = await api.get<ApiResponse<Policy>>(`/rest/api/policy/get-policy/${policyId}`);
-    return unwrapSingle<Policy>(response);
+    const response = await api.get<Policy>(`/rest/api/policy/get-policy/${policyId}`);
+    return response.data;
   },
 
   async addPolicy(newPolicy: Omit<Policy, 'policyId'>): Promise<Policy> {
-    const response = await api.post<ApiResponse<Policy>>(
-      `/rest/api/policy/create-policy`,
-      newPolicy,
-    );
-    return unwrapSingle<Policy>(response);
+    const response = await api.post<Policy>(`/rest/api/policy/create-policy`, newPolicy);
+    return response.data;
   },
 
   async updatePolicy(policyId: string, updatedPolicy: Partial<Policy>) {
-    const response = await api.patch<ApiResponse<Policy>>(
+    const response = await api.patch<Policy>(
       `/rest/api/policy/update-policy/${policyId}`,
       updatedPolicy,
     );
-    return unwrapSingle<Policy>(response);
+    return response.data;
   },
 
-  async deletePolicy(policyId: string): Promise<boolean> {
-    const response = await api.delete<ApiResponse<null>>(
-      `/rest/api/policy/delete-policy/${policyId}`,
-    );
-    return response.data.success;
+  async deletePolicy(policyId: string) {
+    await api.delete<void>(`/rest/api/policy/delete-policy/${policyId}`);
   },
 };

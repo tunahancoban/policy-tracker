@@ -21,9 +21,9 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
 
     Policy findByPolicyId(String policyId);
 
-    long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate startDate, LocalDate endDate);
+    long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(Instant startDate, Instant endDate);
 
-    long countByEndDateLessThan(LocalDate date);
+    long countByEndDateLessThan(Instant date);
 
     long countByEndDateBetween(Instant start, Instant end);
 

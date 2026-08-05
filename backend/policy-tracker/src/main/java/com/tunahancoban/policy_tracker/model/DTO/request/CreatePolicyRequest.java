@@ -35,6 +35,7 @@ public class CreatePolicyRequest {
     @Positive
     private Double premium;
 
-    private InstallmentOptions installmentNumber;
+    @NotNull
+    private InstallmentOptions installment;
 
 }

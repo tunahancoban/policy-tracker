@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
+@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -47,7 +48,6 @@ public class Customer {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
     private Boolean active = true;
-
 
 
 }

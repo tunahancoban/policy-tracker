@@ -1,0 +1,42 @@
+package com.tunahancoban.policy_tracker.mapper;
+
+
+import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.entity.Customer;
+import org.mapstruct.*;
+import org.openapitools.jackson.nullable.JsonNullable;
+
+import java.util.Optional;
+
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+
+public interface CustomerMapper {
+
+
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "active", constant = "true")
+    Customer toEntity(CreateCustomerRequest request);
+
+
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntityFromRequest(UpdateCustomerRequest request, @MappingTarget Customer customer);
+
+
+    default <T> T mapJsonNullable(JsonNullable<T> jsonNullable) {
+        return jsonNullable != null && jsonNullable.isPresent() ? jsonNullable.get() : null;
+    }
+
+    @Condition
+    default <T> boolean isPresent(Optional<T> optional) {
+        return optional != null && optional.isPresent();
+    }
+
+    default <T> T unwrapOptional(Optional<T> optional) {
+        return optional != null ? optional.orElse(null) : null;
+    }
+}

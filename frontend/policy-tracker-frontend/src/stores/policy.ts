@@ -120,11 +120,10 @@ export const usePolicyStore = defineStore('policy', () => {
 
   const deletePolicy = async (policyId: string) => {
     try {
-      const response = await policyService.deletePolicy(policyId);
-      if (response) {
-        policies.value = policies.value.filter((c) => c.policyId !== policyId);
-        customerPolicies.value = customerPolicies.value.filter((c) => c.policyId !== policyId);
-      }
+      await policyService.deletePolicy(policyId);
+
+      policies.value = policies.value.filter((c) => c.policyId !== policyId);
+      customerPolicies.value = customerPolicies.value.filter((c) => c.policyId !== policyId);
     } catch (error) {
       console.error('Poliçe silinemedi: ', error);
       throw error;

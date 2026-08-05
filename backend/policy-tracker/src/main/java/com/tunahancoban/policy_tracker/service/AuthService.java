@@ -22,13 +22,11 @@ public class AuthService {
     private final JWTService jwtService;
 
     public LoginResponse authenticate(LoginRequest request) {
-        List<User> userList = userService.getUserWithParam(null, null, null, request.getEmail(), null);
+        User user = userService.getUserByEmail( request.getEmail());
 
-        if (userList == null || userList.isEmpty()) {
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!");
         }
-
-        User user = userList.getFirst();
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!");

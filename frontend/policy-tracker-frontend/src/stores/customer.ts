@@ -80,10 +80,8 @@ export const useCustomerStore = defineStore('customer', () => {
 
   const deleteCustomer = async (customerId: string) => {
     try {
-      const response = await customerService.deleteCustomer(customerId);
-      if (response) {
-        customerData.value = customerData.value.filter((c) => c.customerId !== customerId);
-      }
+      await customerService.deleteCustomer(customerId);
+      customerData.value = customerData.value.filter((c) => c.customerId !== customerId);
     } catch (error) {
       console.error('deleteCustomer başarısız oldu:', error);
       throw error;

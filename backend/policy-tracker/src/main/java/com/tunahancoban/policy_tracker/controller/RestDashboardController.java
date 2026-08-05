@@ -3,7 +3,6 @@ package com.tunahancoban.policy_tracker.controller;
 import com.tunahancoban.policy_tracker.model.DTO.response.ChartResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.CustomerSummaryResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
-import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;
 import com.tunahancoban.policy_tracker.service.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +20,30 @@ public class RestDashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping(path = "/get-summary")
-    public ResponseEntity<RestResponse<DashboardSummaryResponse>> getSummary(){
+    public ResponseEntity<DashboardSummaryResponse> getSummary(){
         DashboardSummaryResponse dashboardSummaryResponse = dashboardService.getSummary();
-        return ResponseEntity.ok(RestResponse.success("Summary returned successfully", dashboardSummaryResponse));
+        return ResponseEntity.ok(dashboardSummaryResponse);
 
     }
 
     @GetMapping(path= "/get-summary/{id}")
-    public ResponseEntity<RestResponse<CustomerSummaryResponse>> getSummaryById(@PathVariable(name = "id") String id){
+    public ResponseEntity<CustomerSummaryResponse> getSummaryById(@PathVariable(name = "id") String id){
         System.out.println(id);
         CustomerSummaryResponse customerSummaryResponse = dashboardService.getSummaryById(id);
-        return ResponseEntity.ok(RestResponse.success("Summary returned successfully", customerSummaryResponse));
+        return ResponseEntity.ok( customerSummaryResponse);
 
     }
 
     @GetMapping(path="/get-recent-activities/{n}")
-    public ResponseEntity<RestResponse<List<Log>>> getRecentActivities(@PathVariable(name="n") int number) {
+    public ResponseEntity<List<Log>> getRecentActivities(@PathVariable(name="n") int number) {
         List<Log> logList   = dashboardService.getRecentActivities(number);
-        return ResponseEntity.ok(RestResponse.success("Logs are returned successfully", logList));
+        return ResponseEntity.ok(logList);
     }
 
     @GetMapping(path="/get-charts/{year}")
-    public ResponseEntity<RestResponse<ChartResponse>> getCharts(@PathVariable(name="year") int year){
+    public ResponseEntity<ChartResponse> getCharts(@PathVariable(name="year") int year){
         ChartResponse chartResponse = dashboardService.getCharts(year);
-        return ResponseEntity.ok(RestResponse.success("Charts infos returned successfully", chartResponse ));
+        return ResponseEntity.ok( chartResponse );
     }
     
 }

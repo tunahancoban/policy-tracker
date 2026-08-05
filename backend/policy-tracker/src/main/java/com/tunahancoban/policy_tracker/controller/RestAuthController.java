@@ -2,7 +2,6 @@ package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
-import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +18,7 @@ public class RestAuthController {
     private final AuthService authService;
 
     @PostMapping(path = "/login-request")
-    public ResponseEntity<RestResponse<LoginResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response){
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response){
 
             LoginResponse loginResponse = authService.authenticate(request);
             Cookie cookie = new Cookie("jwt_token", loginResponse.getToken());
@@ -31,11 +30,11 @@ public class RestAuthController {
             response.addCookie(cookie);
 
             LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getUserEmail());
-            return ResponseEntity.ok(RestResponse.success("Başarıyla giriş yapıldı", newLoginResponse));
+            return ResponseEntity.ok(newLoginResponse);
     }
 
     @PostMapping(path = "/logout")
-    public ResponseEntity<RestResponse<Void>> logout(HttpServletResponse response){
+    public ResponseEntity<Void> logout(HttpServletResponse response){
         Cookie cookie = new Cookie("jwt_token", null);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
@@ -44,7 +43,7 @@ public class RestAuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(RestResponse.success("Başarıyla çıkış yapıldı" ));
+        return ResponseEntity.noContent().build();
 
     }
 

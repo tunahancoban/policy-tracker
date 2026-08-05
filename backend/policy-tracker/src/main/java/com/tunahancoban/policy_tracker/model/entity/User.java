@@ -19,6 +19,7 @@ import java.util.List;
 @Document(collection = "users")
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 @Getter
 @Builder(toBuilder = true)
 public class User implements UserDetails {

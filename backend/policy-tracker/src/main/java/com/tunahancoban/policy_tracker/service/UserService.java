@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.service;
 
+import com.tunahancoban.policy_tracker.mapper.UserMapper;
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,10 +25,10 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public List<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role) {
+    public Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable) {
         log.debug("Searching users - id: {}, firstName: {}, lastName: {}, email: {}, role: {}",
                 id, firstName, lastName, email, role);
 
@@ -45,8 +48,8 @@ public class UserService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<User> example = Example.of(searchCriteria, matcher);
 
-        List<User> result = userRepository.findAll(example);
-        log.debug("User search completed - found {} record(s)", result.size());
+        Page<User> result = userRepository.findAll(example, pageable);
+        log.debug("User search completed - found {} record(s)", result.getTotalElements());
 
         return result;
     }
@@ -66,13 +69,7 @@ public class UserService {
         // Note: raw and hashed passwords are intentionally never logged
 
         //It saves user
-        User user = User.builder()
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
-                .password(hashedPassword)
-                .role(registerRequest.getRole())
-                .build();
+        User user = userMapper.toEntity(registerRequest);
 
         User savedUser = userRepository.save(user);
         log.info("User successfully created - id: {}, email: {}", savedUser.getId(), savedUser.getEmail());
@@ -102,11 +99,6 @@ public class UserService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "This id does not exist. ID: " + id);
                 });
 
-        User.UserBuilder userBuilder = user.toBuilder();
-
-        request.getFirstName().ifPresent(userBuilder::firstName);
-        request.getLastName().ifPresent(userBuilder::lastName);
-
         if (request.getEmail().isPresent()) {
             String newEmail = request.getEmail().get();
 
@@ -119,35 +111,36 @@ public class UserService {
                 log.warn("User update failed - email already taken: {}", newEmail);
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "This email is taken");
             }
-
-            userBuilder.email(newEmail);
         }
+
+        if (request.getRole().isPresent() && request.getRole().get() == null) {
+            log.warn("User update failed - role cannot be null - id: {}", id);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role cannot be null");
+        }
+
+        userMapper.updateEntityFromRequest(request, user);
 
         if (request.getPassword().isPresent()) {
             String rawPassword = request.getPassword().get();
 
             if (rawPassword != null && !rawPassword.trim().isEmpty()) {
-                userBuilder.password(passwordEncoder.encode(rawPassword));
+                user.setPassword(passwordEncoder.encode(rawPassword));
                 log.info("Password updated for user - id: {}", id);
             }
         }
 
-        if (request.getRole().isPresent()) {
-            Role newRole = request.getRole().get();
-
-            if (newRole == null) {
-                log.warn("User update failed - role cannot be null - id: {}", id);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role cannot be null");
-            }
-
-            userBuilder.role(newRole);
-        }
-
-        User updatedUser = userBuilder.build();
-        userRepository.save(updatedUser);
+        User updatedUser = userRepository.save(user);
         log.info("User successfully updated - id: {}", id);
 
         return updatedUser;
+    }
+
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found with email: " + email
+                ));
     }
 
 }

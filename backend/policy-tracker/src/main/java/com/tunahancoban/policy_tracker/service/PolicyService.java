@@ -1,6 +1,8 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
+import com.tunahancoban.policy_tracker.mapper.CustomerMapper;
+import com.tunahancoban.policy_tracker.mapper.PolicyMapper;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
@@ -32,6 +34,8 @@ public class PolicyService {
     private final IdGeneratorService idGeneratorService;
     private final InstallmentService installmentService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final PolicyMapper policyMapper;
+
 
     public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable) {
         log.debug("Searching policies - customerId: {}, policyId: {}, type: {}, page: {}",
@@ -84,20 +88,13 @@ public class PolicyService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Poliçe bitiş günü başlangıç gününden önce olamaz.");
         }
 
-        //If everything ok save policy
-        Policy policy = Policy.builder()
-                .policyId(idGeneratorService.generatePolicyId(request.getType()))
-                .customerId(request.getCustomerId())
-                .type(request.getType())
-                .note(request.getNote())
-                .installment(request.getInstallmentNumber())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .premium(request.getPremium())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now()).build();
+        Policy policy = policyMapper.toEntity(request);
 
-        installmentService.createInstallment(policy, request.getInstallmentNumber().getValue());
+        policy.setPolicyId(idGeneratorService.generatePolicyId(request.getType()));
+        policy.setCreatedAt(LocalDateTime.now());
+        policy.setUpdatedAt(LocalDateTime.now());
+
+        installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
 
         messagingTemplate.convertAndSend("/topic/dashboard-summary", "REFRESH_DASHBOARD");
@@ -132,26 +129,10 @@ public class PolicyService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
         }
 
-        Policy.PolicyBuilder policyBuilder = policy.toBuilder();
+        policyMapper.updateEntityFromRequest(request, policy);
+        policy.setUpdatedAt(LocalDateTime.now());
 
-        if (request.getCustomerId().isPresent()) {
-            policyBuilder.customerId(request.getCustomerId().get());
-        }
-        if (request.getType().isPresent()) {
-            policyBuilder.type(request.getType().get());
-        }
-        if (request.getStartDate().isPresent()) {
-            policyBuilder.startDate(request.getStartDate().get());
-        }
-        if (request.getEndDate().isPresent()) {
-            policyBuilder.endDate(request.getEndDate().get());
-        }
-        if (request.getPremium().isPresent()) {
-            policyBuilder.premium(request.getPremium().get());
-        }
-
-        policyBuilder.updatedAt(LocalDateTime.now());
-        Policy updatedPolicy = policyBuilder.build();
+        Policy updatedPolicy = policyRepository.save(policy);
 
         policyRepository.save(updatedPolicy);
         log.info("Policy successfully updated - policyId: {}", policyID);

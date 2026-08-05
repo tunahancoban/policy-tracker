@@ -32,15 +32,14 @@ public class DashboardService {
     public DashboardSummaryResponse getSummary() {
         log.debug("Calculating general dashboard summary");
 
-        LocalDateTime today = LocalDateTime.now();
-        LocalDateTime end = today.plusDays(30); // 30 days later
+        Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant day30 =  todayStart.atZone(ZoneOffset.UTC).plusDays(30).toInstant();
 
-        LocalDate today2 = LocalDate.now();
 
         long totalCustomer = customerRepository.count();
-        long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqual(today2, today2);
-        long expiringSoonPolicies = 0;//policyRepository.countByEndDateBetween(today, end);
-        long expiredPolicies = policyRepository.countByEndDateLessThan(today2);
+        long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqual(todayStart, todayStart);
+        long expiringSoonPolicies = policyRepository.countByEndDateBetween(todayStart, day30);
+        long expiredPolicies = policyRepository.countByEndDateLessThan(todayStart);
 
         log.debug("Dashboard summary calculated - totalCustomer: {}, activePolicyNumber: {}, expiredPolicies: {}",
                 totalCustomer, activePolicyNumber, expiredPolicies);

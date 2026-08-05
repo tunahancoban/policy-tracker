@@ -2,16 +2,14 @@ package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
-import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.service.AuthService;
 import com.tunahancoban.policy_tracker.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/rest/api/profile")
@@ -22,34 +20,33 @@ public class RestProfileController {
     private final AuthService authService;
 
     @PutMapping(path = "/update-profile")
-    public ResponseEntity<RestResponse<Void>> updateProfile(Authentication authentication, @RequestBody UpdateUserRequest updateUserRequest){
+    public ResponseEntity<User> updateProfile(
+            Authentication authentication,
+            @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+
         String email = authentication.getName();
 
-        List<User> userList = userService.getUserWithParam(null, null, null, email, null);
-        if(userList==null||userList.isEmpty()){
-            return ResponseEntity.ok(RestResponse.error("Kullanıcı bulunamadı.."));
-        }
-        String userId = userList.getFirst().getId();
+        User user = userService.getUserByEmail(email);
+        User updatedUser = userService.updateUser(user.getId(), updateUserRequest);
 
-        userService.updateUser(userId, updateUserRequest);
-        return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla güncellendi."));
+        return ResponseEntity.ok(updatedUser);
     }
 
-    @GetMapping(path = "/get-profile")
-    public ResponseEntity<RestResponse<User>> getProfile(Authentication authentication){
-        String email  = authentication.getName();
-        List<User> userList = userService.getUserWithParam(null, null, null, email, null);
-        if(userList==null||userList.isEmpty()){
-            return ResponseEntity.ok(RestResponse.error("Kullanıcı bulunamadı.."));
-        }
+    @GetMapping("/get-profile")
+    public ResponseEntity<User> getProfile(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userService.getUserByEmail(email);
 
-        return ResponseEntity.ok(RestResponse.success("Kullanıcı bilgileri başarıyla getirildi.", userList.getFirst()));
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping(path = "/me")
-    public ResponseEntity<RestResponse<LoginResponse>> getCurrentUser(){
+    public ResponseEntity<LoginResponse> getCurrentUser(){
         LoginResponse loginResponse = authService.getCurrentUser();
-        return  ResponseEntity.ok(RestResponse.success("Bilgiler başarıyla yüklendi", loginResponse));
+        return  ResponseEntity.ok(loginResponse);
     }
 
 }

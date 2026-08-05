@@ -1,7 +1,9 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
+import com.tunahancoban.policy_tracker.mapper.CustomerMapper;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -23,6 +24,7 @@ import java.util.Map;
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final IdGeneratorService idGeneratorService;
+    private final CustomerMapper customerMapper;
 
     public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
                                              String identityNumber, String email, String phoneNumber,
@@ -55,12 +57,11 @@ public class CustomerService {
 
     public Customer getCustomerByCustomerId(String customerId) {
         log.debug("Fetching customer - customerId: {}", customerId);
-
-        Customer customer = customerRepository.findByCustomerId(customerId);
-        if (customer == null) {
-            log.warn("Customer not found - customerId: {}", customerId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + customerId);
-        }
+        Customer customer = customerRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> {
+                    log.warn("Customer not found - customerId: {}", customerId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + customerId);
+                });
         return customer;
     }
 
@@ -75,19 +76,12 @@ public class CustomerService {
                     "A customer with this identity number already exists: " + request.getIdentityNumber());
         }
 
-        Customer customer = Customer.builder()
-                .customerId(idGeneratorService.generateCustomerId())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .identityNumber(request.getIdentityNumber())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .city(request.getCity())
-                .district(request.getDistrict())
-                .fullAddress(request.getFullAddress())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .active(true).build();
+
+        Customer customer = customerMapper.toEntity(request);
+
+        customer.setCustomerId(idGeneratorService.generateCustomerId());
+        customer.setCreatedAt(LocalDateTime.now());
+        customer.setUpdatedAt(LocalDateTime.now());
 
         customerRepository.save(customer);
         log.info("Customer successfully created - customerId: {}", customer.getCustomerId());
@@ -96,68 +90,36 @@ public class CustomerService {
     }
 
     @LogActivity(type = "MUSTERI", detail = " Müşteri güncellendi.")
-    public Customer updateCustomer(String id, Map<String, Object> updates) {
-        log.info("Update customer request received - customerId: {}, updated fields: {}", id, updates.keySet());
+    public Customer updateCustomer(String id, UpdateCustomerRequest updates) {
+        log.info("Update customer request received - customerId: {}", id);
 
-        if (!existById(id)) {
-            log.warn("Customer update failed - customer not found: {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
-        }
-        Customer customer = customerRepository.findByCustomerId(id);
-        Customer.CustomerBuilder customerBuilder = customer.toBuilder();
+        Customer customer = customerRepository.findByCustomerId(id)
+                .orElseThrow(() -> {
+                    log.warn("Customer update failed - customer not found: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
+                });
 
-        updates.forEach((key, value) -> {
-            switch (key) {
-                case "firstName":
-                    customerBuilder.firstName((String) value);
-                    break;
-                case "lastName":
-                    customerBuilder.lastName((String) value);
-                    break;
-                case "identityNumber":
-                    customerBuilder.identityNumber((String) value);
-                    break;
-                case "email":
-                    customerBuilder.email((String) value);
-                    break;
-                case "phoneNumber":
-                    customerBuilder.phoneNumber((String) value);
-                    break;
-                case "city":
-                    customerBuilder.city((String) value);
-                    break;
-                case "district":
-                    customerBuilder.district((String) value);
-                    break;
-                case "fullAddress":
-                    customerBuilder.fullAddress((String) value);
-                    break;
-                case "active":
-                    customerBuilder.active((boolean) value);
-                    break;
-                default:
-                    log.warn("Unknown update field ignored - field: {}", key);
-                    break;
-            }
-        });
 
-        customerBuilder.updatedAt(LocalDateTime.now());
-        Customer saveCustomer = customerBuilder.build();
-        customerRepository.save(saveCustomer);
+        customerMapper.updateEntityFromRequest(updates, customer);
+        customer.setUpdatedAt(LocalDateTime.now());
+        Customer savedCustomer = customerRepository.save(customer);
+
+        customerRepository.save(savedCustomer);
         log.info("Customer successfully updated - customerId: {}", id);
 
-        return saveCustomer;
+        return savedCustomer;
     }
 
     @LogActivity(type = "MUSTERI", detail = " Müşteri silindi.")
     public void deleteCustomer(String id) {
         log.info("Delete customer request received - customerId: {}", id);
 
-        if (!existById(id)) {
-            log.warn("Customer deletion failed - customer not found: {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
-        }
-        Customer customer = customerRepository.findByCustomerId(id);
+        Customer customer = customerRepository.findByCustomerId(id)
+                .orElseThrow(() -> {
+                    log.warn("Customer deletion failed - customer not found: {}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
+                });
+
         customerRepository.deleteById(customer.getId());
         log.info("Customer successfully deleted - customerId: {}", id);
     }

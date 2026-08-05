@@ -1,21 +1,18 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
-import com.tunahancoban.policy_tracker.model.DTO.response.RestResponse;
 import com.tunahancoban.policy_tracker.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @CrossOrigin(origins = "*")
@@ -36,7 +33,7 @@ public class RestCustomerController {
     );
 
     @GetMapping(path = "/with-params")
-    public ResponseEntity<RestResponse<Page<Customer>>> getCustomerWithParam(
+    public ResponseEntity<Page<Customer>> getCustomerWithParam(
             @RequestParam(name = "customerId", required = false) String customerId,
             @RequestParam(name = "firstName", required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName,
@@ -52,7 +49,7 @@ public class RestCustomerController {
         Page<Customer> customerList = customerService.getCustomerByParam(
                 customerId, firstName, lastName, identityNumber, email, phoneNumber, active, pageable);
 
-        return ResponseEntity.ok(RestResponse.success("Müşteriler bulundu.", customerList));
+        return ResponseEntity.ok(customerList);
     }
 
     private void validateSort(Pageable pageable) {
@@ -63,28 +60,28 @@ public class RestCustomerController {
         });
     }
     @GetMapping(path ="/get-customer/{id}")
-    public  ResponseEntity<RestResponse<Customer>> getCustomerById(@PathVariable(name="id") String id){
+    public  ResponseEntity<Customer> getCustomerById(@PathVariable(name="id") String id){
         Customer customer = customerService.getCustomerByCustomerId(id);
-        return ResponseEntity.ok(RestResponse.success("Müşteri bulundu.", customer));
+        return ResponseEntity.ok(customer);
     }
 
 
     @PostMapping(path = "/create-customer")
-    public ResponseEntity<RestResponse<Customer>> createCustomer(@Valid @RequestBody CreateCustomerRequest customerRequest){
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody CreateCustomerRequest customerRequest){
             Customer customer = customerService.createCustomer(customerRequest);
-            return ResponseEntity.ok(RestResponse.success("Başarılıyla oluşturuldu", customer));
+            return ResponseEntity.ok(customer);
     }
 
     @DeleteMapping(path="/delete-customer/{id}")
-    public ResponseEntity<RestResponse<Void>> deleteCustomer(@PathVariable(name = "id") String id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable(name = "id") String id) {
         customerService.deleteCustomer(id);
-        return ResponseEntity.ok(RestResponse.success("Müşteri başarıyla silindi: " +id));
+        return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(path = "/update-customer/{id}", consumes = "application/json")
-    public ResponseEntity<RestResponse<Customer>> updateCustomer(@PathVariable(name = "id") String id, @RequestBody Map<String, Object> updates) {
-        Customer customer = customerService.updateCustomer(id,updates);
-        return ResponseEntity.ok(RestResponse.success("Müşteri başarıyla güncellendi : "+id, customer));
+    @PatchMapping(path = "/update-customer/{id}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable(name = "id") String id, @RequestBody UpdateCustomerRequest updateCustomerRequest) {
+        Customer customer = customerService.updateCustomer(id,updateCustomerRequest);
+        return ResponseEntity.ok(customer);
     }
 
 

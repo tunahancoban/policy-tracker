@@ -2,8 +2,6 @@ import { api } from '../boot/axios';
 import type { LoginResponse } from '@/types/api.types';
 import type { UserData } from '@/types/user.types';
 
-import { unwrapSingle } from '@/utils/apiResponseHandler';
-
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
     const response = await api.post('/rest/api/auth/login-request', {
@@ -11,12 +9,12 @@ export const authService = {
       password: password,
     });
 
-    return unwrapSingle<LoginResponse>(response);
+    return response.data;
   },
 
   async checkAuth(): Promise<UserData> {
     const response = await api.get('/rest/api/profile/me');
-    return unwrapSingle<UserData>(response);
+    return response.data;
   },
 
   async logout(): Promise<void> {

@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const fetchUsers = async (params?: Record<string, string>) => {
     isLoading.value = true;
     try {
-      users.value = await userService.getUsers(params);
+      users.value = (await userService.getUsers(params)).content;
     } catch (error) {
       console.error('Kullanıcılar getirilirken hata:', error);
     } finally {
@@ -67,12 +67,8 @@ export const useUserStore = defineStore('user', () => {
 
   const deleteUser = async (id: string) => {
     try {
-      const success = await userService.deleteUser(id);
-      if (success) {
-        users.value = users.value.filter((u) => u.id !== id);
-      } else {
-        console.error('Kullanıcı silinemedi.');
-      }
+      await userService.deleteUser(id);
+      users.value = users.value.filter((u) => u.id !== id);
     } catch (error) {
       console.error('deleteUser başarısız oldu:', error);
       throw error;
