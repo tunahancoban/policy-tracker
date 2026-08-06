@@ -7,10 +7,10 @@ import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
-import com.tunahancoban.policy_tracker.service.interfaces.CustomerServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.InstallmentServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.PolicyServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorService;
+import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
+import com.tunahancoban.policy_tracker.service.interfaces.PolicyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -28,11 +28,11 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PolicyService implements PolicyServiceImp {
+public class PolicyServiceImp implements PolicyService {
     private final PolicyRepository policyRepository;
-    private final CustomerServiceImp customerService;
-    private final IdGeneratorServiceImp idGeneratorService;
-    private final InstallmentServiceImp installmentService;
+    private final CustomerService customerService;
+    private final IdGeneratorService idGeneratorService;
+    private final InstallmentService installmentService;
     private final SimpMessagingTemplate messagingTemplate;
     private final PolicyMapper policyMapper;
 

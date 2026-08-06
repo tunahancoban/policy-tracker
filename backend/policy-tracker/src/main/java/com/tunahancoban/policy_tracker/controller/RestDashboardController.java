@@ -4,7 +4,7 @@ import com.tunahancoban.policy_tracker.model.DTO.response.ChartResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.CustomerSummaryResponse;
 import com.tunahancoban.policy_tracker.model.DTO.response.DashboardSummaryResponse;
 import com.tunahancoban.policy_tracker.model.entity.Log;
-import com.tunahancoban.policy_tracker.service.DashboardService;
+import com.tunahancoban.policy_tracker.service.interfaces.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

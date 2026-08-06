@@ -7,7 +7,7 @@ import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface PolicyServiceImp {
+public interface PolicyService {
 
     Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable);
     Policy getPolicyById(String policyId);

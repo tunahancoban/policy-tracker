@@ -1,7 +1,7 @@
 package com.tunahancoban.policy_tracker.config;
 
-import com.tunahancoban.policy_tracker.service.JWTService;
-import com.tunahancoban.policy_tracker.service.UserService;
+import com.tunahancoban.policy_tracker.service.JWTServiceImp;
+import com.tunahancoban.policy_tracker.service.UserServiceImp;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -22,8 +22,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
-    private final UserService userService;
+    private final JWTServiceImp jwtServiceImp;
+    private final UserServiceImp userServiceImp;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -52,12 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String email = jwtService.extractEmail(jwt);
+        String email = jwtServiceImp.extractEmail(jwt);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userService.getUserByEmail(email);
+            UserDetails userDetails = this.userServiceImp.getUserByEmail(email);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (jwtServiceImp.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

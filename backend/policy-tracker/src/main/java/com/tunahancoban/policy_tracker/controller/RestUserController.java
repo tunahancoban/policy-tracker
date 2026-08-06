@@ -4,8 +4,7 @@ import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
-import com.tunahancoban.policy_tracker.service.UserService;
-
+import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -2,7 +2,7 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.model.entity.DatabaseSequence;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
-import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -18,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class IdGeneratorService implements IdGeneratorServiceImp {
+public class IdGeneratorServiceImp implements IdGeneratorService {
 
     private final MongoOperations mongoOperations;
 

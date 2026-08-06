@@ -3,9 +3,9 @@ package com.tunahancoban.policy_tracker.service;
 import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
-import com.tunahancoban.policy_tracker.service.interfaces.AuthServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.TokenServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.UserServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
+import com.tunahancoban.policy_tracker.service.interfaces.TokenService;
+import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -15,14 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
-public class AuthService implements AuthServiceImp {
-    private final UserServiceImp userService;
+public class AuthServiceImp implements AuthService {
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final TokenServiceImp jwtService;
+    private final TokenService jwtService;
 
     @Override
     public LoginResponse authenticate(LoginRequest request) {

@@ -5,7 +5,7 @@ import com.tunahancoban.policy_tracker.model.entity.Policy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface InstallmentServiceImp {
+public interface InstallmentService {
     Page<Installment> getInstallment(String customerId, String policyId, Pageable pageable);
     void createInstallment(Policy policy, int installmentNumber);
 

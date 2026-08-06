@@ -6,7 +6,7 @@ import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
-import com.tunahancoban.policy_tracker.service.interfaces.UserServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -18,12 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserServiceImp {
+public class UserServiceImp implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

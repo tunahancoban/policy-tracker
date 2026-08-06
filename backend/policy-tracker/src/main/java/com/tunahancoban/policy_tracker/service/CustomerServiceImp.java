@@ -6,8 +6,8 @@ import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
-import com.tunahancoban.policy_tracker.service.interfaces.CustomerServiceImp;
-import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -23,9 +23,9 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomerService implements CustomerServiceImp {
+public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
-    private final IdGeneratorServiceImp idGeneratorService;
+    private final IdGeneratorService idGeneratorService;
     private final CustomerMapper customerMapper;
 
     @Override

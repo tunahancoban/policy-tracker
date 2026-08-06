@@ -8,7 +8,7 @@ import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.repository.LogRepository;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
-import com.tunahancoban.policy_tracker.service.interfaces.DashboardServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DashboardService implements DashboardServiceImp {
+public class DashboardServiceImp implements DashboardService {
 
     private final PolicyRepository policyRepository;
     private final CustomerRepository customerRepository;

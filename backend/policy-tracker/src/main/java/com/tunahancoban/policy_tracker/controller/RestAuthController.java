@@ -2,7 +2,7 @@ package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
-import com.tunahancoban.policy_tracker.service.AuthService;
+import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

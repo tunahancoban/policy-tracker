@@ -1,6 +1,6 @@
 package com.tunahancoban.policy_tracker.service;
 
-import com.tunahancoban.policy_tracker.service.interfaces.TokenServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 @Slf4j
 @Service
-public class JWTService implements TokenServiceImp {
+public class JWTServiceImp implements TokenService {
 
     @Value("${jwt.secret}")
     private String secretString;

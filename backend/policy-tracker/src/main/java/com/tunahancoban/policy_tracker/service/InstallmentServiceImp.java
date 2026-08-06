@@ -4,7 +4,7 @@ import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
-import com.tunahancoban.policy_tracker.service.interfaces.InstallmentServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InstallmentService implements InstallmentServiceImp {
+public class InstallmentServiceImp implements InstallmentService {
 
     private final InstallmentRepository installmentRepository;
 

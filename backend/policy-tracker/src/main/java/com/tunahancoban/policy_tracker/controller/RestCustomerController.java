@@ -3,7 +3,7 @@ package com.tunahancoban.policy_tracker.controller;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
-import com.tunahancoban.policy_tracker.service.CustomerService;
+import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

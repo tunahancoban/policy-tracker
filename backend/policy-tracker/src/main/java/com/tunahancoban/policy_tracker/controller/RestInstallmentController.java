@@ -1,7 +1,7 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.entity.Installment;
-import com.tunahancoban.policy_tracker.service.InstallmentService;
+import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -7,7 +7,7 @@ import com.tunahancoban.policy_tracker.model.entity.Log;
 
 import java.util.List;
 
-public interface DashboardServiceImp {
+public interface DashboardService {
     DashboardSummaryResponse getSummary();
     CustomerSummaryResponse getSummaryById(String customerId);
     List<Log> getRecentActivities(int n);

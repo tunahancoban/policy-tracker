@@ -4,7 +4,7 @@ import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
-import com.tunahancoban.policy_tracker.service.PolicyService;
+import com.tunahancoban.policy_tracker.service.interfaces.PolicyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

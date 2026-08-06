@@ -2,7 +2,7 @@ package com.tunahancoban.policy_tracker.service.interfaces;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
-public interface TokenServiceImp {
+public interface TokenService {
 
     String generateToken(UserDetails userDetails);
     String extractEmail(String token);

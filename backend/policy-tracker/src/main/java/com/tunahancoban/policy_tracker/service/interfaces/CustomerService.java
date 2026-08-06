@@ -6,7 +6,7 @@ import com.tunahancoban.policy_tracker.model.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface CustomerServiceImp {
+public interface CustomerService {
     Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
                                       String identityNumber, String email, String phoneNumber,
                                       Boolean active, Pageable pageable);

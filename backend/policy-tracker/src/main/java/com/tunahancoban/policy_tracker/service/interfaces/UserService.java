@@ -7,7 +7,7 @@ import com.tunahancoban.policy_tracker.model.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface UserServiceImp {
+public interface UserService {
 
     Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable);
     User createUser(RegisterRequest registerRequest);
