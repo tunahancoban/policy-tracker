@@ -6,6 +6,8 @@ import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
+import com.tunahancoban.policy_tracker.service.interfaces.CustomerServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -21,11 +23,12 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomerService {
+public class CustomerService implements CustomerServiceImp {
     private final CustomerRepository customerRepository;
-    private final IdGeneratorService idGeneratorService;
+    private final IdGeneratorServiceImp idGeneratorService;
     private final CustomerMapper customerMapper;
 
+    @Override
     public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
                                              String identityNumber, String email, String phoneNumber,
                                              Boolean active, Pageable pageable) {
@@ -55,6 +58,7 @@ public class CustomerService {
         return result;
     }
 
+    @Override
     public Customer getCustomerByCustomerId(String customerId) {
         log.debug("Fetching customer - customerId: {}", customerId);
         Customer customer = customerRepository.findByCustomerId(customerId)
@@ -66,6 +70,7 @@ public class CustomerService {
     }
 
     @LogActivity( type = "MUSTERI", detail = "Yeni müşteri eklendi.")
+    @Override
     public Customer createCustomer(CreateCustomerRequest request) {
         log.info("Create customer request received - identityNumber: {}, email: {}",
                 request.getIdentityNumber(), request.getEmail());
@@ -90,6 +95,7 @@ public class CustomerService {
     }
 
     @LogActivity(type = "MUSTERI", detail = " Müşteri güncellendi.")
+    @Override
     public Customer updateCustomer(String id, UpdateCustomerRequest updates) {
         log.info("Update customer request received - customerId: {}", id);
 
@@ -111,6 +117,7 @@ public class CustomerService {
     }
 
     @LogActivity(type = "MUSTERI", detail = " Müşteri silindi.")
+    @Override
     public void deleteCustomer(String id) {
         log.info("Delete customer request received - customerId: {}", id);
 
@@ -124,6 +131,7 @@ public class CustomerService {
         log.info("Customer successfully deleted - customerId: {}", id);
     }
 
+    @Override
     public boolean existById(String customerId) {
         return customerRepository.existsByCustomerId(customerId);
     }

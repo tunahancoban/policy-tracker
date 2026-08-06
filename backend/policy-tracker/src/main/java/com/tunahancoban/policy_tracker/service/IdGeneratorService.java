@@ -2,6 +2,7 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.model.entity.DatabaseSequence;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -17,10 +18,11 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class IdGeneratorService {
+public class IdGeneratorService implements IdGeneratorServiceImp {
 
     private final MongoOperations mongoOperations;
 
+    @Override
     public long getNextSequence(String seqName) {
         log.debug("Fetching next sequence value for: {}", seqName);
 
@@ -38,6 +40,7 @@ public class IdGeneratorService {
         return counter.getSeq();
     }
 
+    @Override
     public String generateCustomerId() {
         String sequenceName = "customer_sequence";
         long currentSeq = getNextSequence(sequenceName);
@@ -47,6 +50,7 @@ public class IdGeneratorService {
         return customerId;
     }
 
+    @Override
     public String generatePolicyId(PolicyType type) {
         String prefix = type.getPrefix();
         LocalDate now = LocalDate.now();

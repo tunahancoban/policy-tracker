@@ -1,13 +1,16 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
-import com.tunahancoban.policy_tracker.mapper.CustomerMapper;
 import com.tunahancoban.policy_tracker.mapper.PolicyMapper;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
+import com.tunahancoban.policy_tracker.service.interfaces.CustomerServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.InstallmentServiceImp;
+import com.tunahancoban.policy_tracker.service.interfaces.PolicyServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -20,23 +23,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PolicyService {
+public class PolicyService implements PolicyServiceImp {
     private final PolicyRepository policyRepository;
-    private final CustomerService customerService;
-    private final IdGeneratorService idGeneratorService;
-    private final InstallmentService installmentService;
+    private final CustomerServiceImp customerService;
+    private final IdGeneratorServiceImp idGeneratorService;
+    private final InstallmentServiceImp installmentService;
     private final SimpMessagingTemplate messagingTemplate;
     private final PolicyMapper policyMapper;
 
 
+    @Override
     public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable) {
         log.debug("Searching policies - customerId: {}, policyId: {}, type: {}, page: {}",
                 customerId, policyId, type, pageable);
@@ -59,6 +60,7 @@ public class PolicyService {
         return result;
     }
 
+    @Override
     public Policy getPolicyById(String policyId) {
         log.debug("Fetching policy by id: {}", policyId);
 
@@ -71,6 +73,7 @@ public class PolicyService {
 
     @Transactional
     @LogActivity(type = "POLICE", detail = "Poliçe oluşturuldu")
+    @Override
     public Policy createPolicy(CreatePolicyRequest request) {
         log.info("Creating policy - customerId: {}, type: {}, premium: {}",
                 request.getCustomerId(), request.getType(), request.getPremium());
@@ -105,6 +108,7 @@ public class PolicyService {
     }
 
     @LogActivity(type = "POLICE", detail = "Poliçe silindi")
+    @Override
     public void deletePolicy(String policyID) {
         log.info("Deleting policy - policyId: {}", policyID);
 
@@ -117,6 +121,7 @@ public class PolicyService {
     }
 
     @LogActivity(type = "POLICE", detail = "Poliçe güncellendi")
+    @Override
     public Policy updatePolicy(String policyID, UpdatePolicyRequest request) {
         log.info("Updating policy - policyId: {}", policyID);
 

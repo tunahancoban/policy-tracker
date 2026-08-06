@@ -4,6 +4,7 @@ import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
+import com.tunahancoban.policy_tracker.service.interfaces.InstallmentServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -18,10 +19,11 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InstallmentService {
+public class InstallmentService implements InstallmentServiceImp {
 
     private final InstallmentRepository installmentRepository;
 
+    @Override
     public Page<Installment> getInstallment(String customerId, String policyId, Pageable pageable) {
         log.debug("Searching installments - customerId: {}, policyId: {}, page: {}", customerId, policyId, pageable);
 
@@ -51,6 +53,7 @@ public class InstallmentService {
         return result;
     }
 
+    @Override
     public void createInstallment(Policy policy, int installmentNumber) {
         log.info("Creating {} installment(s) for policy: {}", installmentNumber, policy.getPolicyId());
 

@@ -1,5 +1,6 @@
 package com.tunahancoban.policy_tracker.service;
 
+import com.tunahancoban.policy_tracker.service.interfaces.TokenServiceImp;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 
 @Slf4j
 @Service
-public class JWTService {
+public class JWTService implements TokenServiceImp {
 
     @Value("${jwt.secret}")
     private String secretString;
@@ -36,6 +37,7 @@ public class JWTService {
     }
 
     //It generates JWT token
+    @Override
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -86,6 +88,7 @@ public class JWTService {
     }
 
     //Extract email
+    @Override
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -105,6 +108,7 @@ public class JWTService {
     }
 
     //Extract is token valid
+    @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractEmail(token); // Get email from token
         boolean valid = username.equals(userDetails.getUsername()) && !isTokenExpired(token);

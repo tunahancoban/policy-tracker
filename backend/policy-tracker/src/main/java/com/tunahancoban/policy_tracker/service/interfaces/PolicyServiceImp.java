@@ -1,0 +1,18 @@
+package com.tunahancoban.policy_tracker.service.interfaces;
+
+import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface PolicyServiceImp {
+
+    Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable);
+    Policy getPolicyById(String policyId);
+    Policy createPolicy(CreatePolicyRequest request);
+    void deletePolicy(String policyID);
+    Policy updatePolicy(String policyID, UpdatePolicyRequest request);
+
+}

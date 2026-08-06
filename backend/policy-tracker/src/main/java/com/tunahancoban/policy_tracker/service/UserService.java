@@ -6,6 +6,7 @@ import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
+import com.tunahancoban.policy_tracker.service.interfaces.UserServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -22,12 +23,13 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserServiceImp {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    @Override
     public Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable) {
         log.debug("Searching users - id: {}, firstName: {}, lastName: {}, email: {}, role: {}",
                 id, firstName, lastName, email, role);
@@ -54,6 +56,7 @@ public class UserService {
         return result;
     }
 
+    @Override
     public User createUser(RegisterRequest registerRequest) {
         log.info("Creating user - email: {}, role: {}", registerRequest.getEmail(), registerRequest.getRole());
 
@@ -78,6 +81,7 @@ public class UserService {
     }
 
     //Delete user
+    @Override
     public void deleteUser(String id) {
         log.info("Deleting user - id: {}", id);
 
@@ -90,6 +94,7 @@ public class UserService {
     }
 
     //Update User
+    @Override
     public User updateUser(String id, UpdateUserRequest request) {
         log.info("Updating user - id: {}", id);
 

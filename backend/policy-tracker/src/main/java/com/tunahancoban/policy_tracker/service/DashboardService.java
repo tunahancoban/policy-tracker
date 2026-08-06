@@ -8,6 +8,7 @@ import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.repository.LogRepository;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
+import com.tunahancoban.policy_tracker.service.interfaces.DashboardServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -22,13 +23,14 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DashboardService {
+public class DashboardService implements DashboardServiceImp {
 
     private final PolicyRepository policyRepository;
     private final CustomerRepository customerRepository;
     private final LogRepository logRepository;
     private final InstallmentRepository installmentRepository;
 
+    @Override
     public DashboardSummaryResponse getSummary() {
         log.debug("Calculating general dashboard summary");
 
@@ -47,6 +49,7 @@ public class DashboardService {
         return new DashboardSummaryResponse(totalCustomer, activePolicyNumber, expiringSoonPolicies, expiredPolicies);
     }
 
+    @Override
     public CustomerSummaryResponse getSummaryById(String customerId) {
         log.debug("Calculating customer summary - customerId: {}", customerId);
 
@@ -65,6 +68,7 @@ public class DashboardService {
         return new CustomerSummaryResponse(totalPremium, activePolicyNumber, expiringSoonPolicies, expiredPolicies);
     }
 
+    @Override
     public List<Log> getRecentActivities(int n) {
         log.debug("Fetching last {} activities", n);
 
@@ -73,6 +77,7 @@ public class DashboardService {
         return logRepository.findAll(pageRequest).getContent();
     }
 
+    @Override
     public ChartResponse getCharts(int year) {
         log.debug("Calculating chart data - year: {}", year);
 
