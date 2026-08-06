@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,23 +60,34 @@ public class InstallmentServiceImp implements InstallmentService {
         log.info("Creating {} installment(s) for policy: {}", installmentNumber, policy.getPolicyId());
 
         List<Installment> installments = new ArrayList<>();
-        double rawAmount = policy.getPremium() / installmentNumber;
-        double installmentAmount = Math.round(rawAmount * 100.0) / 100.0;
+
+        BigDecimal countAsBigDecimal = BigDecimal.valueOf(installmentNumber);
+        BigDecimal totalPremium = policy.getPremium();
+
+        BigDecimal baseInstallmentAmount = totalPremium.divide(
+                countAsBigDecimal,
+                2,
+                RoundingMode.DOWN
+        );
+
+        BigDecimal totalCalculated = baseInstallmentAmount.multiply(countAsBigDecimal);
+        BigDecimal remainder = totalPremium.subtract(totalCalculated);
 
         for (int i = 0; i < installmentNumber; i++) {
+            BigDecimal currentAmount = baseInstallmentAmount;
+            if (i == 0) {
+                currentAmount = currentAmount.add(remainder);
+            }
             Installment installment = Installment.builder()
                     .policyId(policy.getPolicyId())
                     .customerId(policy.getCustomerId())
                     .installmentNo(i + 1)
-                    .amount(installmentAmount)
+                    .amount(currentAmount)
                     .status(PaymentStatus.UNPAID)
                     .dueDate(policy.getStartDate().plusMonths(i))
                     .build();
             installments.add(installment);
         }
-
         installmentRepository.saveAll(installments);
-        log.info("Successfully created {} installment(s) for policy: {} - amount per installment: {}",
-                installmentNumber, policy.getPolicyId(), installmentAmount);
     }
 }

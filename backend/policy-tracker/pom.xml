@@ -11,8 +11,8 @@
 	<groupId>com.tunahancoban</groupId>
 	<artifactId>policy-tracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name> Policy Tracker </name>
+	<description>An insurance policy tracking and management system built with Java Spring Boot, MongoDB, and Vue.js.</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -34,6 +34,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 
 		<dependency>

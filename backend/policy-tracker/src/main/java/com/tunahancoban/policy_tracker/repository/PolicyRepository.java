@@ -13,13 +13,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface PolicyRepository extends MongoRepository<Policy, String> {
 
     void deleteByPolicyId(String policyId);
 
-    Policy findByPolicyId(String policyId);
+    Optional<Policy> getPolicyByPolicyId(String policyId);
+
+    boolean existsByPolicyId(String policyId);
 
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(Instant startDate, Instant endDate);
 

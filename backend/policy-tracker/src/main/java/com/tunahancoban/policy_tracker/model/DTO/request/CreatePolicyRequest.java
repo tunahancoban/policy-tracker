@@ -2,6 +2,7 @@ package com.tunahancoban.policy_tracker.model.DTO.request;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -33,9 +35,17 @@ public class CreatePolicyRequest {
     private LocalDate endDate; //Policy end date
 
     @Positive
-    private Double premium;
+    private BigDecimal premium;
 
     @NotNull
     private InstallmentOptions installment;
+
+    @AssertTrue(message = "Poliçe bitiş günü başlangıç gününden önce olamaz.")
+    public boolean isValidDateRange() {
+        if (startDate == null || endDate == null) {
+            return true;
+        }
+        return !endDate.isBefore(startDate);
+    }
 
 }

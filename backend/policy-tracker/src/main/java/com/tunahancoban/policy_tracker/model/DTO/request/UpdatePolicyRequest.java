@@ -5,6 +5,7 @@ import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import lombok.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -23,5 +24,5 @@ public class UpdatePolicyRequest {
     @JsonFormat(pattern = "yyyy/MM/dd")
     private JsonNullable<LocalDate> endDate = JsonNullable.undefined();
 
-    private JsonNullable<Double> premium = JsonNullable.undefined();
+    private JsonNullable<BigDecimal> premium = JsonNullable.undefined();
 }

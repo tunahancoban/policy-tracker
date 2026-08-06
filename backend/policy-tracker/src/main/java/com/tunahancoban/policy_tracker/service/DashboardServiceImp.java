@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +58,10 @@ public class DashboardServiceImp implements DashboardService {
         LocalDate end = today.plusDays(30); // 30 days later
 
         List<Map<String, Object>> premium = policyRepository.sumPremiumByCustomerId(customerId);
-        long totalPremium = premium.isEmpty() ? 0L : ((Number) premium.get(0).get("totalPremium")).longValue();
+        Object rawPremium = premium.isEmpty() ? null : premium.get(0).get("totalPremium");
+        BigDecimal totalPremium = (rawPremium == null)
+                ? BigDecimal.ZERO
+                : new BigDecimal(rawPremium.toString());
         long activePolicyNumber = policyRepository.countByStartDateLessThanEqualAndEndDateGreaterThanEqualAndCustomerId(today, today, customerId);
         long expiringSoonPolicies = policyRepository.countByEndDateBetweenAndCustomerId(today, end, customerId);
         long expiredPolicies = policyRepository.countByEndDateLessThanAndCustomerId(today, customerId);
@@ -98,7 +102,7 @@ public class DashboardServiceImp implements DashboardService {
             log.error("Error occurred while populating Type Labels Map", e);
         }
 
-        Map<String, Double> expectedMonthlyIncomeMap = new LinkedHashMap<>();
+        Map<String, BigDecimal> expectedMonthlyIncomeMap = new LinkedHashMap<>();
         try {
             List<Map<String, Object>> expectedResults = installmentRepository.getExpectedMonthlyIncome(year);
             if (expectedResults != null) {
@@ -108,7 +112,9 @@ public class DashboardServiceImp implements DashboardService {
                     if (yearObj != null && monthObj != null) {
                         String key = yearObj + "-" + String.format("%02d", ((Number) monthObj).intValue());
                         Object totalExpected = row.get("totalExpected");
-                        double amount = totalExpected != null ? ((Number) totalExpected).doubleValue() : 0.0;
+                        BigDecimal amount = (totalExpected != null)
+                                ? new BigDecimal(totalExpected.toString())
+                                : BigDecimal.ZERO;
                         expectedMonthlyIncomeMap.put(key, amount);
                     }
                 }

@@ -5,10 +5,15 @@ import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
+import java.time.LocalDate;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(
+        componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface PolicyMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -21,10 +26,24 @@ public interface PolicyMapper {
     @Mapping(target = "policyId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "note", ignore = true)        
+    @Mapping(target = "note", ignore = true)
     @Mapping(target = "installment", ignore = true)
     void updateEntityFromRequest(UpdatePolicyRequest request, @MappingTarget Policy policy);
 
+    @BeforeMapping
+    default void validateDateRangeOnUpdate(UpdatePolicyRequest request, @MappingTarget Policy policy) {
+        LocalDate effectiveStartDate = (request.getStartDate() != null && request.getStartDate().isPresent() && request.getStartDate().get() != null)
+                ? request.getStartDate().get()
+                : policy.getStartDate();
+
+        LocalDate effectiveEndDate = (request.getEndDate() != null && request.getEndDate().isPresent() && request.getEndDate().get() != null)
+                ? request.getEndDate().get()
+                : policy.getEndDate();
+
+        if (effectiveStartDate != null && effectiveEndDate != null && effectiveEndDate.isBefore(effectiveStartDate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Poliçe bitiş günü başlangıç gününden önce olamaz.");
+        }
+    }
 
     default <T> T mapJsonNullable(JsonNullable<T> jsonNullable) {
         return jsonNullable != null && jsonNullable.isPresent() ? jsonNullable.get() : null;
@@ -34,8 +53,4 @@ public interface PolicyMapper {
     default <T> boolean isPresent(JsonNullable<T> jsonNullable) {
         return jsonNullable != null && jsonNullable.isPresent();
     }
-    default <T> T unwrapOptional(Optional<T> optional) {
-        return optional != null ? optional.orElse(null) : null;
-    }
-
 }

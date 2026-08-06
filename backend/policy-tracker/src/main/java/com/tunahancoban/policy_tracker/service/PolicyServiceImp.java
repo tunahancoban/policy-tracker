@@ -2,6 +2,9 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.mapper.PolicyMapper;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyCreatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyDeletedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
@@ -13,12 +16,12 @@ import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
 import com.tunahancoban.policy_tracker.service.interfaces.PolicyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,7 +36,7 @@ public class PolicyServiceImp implements PolicyService {
     private final CustomerService customerService;
     private final IdGeneratorService idGeneratorService;
     private final InstallmentService installmentService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
     private final PolicyMapper policyMapper;
 
 
@@ -51,7 +54,7 @@ public class PolicyServiceImp implements PolicyService {
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
         Page<Policy> result = policyRepository.findAll(example, pageable);
@@ -64,11 +67,10 @@ public class PolicyServiceImp implements PolicyService {
     public Policy getPolicyById(String policyId) {
         log.debug("Fetching policy by id: {}", policyId);
 
-        if (policyRepository.findByPolicyId(policyId) == null) {
-            log.warn("Policy not found - policyId: {}", policyId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poliçe bulunamadı: " + policyId);
-        }
-        return policyRepository.findByPolicyId(policyId);
+        return policyRepository.getPolicyByPolicyId(policyId).orElseThrow(()->
+        {log.warn("Policy not found - policyId: {}", policyId);
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Poliçe bulunamadı: " + policyId);
+        });
     }
 
     @Transactional
@@ -78,70 +80,59 @@ public class PolicyServiceImp implements PolicyService {
         log.info("Creating policy - customerId: {}, type: {}, premium: {}",
                 request.getCustomerId(), request.getType(), request.getPremium());
 
-        //Checks customerId exist or not
         if (!customerService.existById(request.getCustomerId())) {
             log.warn("Policy creation failed - customer not found: {}", request.getCustomerId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Müşteri ID bulunamadı: " + request.getCustomerId());
         }
 
-        //Checks start date is before end date
-        if (request.getEndDate().isBefore(request.getStartDate())) {
-            log.warn("Policy creation failed - end date ({}) is before start date ({})",
-                    request.getEndDate(), request.getStartDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Poliçe bitiş günü başlangıç gününden önce olamaz.");
-        }
 
         Policy policy = policyMapper.toEntity(request);
 
         policy.setPolicyId(idGeneratorService.generatePolicyId(request.getType()));
-        policy.setCreatedAt(LocalDateTime.now());
-        policy.setUpdatedAt(LocalDateTime.now());
 
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
 
-        messagingTemplate.convertAndSend("/topic/dashboard-summary", "REFRESH_DASHBOARD");
-        log.info("Policy successfully created - policyId: {}, customerId: {}",
-                savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
+        eventPublisher.publishEvent(PolicyUpdatedEvent.from(savedPolicy));
 
+        log.info("Policy successfully created - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
         return savedPolicy;
     }
 
+    @Transactional
     @LogActivity(type = "POLICE", detail = "Poliçe silindi")
     @Override
     public void deletePolicy(String policyID) {
         log.info("Deleting policy - policyId: {}", policyID);
 
-        if (policyRepository.findByPolicyId(policyID)==null) {
+        Policy policy = policyRepository.getPolicyByPolicyId(policyID).orElseThrow(() ->{
             log.warn("Policy deletion failed - policy not found: {}", policyID);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
-        }
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
+        });
         policyRepository.deleteByPolicyId(policyID);
+        eventPublisher.publishEvent(PolicyDeletedEvent.from(policy));
+
         log.info("Policy successfully deleted - policyId: {}", policyID);
     }
 
+    @Transactional
     @LogActivity(type = "POLICE", detail = "Poliçe güncellendi")
     @Override
     public Policy updatePolicy(String policyID, UpdatePolicyRequest request) {
         log.info("Updating policy - policyId: {}", policyID);
 
-        Policy policy;
-        try {
-            policy = policyRepository.findByPolicyId(policyID);
-
-        } catch (Exception e) {
+        Policy policy = policyRepository.getPolicyByPolicyId(policyID).orElseThrow(() ->{
             log.warn("Policy update failed - policy not found: {}", policyID);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
-        }
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
+        });
 
         policyMapper.updateEntityFromRequest(request, policy);
         policy.setUpdatedAt(LocalDateTime.now());
 
         Policy updatedPolicy = policyRepository.save(policy);
 
-        policyRepository.save(updatedPolicy);
         log.info("Policy successfully updated - policyId: {}", policyID);
-
+        eventPublisher.publishEvent(PolicyCreatedEvent.from(updatedPolicy));
         return updatedPolicy;
     }
 

@@ -6,10 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -23,9 +27,12 @@ public class Policy {
     @Id
     private String id;
 
+
+    @Indexed(unique = true)
     private String policyId;
 
     @NotBlank
+    @Indexed
     private String customerId;
 
     private String previousPolicyId;      // For renewal
@@ -44,10 +51,12 @@ public class Policy {
     private LocalDate endDate; //Policy end date
 
     @Positive
-    private Double premium;
+    private BigDecimal premium;
 
     //Metadata
+    @CreatedDate
     private LocalDateTime createdAt = LocalDateTime.now();
+    @LastModifiedDate
     private LocalDateTime updatedAt = LocalDateTime.now();
     public String toString() {
         return "Policy.PolicyBuilder(id=" + this.id + ", policyId=" + this.policyId + ", customerId=" + this.customerId + ", type=" + this.type + ", startDate=" + this.startDate + ", endDate=" + this.endDate + ", premium=" + this.premium + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt + ")";

@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -21,7 +22,7 @@ public class Installment {
     private String policyId;
     private String customerId;
     private Integer installmentNo;
-    private Double amount;
+    private BigDecimal amount;
     private PaymentStatus status;
     private LocalDate paidAt;
     private LocalDate dueDate;

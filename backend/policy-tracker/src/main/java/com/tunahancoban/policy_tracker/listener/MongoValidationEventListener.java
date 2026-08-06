@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.config;
+package com.tunahancoban.policy_tracker.listener;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
