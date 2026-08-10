@@ -2,10 +2,13 @@
     <q-layout view="lHh Lpr lFf">
         <q-page-container>
             <q-page class="login-bg flex flex-center q-pa-md">
-                <q-card class="login-card shadow-24 q-pa-lg">
+                <q-card class="login-form-card q-pa-lg">
                     <q-card-section class="text-center q-pb-none">
-                        <q-img src="../assets/quasar-logo-vertical.svg" class="q-mb-md"
-                            style="width: 120px; height: 120px" />
+                        <!-- Marka İkonu -->
+                        <div
+                            style="width: 64px; height: 64px; border-radius: 14px; background-color: var(--q-primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                            <q-icon name="shield" size="32px" color="white" />
+                        </div>
                         <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">
                             Sigorta Poliçe Takip
                         </div>
@@ -76,6 +79,9 @@ const handleLogin = async () => {
         Notify.create({
             message: `Giriş yaparken bir hata oluştu: ${errorMessage}`,
             color: 'negative',
+            icon: 'error',
+            position: 'top-right',
+            timeout: 5000,
         });
         console.error(error);
     } finally {
@@ -89,14 +95,6 @@ const handleLogin = async () => {
     background-image: url('../assets/login_background.jpg');
     background-size: cover;
     background-position: center;
-}
-
-.login-card {
-    width: 100%;
-    /* 200% yerine 100% yapıldı */
-    max-width: 400px;
-    background-image: linear-gradient(to bottom right, #d8d8d8, #ffffff);
-    outline: 3px solid #c2c2c2;
 }
 
 .tracking-wide {

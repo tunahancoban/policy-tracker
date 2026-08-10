@@ -14,6 +14,7 @@ export const useUserStore = defineStore('user', () => {
       users.value = (await userService.getUsers(params)).content;
     } catch (error) {
       console.error('Kullanıcılar getirilirken hata:', error);
+      throw error;
     } finally {
       isLoading.value = false;
     }

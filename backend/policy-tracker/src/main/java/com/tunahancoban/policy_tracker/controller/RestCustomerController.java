@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path = "rest/api/customer")
 @RequiredArgsConstructor
@@ -60,7 +59,7 @@ public class RestCustomerController {
         });
     }
     @GetMapping(path ="/get-customer/{id}")
-    public  ResponseEntity<Customer> getCustomerById(@PathVariable(name="id") String id){
+    public  ResponseEntity<Customer> getCustomerById(@PathVariable String id){
         Customer customer = customerService.getCustomerByCustomerId(id);
         return ResponseEntity.ok(customer);
     }
@@ -73,13 +72,13 @@ public class RestCustomerController {
     }
 
     @DeleteMapping(path="/delete-customer/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable(name = "id") String id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping(path = "/update-customer/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable(name = "id") String id, @RequestBody UpdateCustomerRequest updateCustomerRequest) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody UpdateCustomerRequest updateCustomerRequest) {
         Customer customer = customerService.updateCustomer(id,updateCustomerRequest);
         return ResponseEntity.ok(customer);
     }

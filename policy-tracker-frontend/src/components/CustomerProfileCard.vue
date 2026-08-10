@@ -1,6 +1,5 @@
 <template>
-    <div class="col-12 col-md-4">
-        <q-card class="my-card full-height" flat bordered>
+    <q-card class="my-card full-height" flat bordered>
             <q-card-section class="bg-primary text-white row items-center q-gap-md q-pa-lg">
                 <q-avatar size="64px" font-size="32px" color="white" text-color="primary" icon="person" />
                 <div class="q-ml-md">
@@ -91,8 +90,7 @@
                     </q-item>
                 </q-list>
             </q-card-section>
-        </q-card>
-    </div>
+    </q-card>
 </template>
 
 <script setup lang="ts">

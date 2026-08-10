@@ -1,28 +1,27 @@
 <template>
-    <div class="q-px-sm q-py-xs scroll" style="max-height: 400px; overflow-y: auto;">
-        <q-list bordered separator class="rounded-borders">
-            <q-item-label header class="text-weight-bold text-subtitle1">
-                Son İşlemler
-            </q-item-label>
+    <div class="q-px-sm q-py-xs">
+        <div class="text-subtitle1 text-weight-bold q-mb-md">Son İşlemler</div>
 
-            <q-item v-for="(activity, index) in activities" :key="index" class="q-py-md">
-                <q-item-section>
-                    <q-item-label class="text-weight-medium">{{ activity.type }}</q-item-label>
-                    <q-item-label caption lines="2" class="text-grey-8">
-                        {{ activity.detail }}
-                    </q-item-label>
-                    <q-item-label caption class="text-caption text-grey-6 q-mt-xs">
-                        <q-icon name="person" size="14px" class="q-mr-xs" />{{ activity.user }}
-                    </q-item-label>
-                </q-item-section>
+        <div v-if="!activities || activities.length === 0" class="empty-state">
+            <div class="empty-state__icon">
+                <q-icon name="history" size="32px" color="grey-5" />
+            </div>
+            <div class="empty-state__title">Henüz işlem kaydı yok</div>
+            <div class="empty-state__description">Sistem üzerinde gerçekleştirilen işlemler burada listelenir.</div>
+        </div>
 
-                <q-item-section side top>
-                    <q-badge outline color="primary" class="q-pa-xs">
-                        {{ formatDate(activity.dateTime) }}
-                    </q-badge>
-                </q-item-section>
-            </q-item>
-        </q-list>
+        <q-timeline v-else color="primary" class="activity-timeline" style="max-height: 400px; overflow-y: auto;">
+            <q-timeline-entry v-for="(activity, index) in activities" :key="index" :subtitle="formatDate(activity.dateTime)"
+                :icon="getActivityIcon(activity.type)">
+                <template v-slot:title>
+                    <span class="text-weight-medium" style="font-size: 0.9rem;">{{ activity.type }}</span>
+                </template>
+                <div class="text-grey-8" style="font-size: 0.85rem;">{{ activity.detail }}</div>
+                <div class="text-caption text-grey-6 q-mt-xs">
+                    <q-icon name="person" size="14px" class="q-mr-xs" />{{ activity.user }}
+                </div>
+            </q-timeline-entry>
+        </q-timeline>
     </div>
 </template>
 
@@ -32,4 +31,11 @@ import { formatDate } from '@/utils/dateHelper';
 
 defineProps<{ activities: Activity[] }>();
 
+const getActivityIcon = (type: string): string => {
+    const lower = type.toLowerCase();
+    if (lower.includes('oluştur') || lower.includes('ekle')) return 'add_circle';
+    if (lower.includes('güncelle') || lower.includes('düzenle')) return 'edit';
+    if (lower.includes('sil')) return 'delete';
+    return 'info';
+};
 </script>

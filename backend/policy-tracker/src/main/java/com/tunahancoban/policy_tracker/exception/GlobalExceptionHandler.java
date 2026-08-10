@@ -1,10 +1,10 @@
 package com.tunahancoban.policy_tracker.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler {
             cleanErrorMessage = "Validation error occurred";
         }
 
-        System.out.println("Validation Error: " + cleanErrorMessage);
+        log.warn("Validation Error: {}", cleanErrorMessage);
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, cleanErrorMessage);
         problemDetail.setTitle("Validasyon Hatası");
@@ -53,7 +54,7 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("Validation error occurred");
 
-        System.out.println("Validation Error: " + cleanErrorMessage);
+        log.warn("Constraint Violation Error: {}", cleanErrorMessage);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, cleanErrorMessage);
     }
 
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException exception) {
-        System.out.println("Illegal Argument: " + exception.getMessage());
+        log.warn("Illegal Argument: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
@@ -72,7 +73,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ProblemDetail handleMissingServletRequestParameter(MissingServletRequestParameterException exception) {
         String message = "Eksik parametre: " + exception.getParameterName();
-        System.out.println(message);
+        log.warn(message);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message);
     }
 
@@ -83,7 +84,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
         String message = String.format("'%s' parametresi için geçersiz değer: %s",
                 exception.getName(), exception.getValue());
-        System.out.println(message);
+        log.warn(message);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message);
     }
 
@@ -92,7 +93,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
-        System.out.println("Malformed JSON request: " + exception.getMessage());
+        log.warn("Malformed JSON request: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Geçersiz istek gövdesi (JSON formatı hatalı)");
     }
 
@@ -101,7 +102,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException exception) {
-        System.out.println("Data Integrity Violation: " + exception.getMessage());
+        log.error("Data Integrity Violation: {}", exception.getMessage(), exception);
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,
                 "Bu işlem veri bütünlüğünü ihlal ediyor (örn. kayıt zaten mevcut veya ilişkili veri var)"
@@ -113,7 +114,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDeniedException(AccessDeniedException exception) {
-        System.out.println("Access Denied: " + exception.getMessage());
+        log.warn("Access Denied: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Bu işlem için yetkiniz yok");
     }
 
@@ -122,7 +123,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(ResponseStatusException.class)
     public ProblemDetail handleResponseStatusException(ResponseStatusException exception) {
-        System.out.println(exception.getReason());
+        log.warn("Response Status Exception [{}]: {}", exception.getStatusCode(), exception.getReason());
         return ProblemDetail.forStatusAndDetail(exception.getStatusCode(), exception.getReason());
     }
 
@@ -131,7 +132,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(RuntimeException.class)
     public ProblemDetail handleRuntimeException(RuntimeException exception) {
-        System.out.println(exception.getMessage());
+        log.error("Unhandled RuntimeException: {}", exception.getMessage(), exception);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
@@ -140,8 +141,7 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception exception) {
-        System.out.println("Unexpected error: " + exception.getMessage());
-        exception.printStackTrace();
+        log.error("Unexpected error occurred: {}", exception.getMessage(), exception);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Beklenmeyen bir hata oluştu");
     }
 }

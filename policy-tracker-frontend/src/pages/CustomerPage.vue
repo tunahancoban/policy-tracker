@@ -1,5 +1,12 @@
 <template>
-    <q-page class="q-pa-md">
+    <q-page class="q-pa-md fade-in-up">
+        <!-- Breadcrumb -->
+        <div class="app-breadcrumb">
+            <router-link to="/dashboard">Dashboard</router-link>
+            <span class="separator">›</span>
+            <span class="current">Müşteriler</span>
+        </div>
+
         <q-card flat bordered class="my-card">
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6 text-weight-bold">Müşteri Yönetimi</div>
@@ -37,12 +44,13 @@
                 <q-table :rows="customers" :columns="customerColumns" :loading="isLoading" row-key="customerId"
                     v-model:pagination="pagination" :rows-number="totalElements"
                     no-data-label="Kayıtlı müşteri bulunamadı." loading-label="Veriler yükleniyor."
-                    @row-click="goToCustomerDetail" @request="onTableRequest" class="customer-table">
+                    @row-click="goToCustomerDetail" @request="onTableRequest" class="clickable-table">
                     <template v-slot:body-cell-active="props">
                         <q-td :props="props" class="text-center">
-                            <span>
+                            <q-chip :color="props.row.active ? 'positive' : 'grey-5'" text-color="white" dense
+                                class="status-chip">
                                 {{ props.row.active ? 'Aktif' : 'Pasif' }}
-                            </span>
+                            </q-chip>
                         </q-td>
                     </template>
                     <template v-slot:body-cell-actions="props">
@@ -204,7 +212,7 @@ const handleDelete = async (customer: Customer) => {
 
     const isConfirmed = await confirm({
         title: 'Müşteri Silme Onayı',
-        message: `${customer.firstName}, ${customer.lastName} isimli kişiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+        message: `${customer.firstName} ${customer.lastName} isimli müşteriyi silmek istediğinize emin misiniz? Bu müşteriye tanımlı poliçeler de etkilenecektir. Bu işlem geri alınamaz.`,
         okLabel: 'Evet, Sil',
         cancelLabel: 'Vazgeç',
         color: 'negative',
@@ -214,11 +222,11 @@ const handleDelete = async (customer: Customer) => {
 
     try {
         await deleteCustomer(customer.customerId);
-        $q.notify({ message: 'Müşteri başarıyla silindi.', color: 'positive' });
+        $q.notify({ message: 'Müşteri başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         await onTableRequest({ pagination: pagination.value });
     } catch (err) {
         console.error('Silme esnasında hata oluştu:', err);
-        $q.notify({ message: 'Müşteri silinirken bir hata oluştu.', color: 'negative' });
+        $q.notify({ message: 'Müşteri silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
     }
 };
 
@@ -226,9 +234,3 @@ onMounted(() => {
     void onTableRequest({ pagination: pagination.value });
 });
 </script>
-
-<style scoped>
-.customer-table :deep(.q-table tbody tr) {
-    cursor: pointer;
-}
-</style>

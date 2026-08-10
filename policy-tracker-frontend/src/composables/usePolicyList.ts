@@ -14,6 +14,11 @@ export function usePolicyList() {
     await loadPolicies();
   };
 
+  const renewPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
+    await policyStore.renewPolicy(newPolicy);
+    await loadPolicies();
+  };
+
   const updatePolicy = async (policyId: string, patchData: Partial<Policy>) => {
     await policyStore.updatePolicy(policyId, patchData);
     await loadPolicies();
@@ -34,5 +39,6 @@ export function usePolicyList() {
     updatePolicy,
     createPolicy,
     deletePolicy,
+    renewPolicy,
   };
 }

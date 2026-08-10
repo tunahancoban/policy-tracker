@@ -31,6 +31,7 @@ export const useCustomerStore = defineStore('customer', () => {
       customerData.value = [];
       totalElements.value = 0;
       totalPages.value = 0;
+      throw error;
     } finally {
       isLoading.value = false;
     }
@@ -44,6 +45,7 @@ export const useCustomerStore = defineStore('customer', () => {
     } catch (error) {
       console.error('Müşteri bilgisi çekilemedi', error);
       selectedCustomer.value = null;
+      throw error;
     } finally {
       isLoading.value = false;
     }

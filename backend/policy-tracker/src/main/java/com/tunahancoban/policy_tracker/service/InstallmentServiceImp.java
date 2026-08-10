@@ -11,7 +11,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -88,6 +90,30 @@ public class InstallmentServiceImp implements InstallmentService {
                     .build();
             installments.add(installment);
         }
+        log.info("Installments successfully saved - policyId: {}", policy.getPolicyId());
         installmentRepository.saveAll(installments);
+    }
+
+    @Override
+    public Installment updateInstallment(String installmentId, PaymentStatus status) {
+        Installment installment = installmentRepository.findById(installmentId).orElseThrow(() -> { log.warn("Installment update failed - installment not found: {}", installmentId);
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "Installment not found: " + installmentId);});
+        installment.setStatus(status);
+        log.info("Installments successfully updated - installmentId: {}", installmentId);
+        return installment;
+    }
+
+    @Override
+    public void deleteInstallment(String policyId) {
+        List<Installment> installments = installmentRepository.findAllByPolicyId(policyId);
+        if(installments.isEmpty()){
+            log.warn("Installment deletion failed - installments not found" );
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy never exists: " + policyId);
+        }
+
+        for (Installment installment: installments){
+            installmentRepository.deleteById(installment.getId());
+        }
+        log.info("Installments successfully deleted - policyId: {}", policyId);
     }
 }

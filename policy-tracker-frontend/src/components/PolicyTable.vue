@@ -15,11 +15,16 @@
             <q-table flat :rows="policies" :columns="policyColumns" row-key="policyId" :loading="loading"
                 v-model:pagination="internalPagination" @request="onRequest" @row-click="onRowClick">
                 <template v-slot:no-data>
-                    <div class="full-width row flex-center text-grey-6 q-pa-xl">
-                        <q-icon name="folder_open" size="64px" color="grey-4" />
-                        <div class="text-subtitle1 q-mt-md full-width text-center">
+                    <div class="empty-state">
+                        <div class="empty-state__icon">
+                            <q-icon name="folder_open" size="32px" color="grey-5" />
+                        </div>
+                        <div class="empty-state__title">Kayıt bulunamadı</div>
+                        <div class="empty-state__description">
                             {{ emptyStateText }}
                         </div>
+                        <q-btn v-if="showAddButton" outline color="primary" :label="addButtonLabel" icon="add"
+                            no-caps @click="emit('add')" />
                     </div>
                 </template>
 

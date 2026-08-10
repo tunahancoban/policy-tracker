@@ -1,6 +1,13 @@
 <!-- src/pages/UserManagementPage.vue -->
 <template>
-    <q-page class="q-pa-md">
+    <q-page class="q-pa-md fade-in-up">
+        <!-- Breadcrumb -->
+        <div class="app-breadcrumb">
+            <router-link to="/dashboard">Dashboard</router-link>
+            <span class="separator">›</span>
+            <span class="current">Kullanıcı Yönetimi</span>
+        </div>
+
         <!-- Başlık Bölümü -->
         <div class="row items-center justify-between q-mb-md">
             <div class="text-h5 text-weight-bold text-grey-8 row items-center">
@@ -34,7 +41,7 @@
         </q-card>
 
         <q-dialog v-model="showDialog">
-            <q-card style="min-width: 400px;">
+            <q-card class="modal-card">
                 <q-card-section class="row items-center q-pb-none">
                     <div class="text-h6 text-weight-bold text-grey-8">
                         {{ isEditMode ? 'Kullanıcı Bilgilerini Güncelle' : 'Yeni Kullanıcı Oluştur' }}
@@ -157,7 +164,7 @@ const handleCreateUser = async () => {
         role: form.value.role,
     };
     await addUser(payload);
-    $q.notify({ message: 'Yeni kullanıcı başarıyla oluşturuldu.', color: 'positive' });
+    $q.notify({ message: 'Yeni kullanıcı başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
 };
 
 const handleUpdateUser = async () => {
@@ -190,7 +197,7 @@ const handleUpdateUser = async () => {
     }
 
     await updateUser(patchData, form.value.id);
-    $q.notify({ message: 'Kullanıcı bilgileri başarıyla güncellendi.', color: 'positive' });
+    $q.notify({ message: 'Kullanıcı bilgileri başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
 };
 
 const saveUser = async () => {
@@ -203,7 +210,7 @@ const saveUser = async () => {
         showDialog.value = false;
     } catch (error) {
         console.error('Kullanıcı işlemi başarısız:', error);
-        $q.notify({ message: 'İşlem sırasında bir hata oluştu.', color: 'negative' });
+        $q.notify({ message: 'İşlem sırasında bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
     }
 };
 
@@ -221,10 +228,10 @@ const confirmDelete = (user: User) => {
 const handleDelete = async (user: User) => {
     try {
         await deleteUser(user.id);
-        $q.notify({ message: 'Kullanıcı başarıyla silindi.', color: 'positive' });
+        $q.notify({ message: 'Kullanıcı başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
     } catch (error) {
         console.error('Kullanıcı silinirken hata:', error);
-        $q.notify({ message: 'Kullanıcı silinirken bir hata oluştu.', color: 'negative' });
+        $q.notify({ message: 'Kullanıcı silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
     }
 };
 

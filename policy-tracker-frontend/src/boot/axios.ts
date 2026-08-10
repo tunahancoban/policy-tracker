@@ -1,7 +1,9 @@
 import axios from 'axios';
+console.log('BASE_URL:', import.meta.env.QCLI_BASE_URL);
+console.log('FULL ENV:', import.meta.env);
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.QCLI_BASE_URL || '',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

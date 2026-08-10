@@ -1,6 +1,6 @@
 <template>
     <q-dialog v-model="isOpen" persistent @show="onModalShow">
-        <q-card style="min-width: 450px; max-width: 600px;">
+        <q-card class="modal-card">
 
             <!-- Modal Başlığı -->
             <q-card-section class="row items-center q-pb-none">

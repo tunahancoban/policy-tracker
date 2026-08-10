@@ -1,13 +1,14 @@
 <template>
     <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
-        <q-card style="min-width: 450px;">
+        <q-card class="modal-card">
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6">{{ isEditMode ? 'Müşteri Güncelle' : 'Yeni Müşteri Ekle' }}</div>
                 <q-space />
                 <q-btn icon="close" flat round dense v-close-popup />
             </q-card-section>
 
-            <q-card-section class="q-gutter-sm">
+            <q-form @submit.prevent="saveCustomer">
+                <q-card-section class="q-gutter-sm">
                 <q-input v-model="form.firstName" label="Ad *" outlined dense
                     :rules="[val => !!val || 'Ad zorunludur']" />
                 <q-input v-model="form.lastName" label="Soyad *" outlined dense
@@ -24,13 +25,14 @@
                 <q-input v-model="form.city" label="Şehir" outlined dense />
                 <q-input v-model="form.district" label="İlçe" outlined dense />
                 <q-input v-model="form.fullAddress" label="Adres" outlined dense type="textarea" rows="2" />
-            </q-card-section>
+                </q-card-section>
 
-            <q-card-actions align="right" class="text-primary q-pt-none">
-                <q-btn flat label="Vazgeç" v-close-popup color="grey" />
-                <q-btn flat :label="isEditMode ? 'Güncelle' : 'Kaydet'" color="primary" @click="saveCustomer"
-                    :loading="customerStore.isLoading" />
-            </q-card-actions>
+                <q-card-actions align="right" class="text-primary q-pt-none">
+                    <q-btn flat label="Vazgeç" v-close-popup color="grey" />
+                    <q-btn flat :label="isEditMode ? 'Güncelle' : 'Kaydet'" color="primary" type="submit"
+                        :loading="customerStore.isLoading" />
+                </q-card-actions>
+            </q-form>
         </q-card>
     </q-dialog>
 </template>
@@ -77,18 +79,13 @@ watch(() => props.modelValue, (newVal) => {
 });
 
 const saveCustomer = async () => {
-    if (!form.value.firstName || !form.value.lastName || !form.value.identityNumber) {
-        $q.notify({ message: 'Lütfen zorunlu alanları doldurun.', color: 'warning' });
-        return;
-    }
-
     try {
         if (isEditMode.value) {
             await customerStore.updateCustomer(form.value);
-            $q.notify({ message: 'Müşteri başarıyla güncellendi.', color: 'positive' });
+            $q.notify({ message: 'Müşteri başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         } else {
             await customerStore.addCustomer(form.value);
-            $q.notify({ message: 'Müşteri başarıyla eklendi.', color: 'positive' });
+            $q.notify({ message: 'Müşteri başarıyla eklendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         }
 
         emit('update:modelValue', false);
@@ -96,7 +93,7 @@ const saveCustomer = async () => {
 
     } catch (error) {
         console.error('Müşteri güncelleme/kayıt hatası:', error);
-        $q.notify({ message: 'İşlem sırasında bir hata oluştu', color: 'negative' });
+        $q.notify({ message: 'İşlem sırasında bir hata oluştu', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
     }
 };
 </script>

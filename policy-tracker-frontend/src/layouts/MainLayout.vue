@@ -4,10 +4,18 @@
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
         <q-toolbar-title> Policy Tracker Panel </q-toolbar-title>
+
+        <!-- WS Bağlantı Göstergesi -->
+        <div :class="['ws-indicator', isConnected ? 'ws-indicator--online' : 'ws-indicator--offline']"
+          class="q-mr-md">
+          <span class="ws-indicator__dot" />
+          {{ isConnected ? 'Bağlı' : 'Bağlantı Yok' }}
+        </div>
+
         <q-btn flat dense round icon="logout" aria-label="Logout" @click="isLogoutDialogOpen = true" />
 
         <q-dialog v-model="isLogoutDialogOpen">
-          <q-card style="min-width: 350px">
+          <q-card class="modal-card" style="min-width: 350px">
             <q-card-section class="row items-center">
               <q-avatar icon="logout" color="primary" text-color="white" />
               <span class="q-ml-sm text-weight-bold text-subtitle1">Oturumu Kapat</span>
@@ -33,9 +41,12 @@
           Yönetim Paneli
         </q-item-label>
 
-        <template v-for="link in linksList" :key="link.label">
+        <q-separator class="sidebar-separator" />
+
+        <template v-for="(link, idx) in linksList" :key="link.label">
+          <q-separator v-if="idx === 3" class="sidebar-separator" />
           <q-item v-if="!link.requiresAdmin || isAdmin" clickable v-ripple :to="link.link"
-            active-class="bg-blue-1 text-primary text-weight-bold">
+            :active-class="'sidebar-item--active'">
             <q-item-section avatar>
               <q-icon :name="link.icon" />
             </q-item-section>
@@ -49,7 +60,11 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
@@ -59,11 +74,12 @@ import { ref } from 'vue';
 import { computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
-
+import { useWebSocket } from '@/composables/useWebSocket';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const isLogoutDialogOpen = ref(false);
+const { isConnected } = useWebSocket();
 
 interface MenuLink {
   label: string;

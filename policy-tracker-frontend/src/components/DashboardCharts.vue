@@ -16,14 +16,14 @@
                     </q-select>
                 </q-card-section>
                 <q-card-section class="q-pa-none">
-                    <div class="chart-container">
+                    <div class="chart-container-responsive">
                         <canvas ref="myBarChartCanvas"></canvas>
                     </div>
                 </q-card-section>
             </q-card>
 
             <q-card flat bordered class="q-pa-sm">
-                <div class="chart-container">
+                <div class="chart-container-responsive">
                     <canvas ref="renewalBarChartCanvas"></canvas>
                 </div>
             </q-card>
@@ -31,12 +31,12 @@
 
         <div class="chart-grid-row">
             <q-card flat bordered class="q-pa-sm">
-                <div class="chart-container">
+                <div class="chart-container-responsive">
                     <canvas ref="myPieChartCanvas"></canvas>
                 </div>
             </q-card>
             <q-card flat bordered class="q-pa-sm">
-                <div class="chart-container">
+                <div class="chart-container-responsive">
                     <canvas ref="myStatusChartCanvas"></canvas>
                 </div>
             </q-card>
@@ -186,18 +186,5 @@ onBeforeUnmount(() => {
     .chart-grid-row {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
-}
-
-.chart-container {
-    position: relative;
-    width: 100%;
-    height: 320px;
-    overflow: hidden;
-}
-
-.chart-container canvas {
-    display: block;
-    width: 100% !important;
-    height: 100% !important;
 }
 </style>

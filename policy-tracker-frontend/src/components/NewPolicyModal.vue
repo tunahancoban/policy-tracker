@@ -1,11 +1,11 @@
 <template>
     <q-dialog v-model="isOpen" @show="onModalShow">
-        <q-card style="min-width: 450px; max-width: 600px;">
+        <q-card class="modal-card">
 
-            <!-- Modal Başlığı -->
+            <!-- Modal Başlığı (Dinamik) -->
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6 text-weight-bold text-grey-8">
-                    Yeni Poliçe Ekle
+                    {{ isRenewal ? 'Poliçeyi Yenile' : 'Yeni Poliçe Ekle' }}
                 </div>
                 <q-space />
                 <q-btn icon="close" flat round dense v-close-popup />
@@ -17,11 +17,11 @@
             <q-form @submit="onSubmit">
                 <q-card-section class="q-gutter-md">
 
-                    <!-- Müşteri Seçimi -->
+                    <!-- Müşteri Seçimi (Yenileme modunda kilitli) -->
                     <q-select v-model="form.customerId" :options="filteredCustomerOptions" option-value="customerId"
                         option-label="fullName" emit-value map-options use-input fill-input hide-selected
                         input-debounce="300" @filter="filterFn" label="Müşteri Ara (İsim, TC veya ID yazın.) *" outlined
-                        dense :rules="[val => !!val || 'Müşteri seçimi zorunludur']">
+                        dense :disable="isRenewal" :rules="[val => !!val || 'Müşteri seçimi zorunludur']">
                         <template v-slot:no-option>
                             <q-item>
                                 <q-item-section class="text-grey">
@@ -31,12 +31,12 @@
                         </template>
                     </q-select>
 
-                    <!-- Poliçe Türü -->
+                    <!-- Poliçe Türü (Yenileme modunda kilitli) -->
                     <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
-                        emit-value map-options label="Poliçe Türü *" outlined dense
+                        emit-value map-options label="Poliçe Türü *" outlined dense :disable="isRenewal"
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
-
+                    <!-- Taksit Sayısı -->
                     <q-input v-model.number="form.installment" type="number" label="Taksit Sayısı(1-3-6) *" outlined
                         dense :rules="[
                             val => val !== null && val !== undefined || 'Taksit Sayısı Zorunludur',
@@ -89,10 +89,11 @@
 
                 <q-separator />
 
-                <!-- Aksiyon Butonları -->
+                <!-- Aksiyon Butonları (Dinamik) -->
                 <q-card-actions align="right" class="q-pa-md">
                     <q-btn flat label="İptal" color="grey-7" v-close-popup :disable="loading" />
-                    <q-btn type="submit" label="Kaydet" color="primary" :loading="loading" />
+                    <q-btn type="submit" :label="isRenewal ? 'Poliçeyi Yenile' : 'Kaydet'"
+                        :color="isRenewal ? 'secondary' : 'primary'" :loading="loading" />
                 </q-card-actions>
             </q-form>
         </q-card>
@@ -102,11 +103,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useCustomerStore } from '../stores/customer';
-import { policyTypeOptions, type PolicyForm } from '../types/policy.types';
-import { QPopupProxy } from 'quasar'; // Bileşeni doğrudan import ediyoruz
+import { policyTypeOptions, type PolicyForm, type Policy } from '../types/policy.types';
+import { QPopupProxy } from 'quasar';
 
 interface Props {
     modelValue: boolean;
+    isRenewal?: boolean;
+    policyData?: Policy | null;
 }
 
 interface CustomerOption {
@@ -115,7 +118,11 @@ interface CustomerOption {
     identityNumber: string;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    isRenewal: false,
+    policyData: null,
+});
+
 const emit = defineEmits(['update:modelValue', 'created']);
 
 const customerStore = useCustomerStore();
@@ -158,6 +165,26 @@ const isOpen = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
 });
+
+const formatDateToSlash = (dateStr?: string): string => {
+    if (!dateStr) return '';
+    return dateStr.replace(/-/g, '/');
+};
+
+const getTodayFormatted = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
+};
+
+const getNextYearFormatted = (startDateFormatted: string): string => {
+    const parts = startDateFormatted.split('/');
+    if (parts.length !== 3) return '';
+    const year = parseInt(parts[0] as string, 10) + 1;
+    return `${year}/${parts[1]}/${parts[2]}`;
+};
 
 const initialFormState = (): PolicyForm => ({
     customerId: '',
@@ -204,11 +231,34 @@ const filterFn = (val: string, update: (callback: () => void) => void) => {
 
 const onModalShow = async () => {
     if (!customerStore.customerData || customerStore.customerData.length === 0) {
-        await customerStore.fetchCustomerData(); // parametre yok, tüm müşteri listesi çekiliyor
+        await customerStore.fetchCustomerData();
     }
 
     filteredCustomerOptions.value = [];
-    form.value = initialFormState();
+
+    if (props.isRenewal && props.policyData) {
+        const start = props.policyData.endDate
+            ? formatDateToSlash(props.policyData.endDate)
+            : getTodayFormatted();
+        const end = getNextYearFormatted(start);
+
+        form.value = {
+            customerId: props.policyData.customerId || '',
+            type: props.policyData.type || '',
+            premium: props.policyData.premium ?? 0,
+            installment: props.policyData.installment ?? 1,
+            startDate: start,
+            endDate: end,
+            note: props.policyData.note ? `${props.policyData.note} (Yenileme)` : 'Poliçe Yenileme',
+        };
+
+        const matchedCustomer = customerOptions.value.find(c => c.customerId === props.policyData?.customerId);
+        if (matchedCustomer) {
+            filteredCustomerOptions.value = [matchedCustomer];
+        }
+    } else {
+        form.value = initialFormState();
+    }
 };
 
 const onSubmit = () => {

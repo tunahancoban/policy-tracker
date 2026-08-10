@@ -7,7 +7,7 @@ export function useWebSocket() {
 
   const connect = (onDashboardUpdate?: (data: string) => void) => {
     stompClient = new Client({
-      webSocketFactory: () => new WebSocket('ws://localhost:8080/ws'),
+      webSocketFactory: () => new WebSocket(import.meta.env.QCLI_WS_URL || ''),
       debug: (str: string) => console.log('[WS Debug]:', str),
       reconnectDelay: 5000,
     });

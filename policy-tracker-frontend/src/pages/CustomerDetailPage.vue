@@ -1,11 +1,34 @@
 <template>
-    <q-page class="q-pa-md">
-        <!-- Sadece ilk açılışta tüm sayfa yükleniyor gösterilir -->
-        <div v-if="isInitialLoading" class="row justify-center items-center q-pa-xl">
-            <q-spinner-dots color="primary" size="60px" />
+    <q-page class="q-pa-md fade-in-up">
+        <!-- Skeleton Loading -->
+        <div v-if="isInitialLoading" class="q-pa-xl">
+            <div class="row q-col-gutter-md">
+                <div class="col-12 col-md-4">
+                    <q-card class="q-pa-md">
+                        <div class="skeleton-box skeleton-card" style="height: 200px;" />
+                    </q-card>
+                </div>
+                <div class="col-12 col-md-8">
+                    <q-card class="q-pa-md">
+                        <div class="skeleton-box skeleton-title" />
+                        <div class="skeleton-box skeleton-text" />
+                        <div class="skeleton-box skeleton-text" style="width: 70%;" />
+                        <div class="skeleton-box skeleton-card q-mt-md" style="height: 120px;" />
+                    </q-card>
+                </div>
+            </div>
         </div>
 
         <template v-else-if="customer">
+            <!-- Breadcrumb -->
+            <div class="app-breadcrumb">
+                <router-link to="/dashboard">Dashboard</router-link>
+                <span class="separator">›</span>
+                <router-link to="/customers">Müşteriler</router-link>
+                <span class="separator">›</span>
+                <span class="current">{{ customer.firstName }} {{ customer.lastName }}</span>
+            </div>
+
             <div class="row items-center justify-between q-mb-md">
                 <q-btn flat color="primary" icon="arrow_back" label="Müşteri Listesine Dön" to="/customers" />
                 <q-btn color="secondary" icon="edit" label="Müşteriyi Düzenle" @click="showModal = true" />
@@ -31,9 +54,13 @@
                 @updated="handlePolicyUpdate" />
         </template>
 
-        <div v-else class="text-center q-pa-xl text-grey-6">
-            <q-icon name="person_off" size="64px" color="grey-4" />
-            <div class="text-subtitle1 q-mt-md">Müşteri bulunamadı.</div>
+        <div v-else class="empty-state">
+            <div class="empty-state__icon">
+                <q-icon name="person_off" size="32px" color="grey-5" />
+            </div>
+            <div class="empty-state__title">Müşteri bulunamadı</div>
+            <div class="empty-state__description">Aradığınız müşteri kaydına erişilemiyor.</div>
+            <q-btn outline color="primary" label="Müşteri Listesine Dön" to="/customers" icon="arrow_back" no-caps />
         </div>
     </q-page>
 </template>
@@ -123,20 +150,20 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
     try {
         const payload = formatPolicyPayload(event.data);
         await updatePolicy(event.id, payload);
-        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive' });
+        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
     } catch (err) {
-        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative' });
+        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Update Error:', err);
     }
 };
 const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
     try {
         await createPolicy(newPolicy);
-        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive' });
+        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
         await loadAllData();
     } catch (err) {
-        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative' });
+        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Create Error:', err);
     }
 };

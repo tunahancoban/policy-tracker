@@ -1,10 +1,35 @@
 <template>
-    <q-page class="q-pa-md">
-        <div v-if="isLoading" class="row justify-center items-center q-pa-xl">
-            <q-spinner-dots color="primary" size="60px" />
+    <q-page class="q-pa-md fade-in-up">
+
+        <!-- Skeleton Loading -->
+        <div v-if="isLoading" class="q-pa-xl">
+            <div class="row q-col-gutter-md">
+                <div class="col-12 col-md-4">
+                    <q-card class="q-pa-md">
+                        <div class="skeleton-box skeleton-card" style="height: 200px;" />
+                    </q-card>
+                </div>
+                <div class="col-12 col-md-8">
+                    <q-card class="q-pa-md">
+                        <div class="skeleton-box skeleton-title" />
+                        <div class="skeleton-box skeleton-text" />
+                        <div class="skeleton-box skeleton-text" style="width: 70%;" />
+                        <div class="skeleton-box skeleton-card q-mt-md" style="height: 120px;" />
+                    </q-card>
+                </div>
+            </div>
         </div>
 
         <template v-else-if="policy">
+            <!-- Breadcrumb -->
+            <div class="app-breadcrumb">
+                <router-link to="/dashboard">Dashboard</router-link>
+                <span class="separator">›</span>
+                <router-link to="/policy">Poliçeler</router-link>
+                <span class="separator">›</span>
+                <span class="current">{{ policy.policyId }}</span>
+            </div>
+
             <div class="row items-center justify-between q-mb-md">
                 <q-btn flat color="primary" icon="arrow_back" label="Poliçe Listesine Dön" to="/policy" />
             </div>
@@ -38,23 +63,25 @@
                                     <q-item-section avatar><q-icon name="event" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Başlangıç Tarihi</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ policy.startDate }}</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate) }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
                                 <q-item class="q-py-sm">
-                                    <q-item-section avatar><q-icon name="event_busy" color="primary" /></q-item-section>
+                                    <q-item-section avatar><q-icon name="event_busy"
+                                            color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Bitiş Tarihi</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ policy.endDate }}</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate) }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
                                 <q-item class="q-py-sm">
-                                    <q-item-section avatar><q-icon name="payments" color="primary" /></q-item-section>
+                                    <q-item-section avatar><q-icon name="payments"
+                                            color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Prim Tutarı</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ policy.premium }} TL</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium) }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -83,20 +110,33 @@
                         <q-separator />
 
                         <q-card-section>
-                            <div v-if="installments.length === 0 && !isInstallmentsLoading"
-                                class="text-center q-pa-xl text-grey-6">
-                                <q-icon name="folder_open" size="64px" color="grey-4" />
-                                <div class="text-subtitle1 q-mt-md">Bu poliçeye ait taksit kaydı bulunamadı.</div>
+                            <div v-if="installments.length === 0 && !isInstallmentsLoading" class="empty-state">
+                                <div class="empty-state__icon">
+                                    <q-icon name="folder_open" size="32px" color="grey-5" />
+                                </div>
+                                <div class="empty-state__title">Taksit kaydı bulunamadı</div>
+                                <div class="empty-state__description">Bu poliçeye ait henüz bir taksit tanımı yapılmamış.
+                                </div>
                             </div>
 
                             <q-table v-else flat bordered :rows="installments" :columns="installmentColumns"
                                 row-key="installmentNo" :loading="isInstallmentsLoading" v-model:pagination="pagination"
                                 :rows-number="installmentsTotal" no-data-label="Taksit bulunamadı."
                                 @request="onInstallmentsRequest">
+                                <template v-slot:body-cell-amount="props">
+                                    <q-td :props="props" class="text-right">
+                                        {{ formatCurrency(props.row.amount) }}
+                                    </q-td>
+                                </template>
+                                <template v-slot:body-cell-dueDate="props">
+                                    <q-td :props="props" class="text-center">
+                                        {{ formatDateOnly(props.row.dueDate) }}
+                                    </q-td>
+                                </template>
                                 <template v-slot:body-cell-status="props">
                                     <q-td :props="props" class="text-center">
                                         <q-chip :color="props.row.status === 'PAID' ? 'positive' : 'warning'"
-                                            text-color="white" dense class="text-weight-bold">
+                                            text-color="white" dense class="status-chip">
                                             {{ props.row.status === 'PAID' ? 'Ödendi' : 'Ödenmedi' }}
                                         </q-chip>
                                     </q-td>
@@ -108,9 +148,13 @@
             </div>
         </template>
 
-        <div v-else class="text-center q-pa-xl text-grey-6">
-            <q-icon name="description" size="64px" color="grey-4" />
-            <div class="text-subtitle1 q-mt-md">Poliçe bulunamadı.</div>
+        <div v-else class="empty-state">
+            <div class="empty-state__icon">
+                <q-icon name="description" size="32px" color="grey-5" />
+            </div>
+            <div class="empty-state__title">Poliçe bulunamadı</div>
+            <div class="empty-state__description">Aradığınız poliçe kaydına erişilemiyor.</div>
+            <q-btn outline color="primary" label="Poliçe Listesine Dön" to="/policy" icon="arrow_back" no-caps />
         </div>
     </q-page>
 </template>
@@ -134,10 +178,21 @@ const {
 
 } = usePolicyDetail(policyId);
 
+const formatDateOnly = (dateStr: string | null | undefined): string => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+};
+
+const formatCurrency = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return '—';
+    return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+};
+
 // Taksit tipine göre kolonlar — Installment.types.ts'e göre kesinleştirilmeli
 const installmentColumns = [
     { name: 'installmentNo', label: 'Taksit No', field: 'installmentNo', align: 'center' as const },
-    { name: 'amount', label: 'Tutar', field: 'amount', align: 'right' as const, format: (val: number) => `${val} TL` },
+    { name: 'amount', label: 'Tutar', field: 'amount', align: 'right' as const },
     { name: 'dueDate', label: 'Vade Tarihi', field: 'dueDate', align: 'center' as const },
     { name: 'status', label: 'Durum', field: 'status', align: 'center' as const },
 ];

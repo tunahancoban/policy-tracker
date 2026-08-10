@@ -1,5 +1,11 @@
 <template>
     <q-page class="q-pa-md fade-in-up">
+
+        <!-- Breadcrumb -->
+        <div class="app-breadcrumb">
+            <span class="current">Dashboard</span>
+        </div>
+
         <q-card class="my-card">
             <q-card-section>
                 <div class="text-h6">Dashboard</div>
@@ -8,7 +14,7 @@
             <q-separator />
 
             <q-card-section>
-                <DashboardSummaryCard :summary="summary" />
+                <DashboardSummaryCard :summary="summary" :loading="isInitialLoading" />
             </q-card-section>
 
             <q-card-section>
@@ -60,7 +66,7 @@ const {
 
 const { connect } = useWebSocket();
 
-
+const isInitialLoading = ref<boolean>(true);
 const renewalSortBy = ref<string | null>('endDate');
 const renewalDescending = ref<boolean>(false);
 const year = ref<number>(new Date().getFullYear());
@@ -147,7 +153,11 @@ const renewalChartData = computed<ChartData<'bar'>>(() => {
 });
 
 onMounted(async () => {
-    await refreshAllData();
+    try {
+        await refreshAllData();
+    } finally {
+        isInitialLoading.value = false;
+    }
     connect((_signal) => {
         console.log(_signal);
         void refreshAllData();

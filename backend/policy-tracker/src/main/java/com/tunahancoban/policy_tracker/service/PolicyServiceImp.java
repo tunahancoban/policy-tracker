@@ -74,7 +74,7 @@ public class PolicyServiceImp implements PolicyService {
     }
 
     @Transactional
-    @LogActivity(type = "POLICE", detail = "Poliçe oluşturuldu")
+    @LogActivity(type = "POLICE", detail = "'Poliçe oluşturuldu ID: ' + #result.policyId")
     @Override
     public Policy createPolicy(CreatePolicyRequest request) {
         log.info("Creating policy - customerId: {}, type: {}, premium: {}",
@@ -100,7 +100,7 @@ public class PolicyServiceImp implements PolicyService {
     }
 
     @Transactional
-    @LogActivity(type = "POLICE", detail = "Poliçe silindi")
+    @LogActivity(type = "POLICE", detail = "'Poliçe silindi. ID: ' + #id")
     @Override
     public void deletePolicy(String policyID) {
         log.info("Deleting policy - policyId: {}", policyID);
@@ -116,7 +116,7 @@ public class PolicyServiceImp implements PolicyService {
     }
 
     @Transactional
-    @LogActivity(type = "POLICE", detail = "Poliçe güncellendi")
+    @LogActivity(type = "POLICE", detail = "'Poliçe güncellendi. ID: ' + #result.policyId")
     @Override
     public Policy updatePolicy(String policyID, UpdatePolicyRequest request) {
         log.info("Updating policy - policyId: {}", policyID);

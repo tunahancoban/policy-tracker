@@ -69,7 +69,7 @@ public class CustomerServiceImp implements CustomerService {
         return customer;
     }
 
-    @LogActivity( type = "MUSTERI", detail = "Yeni müşteri eklendi.")
+    @LogActivity( type = "MUSTERI", detail = "'Yeni müşteri eklendi. ID: ' + #result.customerId" )
     @Override
     public Customer createCustomer(CreateCustomerRequest request) {
         log.info("Create customer request received - identityNumber: {}, email: {}",
@@ -94,7 +94,7 @@ public class CustomerServiceImp implements CustomerService {
         return customer;
     }
 
-    @LogActivity(type = "MUSTERI", detail = " Müşteri güncellendi.")
+    @LogActivity(type = "MUSTERI", detail = "'Müşteri güncellendi. ID: ' + #result.customerId")
     @Override
     public Customer updateCustomer(String id, UpdateCustomerRequest updates) {
         log.info("Update customer request received - customerId: {}", id);
@@ -116,7 +116,7 @@ public class CustomerServiceImp implements CustomerService {
         return savedCustomer;
     }
 
-    @LogActivity(type = "MUSTERI", detail = " Müşteri silindi.")
+    @LogActivity(type = "MUSTERI", detail = "'Müşteri silindi. ID: ' + #id")
     @Override
     public void deleteCustomer(String id) {
         log.info("Delete customer request received - customerId: {}", id);

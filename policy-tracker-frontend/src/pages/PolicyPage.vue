@@ -1,5 +1,12 @@
 <template>
     <q-page class="q-pa-md fade-in-up">
+        <!-- Breadcrumb -->
+        <div class="app-breadcrumb">
+            <router-link to="/dashboard">Dashboard</router-link>
+            <span class="separator">›</span>
+            <span class="current">Poliçeler</span>
+        </div>
+
         <div class="row items-center justify-between q-mb-md">
             <div class="text-h5 text-weight-bold text-grey-8 row items-center">
                 <q-icon name="description" color="primary" class="q-mr-sm" size="32px" />
@@ -27,7 +34,7 @@
                     </div>
 
                     <div class="col-12 col-md-3 row q-gutter-x-sm justify-end">
-                        <q-btn label="Temizle" color="primary" @click="resetFilters" />
+                        <q-btn label="Temizle" color="primary" outline @click="resetFilters" />
                     </div>
                 </div>
             </q-card-section>
@@ -35,17 +42,27 @@
 
         <!-- POLICY TABLE -->
         <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
-            title="Genel Poliçe Yönetimi" :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest">
+            title="Genel Poliçe Yönetimi" :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest"
+            class="clickable-table">
             <template v-slot:row-actions="{ policy }">
                 <q-btn flat round color="primary" icon="account_circle" size="sm" :to="`/customer/${policy.customerId}`"
                     @click.stop />
                 <q-btn flat round color="secondary" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
+                <q-btn flat round color="secondary" icon="autorenew" size="sm" @click.stop="openRenewDialog(policy)">
+                    <q-tooltip>Poliçeyi Yenile</q-tooltip>
+                </q-btn>
                 <q-btn flat round color="red" icon="delete" size="sm" @click.stop="handlePolicyDelete(policy)" />
             </template>
         </PolicyTable>
 
+        <!-- Yeni Poliçe Oluşturma Modalı -->
         <NewPolicyModal v-model="isCreateModalOpen" @created="handlePolicyCreate" />
 
+        <!-- Poliçe Yenileme Modalı -->
+        <NewPolicyModal v-if="selectedPolicy" v-model="isRenewModalOpen" :isRenewal="true" :policyData="selectedPolicy"
+            @created="handlePolicyRenew" />
+
+        <!-- Poliçe Düzenleme Modalı -->
         <EditPolicyModal v-if="selectedPolicy" v-model="isEditModalOpen" :policyData="selectedPolicy"
             @updated="handlePolicyUpdate" />
     </q-page>
@@ -73,7 +90,8 @@ const {
     loadPolicies,
     createPolicy,
     updatePolicy,
-    deletePolicy
+    deletePolicy,
+    renewPolicy,
 } = usePolicyList();
 
 const router = useRouter();
@@ -81,10 +99,11 @@ const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
 const { confirm } = useConfirmDialog();
 
+// Modal State'leri
 const isCreateModalOpen = ref<boolean>(false);
+const isRenewModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
-
 
 const sortByColumn = ref<string | null>('endDate');
 const sortDescending = ref<boolean>(false);
@@ -164,8 +183,15 @@ const onRequest = async (requestProp: {
     );
 };
 
+// Modal Açma Fonksiyonları
 const openCreateDialog = () => {
+    selectedPolicy.value = null;
     isCreateModalOpen.value = true;
+};
+
+const openRenewDialog = (policy: Policy) => {
+    selectedPolicy.value = policy;
+    isRenewModalOpen.value = true;
 };
 
 const openEditDialog = (policy: Policy) => {
@@ -173,24 +199,39 @@ const openEditDialog = (policy: Policy) => {
     isEditModalOpen.value = true;
 };
 
+// İşlem Handlers
 const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
     try {
         await createPolicy(newPolicy);
-        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive' });
+        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
         void loadPolicies(buildQueryParams());
     } catch (err) {
-        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative' });
+        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Create Error:', err);
+    }
+};
+
+const handlePolicyRenew = async (newPolicy: Omit<Policy, 'policyId'>) => {
+    try {
+        await renewPolicy(newPolicy);
+        Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+        isRenewModalOpen.value = false;
+        void loadPolicies(buildQueryParams());
+    } catch (err) {
+        Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        console.error('Policy Renew Error:', err);
     }
 };
 
 const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
     try {
         await updatePolicy(event.id, event.data);
-        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive' });
+        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+        isEditModalOpen.value = false;
+        void loadPolicies(buildQueryParams());
     } catch (err) {
-        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative' });
+        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Update Error:', err);
     }
 };
@@ -210,10 +251,10 @@ const handlePolicyDelete = async (policy: Policy) => {
 
     try {
         await deletePolicy(policy.policyId);
-        Notify.create({ message: 'Poliçe başarıyla silindi.', color: 'positive', icon: 'check' });
+        Notify.create({ message: 'Poliçe başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         void loadPolicies(buildQueryParams());
     } catch (err) {
-        Notify.create({ message: 'Poliçe silinirken bir hata oluştu.', color: 'negative' });
+        Notify.create({ message: 'Poliçe silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Delete Error:', err);
     }
 };
@@ -221,8 +262,6 @@ const handlePolicyDelete = async (policy: Policy) => {
 const goToPolicyDetail = (evt: unknown, row: Policy) => {
     void router.push({ name: 'policy-detail', params: { id: row.policyId } });
 };
-
-
 
 onMounted(() => {
     void loadPolicies(buildQueryParams());
