@@ -1,9 +1,3 @@
-/**
- * Customer type definitions and table column configuration.
- * Single source of truth — imported by pages, composables, and components.
- */
-
-/** Matches the backend CustomerData contract returned by the REST API. */
 export interface Customer {
   customerId: string;
   firstName: string;

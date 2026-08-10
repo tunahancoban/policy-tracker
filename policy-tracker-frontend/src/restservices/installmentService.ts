@@ -9,4 +9,17 @@ export const installmentService = {
     });
     return response.data;
   },
+  async updateInstallment(
+    installmentId: string,
+    params?: Record<string, string>,
+  ): Promise<Installment> {
+    const response = await api.patch<Installment>(
+      `/rest/api/installment/update-installment/${installmentId}`,
+      {},
+      {
+        params,
+      },
+    );
+    return response.data;
+  },
 };

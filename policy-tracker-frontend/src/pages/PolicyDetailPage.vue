@@ -63,25 +63,26 @@
                                     <q-item-section avatar><q-icon name="event" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Başlangıç Tarihi</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate) }}</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate)
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
                                 <q-item class="q-py-sm">
-                                    <q-item-section avatar><q-icon name="event_busy"
-                                            color="primary" /></q-item-section>
+                                    <q-item-section avatar><q-icon name="event_busy" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Bitiş Tarihi</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate) }}</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate)
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
                                 <q-item class="q-py-sm">
-                                    <q-item-section avatar><q-icon name="payments"
-                                            color="primary" /></q-item-section>
+                                    <q-item-section avatar><q-icon name="payments" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Prim Tutarı</q-item-label>
-                                        <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium) }}</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium)
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -115,7 +116,8 @@
                                     <q-icon name="folder_open" size="32px" color="grey-5" />
                                 </div>
                                 <div class="empty-state__title">Taksit kaydı bulunamadı</div>
-                                <div class="empty-state__description">Bu poliçeye ait henüz bir taksit tanımı yapılmamış.
+                                <div class="empty-state__description">Bu poliçeye ait henüz bir taksit tanımı
+                                    yapılmamış.
                                 </div>
                             </div>
 
@@ -133,12 +135,19 @@
                                         {{ formatDateOnly(props.row.dueDate) }}
                                     </q-td>
                                 </template>
-                                <template v-slot:body-cell-status="props">
+                                <template v-slot:body-cell-paymentStatus="props">
                                     <q-td :props="props" class="text-center">
-                                        <q-chip :color="props.row.status === 'PAID' ? 'positive' : 'warning'"
-                                            text-color="white" dense class="status-chip">
-                                            {{ props.row.status === 'PAID' ? 'Ödendi' : 'Ödenmedi' }}
+                                        <q-chip :color="getStatusColor(props.row.status)" text-color="white" dense
+                                            class="status-chip">
+                                            {{ getStatusLabel(props.row.status) }}
                                         </q-chip>
+                                    </q-td>
+                                </template>
+                                <template v-slot:body-cell-operations="props">
+                                    <q-td :props="props" class="text-center">
+                                        <q-btn v-if="props.row.status !== 'PAID'" flat color="primary" icon="payment"
+                                            label="Ödeme Yap" :loading="paymentLoadingNo === props.row.installmentNo"
+                                            @click="handlePayInstallment(props.row)" />
                                     </q-td>
                                 </template>
                             </q-table>
@@ -163,9 +172,17 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePolicyDetail } from '@/composables/usePolicyDetail';
+import { useInstallmentStore } from '@/stores/installment';
+import type { Installment, paymentStatus } from '@/types/installment.types'; // Dosya konumunuza göre ayarlayınız
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { Notify } from 'quasar';
 
 const route = useRoute();
 const policyId = route.params.id as string;
+const installmentStore = useInstallmentStore();
+const { confirm } = useConfirmDialog();
+
+const { setPaymentStatus } = installmentStore;
 
 const {
     policy,
@@ -175,8 +192,9 @@ const {
     installmentsTotal,
     fetchInstallmentsOnly,
     loadAllData,
-
 } = usePolicyDetail(policyId);
+
+const paymentLoadingNo = ref<number | null>(null);
 
 const formatDateOnly = (dateStr: string | null | undefined): string => {
     if (!dateStr) return '—';
@@ -189,19 +207,81 @@ const formatCurrency = (value: number | null | undefined): string => {
     return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
 };
 
-// Taksit tipine göre kolonlar — Installment.types.ts'e göre kesinleştirilmeli
+// Statü Renk Tanımlamaları
+const getStatusColor = (status: paymentStatus): string => {
+    switch (status) {
+        case 'PAID':
+            return 'positive';
+        case 'DUE':
+            return 'negative';
+        case 'UNPAID':
+        default:
+            return 'warning';
+    }
+};
+
+// Statü Metin Tanımlamaları
+const getStatusLabel = (status: paymentStatus): string => {
+    switch (status) {
+        case 'PAID':
+            return 'Ödendi';
+        case 'DUE':
+            return 'Vadesi Geçti';
+        case 'UNPAID':
+        default:
+            return 'Ödenmedi';
+    }
+};
+
 const installmentColumns = [
     { name: 'installmentNo', label: 'Taksit No', field: 'installmentNo', align: 'center' as const },
     { name: 'amount', label: 'Tutar', field: 'amount', align: 'right' as const },
     { name: 'dueDate', label: 'Vade Tarihi', field: 'dueDate', align: 'center' as const },
-    { name: 'status', label: 'Durum', field: 'status', align: 'center' as const },
+    { name: 'paymentStatus', label: 'Durum', field: 'paymentStatus', align: 'center' as const },
+    { name: 'operations', label: 'İşlemler', field: 'operations', align: 'center' as const },
 ];
 
 const pagination = ref({
-    page: 1, // Quasar 1-indexed
+    page: 1,
     rowsPerPage: 5,
     rowsNumber: 0,
 });
+
+const handlePayInstallment = async (installment: Installment) => {
+    const isConfirmed = await confirm({
+        title: 'Ödeme Onayı',
+        message: `${installment.installmentNo}. taksit için ${formatCurrency(installment.amount)} tutarındaki ödemeyi onaylıyor musunuz?`,
+        okLabel: 'Öde',
+        cancelLabel: 'Vazgeç',
+        color: 'primary'
+    });
+
+    if (!isConfirmed) return;
+
+    paymentLoadingNo.value = installment.installmentNo;
+    try {
+        await setPaymentStatus(installment.id, installment.installmentNo, 'PAID');
+        Notify.create({
+            message: `${installment.installmentNo}. taksit ödemesi başarıyla gerçekleştirildi.`,
+            color: 'positive',
+            icon: 'check_circle',
+            position: 'top-right',
+            timeout: 4000
+        });
+        await fetchInstallmentsOnly();
+    } catch (error) {
+        Notify.create({
+            message: 'Taksit ödemesi alınırken bir hata oluştu.',
+            color: 'negative',
+            icon: 'error',
+            position: 'top-right',
+            timeout: 5000
+        });
+        console.error('Taksit ödeme hatası:', error);
+    } finally {
+        paymentLoadingNo.value = null;
+    }
+};
 
 const onInstallmentsRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
     const { page, rowsPerPage } = requestProp.pagination;
@@ -212,7 +292,6 @@ const onInstallmentsRequest = async (requestProp: { pagination: { page: number; 
 
     await fetchInstallmentsOnly();
 };
-
 
 onMounted(async () => {
     await loadAllData();

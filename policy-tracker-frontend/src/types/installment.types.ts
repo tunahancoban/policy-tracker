@@ -1,9 +1,10 @@
 export interface Installment {
+  id: number;
   policyId: string;
   customerId: string;
   installmentNo: number;
   amount: number;
-  paymentStatus: paymentStatus; //Fix here
+  status: paymentStatus; //Fix here
   paidAt: string;
   dueDate: string;
 }

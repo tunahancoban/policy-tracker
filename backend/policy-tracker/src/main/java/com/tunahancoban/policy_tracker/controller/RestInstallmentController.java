@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "rest/api/installment")
 @RequiredArgsConstructor
 public class RestInstallmentController {
-    private  final InstallmentService installmentService;
+    private final InstallmentService installmentService;
 
     @GetMapping(path="/with-params")
     public ResponseEntity<Page<Installment>> getInstallment(@RequestParam(name="customerId", required = false) String customerId,
@@ -27,12 +28,14 @@ public class RestInstallmentController {
     }
 
     @PatchMapping(path="/update-installment/{id}")
-    public ResponseEntity<Installment> updateInstallment(@PathVariable String id, @RequestParam(name = "status")PaymentStatus status){
-
+    public ResponseEntity<Installment> updateInstallment(@PathVariable String id, @RequestParam(name = "status") PaymentStatus status){
+        Installment installment = installmentService.updateInstallment(id, status);
+        return ResponseEntity.ok(installment);
     }
 
     @DeleteMapping(path = "/delete-installment/{policyId}")
     public ResponseEntity<Void> deleteInstallment(@PathVariable String policyId){
-
+        installmentService.deleteInstallment(policyId);
+        return ResponseEntity.noContent().build();
     }
 }

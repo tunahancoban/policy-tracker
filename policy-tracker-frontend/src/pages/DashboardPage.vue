@@ -53,7 +53,7 @@ import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
 import DashboardCharts from '@/components/DashboardCharts.vue';
 import RecentActivitiesTimeline from '@/components/RecentActivitiesTimeline.vue';
 import type { ChartData } from 'chart.js';
-import { policyColorMap } from '@/utils/policyHelper';
+import { getPolicyTypeColor } from '@/utils/policyHelper';
 import { useWebSocket } from '@/composables/useWebSocket';
 import PolicyTable from '@/components/PolicyTable.vue';
 import { SORT_FIELD_MAP } from '@/types/policy.types';
@@ -115,7 +115,7 @@ const barChartData = computed<ChartData<'bar'>>(() => ({
 
 const pieChartData = computed<ChartData<'doughnut'>>(() => {
     const labels = Object.keys(chartDataFromApi.value.typeLabels);
-    const backgroundColors = labels.map(label => policyColorMap[label] || '#607D8B');
+    const backgroundColors = labels.map(label => getPolicyTypeColor(label) || '#607D8B');
     return {
         labels,
         datasets: [{

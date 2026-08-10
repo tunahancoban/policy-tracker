@@ -89,8 +89,10 @@ interface CustomerOption {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['update:modelValue', 'updated']);
-
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'updated', payload: { id: string; data: Partial<PolicyForm> }): Promise<void> | void;
+}>();
 const customerStore = useCustomerStore();
 const loading = ref(false);
 
@@ -163,8 +165,7 @@ const onModalShow = () => {
 
     originalForm.value = { ...form.value };
 };
-
-const onSubmit = () => {
+const onSubmit = async () => {
     const patchData = getChangedFields();
 
     if (Object.keys(patchData).length === 0) {
@@ -174,10 +175,11 @@ const onSubmit = () => {
 
     loading.value = true;
     try {
-        emit('updated', {
+        await emit('updated', {
             id: props.policyData.policyId,
             data: patchData
         });
+
         isOpen.value = false;
     } catch (error) {
         console.error('Poliçe güncellenirken hata oluştu:', error);

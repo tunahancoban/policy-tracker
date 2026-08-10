@@ -18,30 +18,17 @@ export const formatPolicyPayload = (eventData: Partial<Policy>) => {
 
   return payload;
 };
-export const policyColorMap: Record<string, string> = {
-  KASKO: '#1976D2',
-  TRAFIK: '#26A69A',
-  SAGLIK: '#21BA45',
-  KONUT: '#F2C037',
-  DASK: '#9C27B0',
+const policyTypeColor: Record<string, string> = {
+  KASKO: '#418fe8',
+  TRAFIK: '#24a999',
+  SAGLIK: '#529f56',
+  KONUT: '#ffb758',
+  DASK: '#975bbc',
 };
 
-const typeBackgroundMap: Record<string, string> = {
-  KASKO: 'blue-2',
-  TRAFİK: 'teal-2',
-  TRAFIK: 'teal-2',
-  SAGLIK: 'green-2',
-  KONUT: 'amber-2',
-  DASK: 'purple-2',
-};
-const typeTextMap: Record<string, string> = {
-  KASKO: 'blue-9',
-  TRAFİK: 'teal-9',
-  TRAFIK: 'teal-9',
-  SAGLIK: 'green-9',
-  KONUT: 'amber-9',
-  DASK: 'purple-9',
-};
+export const getPolicyTypeColor = (type: string | undefined | null): string => {
+  if (!type) return '#607D8B';
 
-export const getPolicyTypeColor = (type: string): string => typeBackgroundMap[type] || 'grey-3';
-export const getPolicyTypeTextColor = (type: string): string => typeTextMap[type] || 'grey-9';
+  const normalizedType = type.trim().toUpperCase();
+  return policyTypeColor[normalizedType] || '#607D8B';
+};

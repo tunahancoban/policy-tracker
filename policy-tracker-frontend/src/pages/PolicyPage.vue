@@ -99,7 +99,7 @@ const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
 const { confirm } = useConfirmDialog();
 
-// Modal State'leri
+// Modal States
 const isCreateModalOpen = ref<boolean>(false);
 const isRenewModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
@@ -228,11 +228,11 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
     try {
         await updatePolicy(event.id, event.data);
         Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
-        isEditModalOpen.value = false;
         void loadPolicies(buildQueryParams());
-    } catch (err) {
+    } catch (error) {
         Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
-        console.error('Policy Update Error:', err);
+        console.error('Policy Update Error:', error);
+        throw error;
     }
 };
 

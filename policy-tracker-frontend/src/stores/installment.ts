@@ -28,6 +28,24 @@ export const useInstallmentStore = defineStore('installment', () => {
     }
   };
 
+  const setPaymentStatus = async (installmentId: number, installmentNo: number, status: string) => {
+    isLoading.value = true;
+    try {
+      const updatedInstallment = await installmentService.updateInstallment(
+        installmentId.toString(),
+        { status: status },
+      );
+      const index = installments.value.findIndex((i) => i.installmentNo === installmentNo);
+      if (index !== -1) {
+        installments.value[index] = updatedInstallment;
+      }
+    } catch (error) {
+      console.error('Taksit güncellenirken hata oluştu:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     installments,
     isLoading,
@@ -36,5 +54,6 @@ export const useInstallmentStore = defineStore('installment', () => {
     currentPage,
     pageSize,
     fetchInstallments,
+    setPaymentStatus,
   };
 });

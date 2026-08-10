@@ -98,7 +98,9 @@ public class InstallmentServiceImp implements InstallmentService {
     public Installment updateInstallment(String installmentId, PaymentStatus status) {
         Installment installment = installmentRepository.findById(installmentId).orElseThrow(() -> { log.warn("Installment update failed - installment not found: {}", installmentId);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "Installment not found: " + installmentId);});
+        System.out.println(installment);
         installment.setStatus(status);
+        installmentRepository.save(installment);
         log.info("Installments successfully updated - installmentId: {}", installmentId);
         return installment;
     }
