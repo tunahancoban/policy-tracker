@@ -1,6 +1,6 @@
 import { storeToRefs } from 'pinia';
 import { usePolicyStore } from '@/stores/policy';
-import type { Policy } from '@/types/policy.types';
+import type { CreatePolicyRequest, Policy, RenewPolicyRequest } from '@/types/policy.types';
 
 export function usePolicyList() {
   const policyStore = usePolicyStore();
@@ -9,12 +9,12 @@ export function usePolicyList() {
 
   const loadPolicies = (params?: Record<string, string>) => policyStore.fetchPolicies(params);
 
-  const createPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
+  const createPolicy = async (newPolicy: CreatePolicyRequest) => {
     await policyStore.addPolicy(newPolicy);
     await loadPolicies();
   };
 
-  const renewPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
+  const renewPolicy = async (newPolicy: RenewPolicyRequest) => {
     await policyStore.renewPolicy(newPolicy);
     await loadPolicies();
   };

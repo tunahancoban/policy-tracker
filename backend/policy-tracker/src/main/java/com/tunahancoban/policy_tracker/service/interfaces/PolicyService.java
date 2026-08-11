@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.service.interfaces;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
@@ -14,5 +15,6 @@ public interface PolicyService {
     Policy createPolicy(CreatePolicyRequest request);
     void deletePolicy(String policyID);
     Policy updatePolicy(String policyID, UpdatePolicyRequest request);
+    Policy renewPolicy(RenewPolicyRequest request);
 
 }

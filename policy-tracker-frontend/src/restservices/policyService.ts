@@ -1,5 +1,5 @@
 import { api } from '../boot/axios';
-import type { Policy } from '../types/policy.types';
+import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '../types/policy.types';
 import type { Page } from '../types/api.types';
 
 export const policyService = {
@@ -15,8 +15,13 @@ export const policyService = {
     return response.data;
   },
 
-  async addPolicy(newPolicy: Omit<Policy, 'policyId'>): Promise<Policy> {
+  async addPolicy(newPolicy: CreatePolicyRequest): Promise<Policy> {
     const response = await api.post<Policy>(`/rest/api/policy/create-policy`, newPolicy);
+    return response.data;
+  },
+
+  async renewPolicy(newPolicy: RenewPolicyRequest): Promise<Policy> {
+    const response = await api.post<Policy>(`/rest/api/policy/renew-policy`, newPolicy);
     return response.data;
   },
 

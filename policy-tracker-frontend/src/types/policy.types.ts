@@ -1,5 +1,4 @@
-export interface Policy {
-  policyId: string;
+export interface CreatePolicyRequest {
   type: string;
   startDate: string;
   endDate: string;
@@ -7,6 +6,32 @@ export interface Policy {
   customerId: string;
   note: string;
   installment: number;
+}
+
+export interface RenewPolicyRequest {
+  previousPolicyId: string;
+  startDate: string;
+  endDate: string;
+  premium: number;
+  installment: number;
+  note?: string;
+}
+
+export interface Policy {
+  id: string;
+  policyId: string;
+  customerId: string;
+  note: string;
+  installment: number;
+  type: string;
+  startDate: string;
+  endDate: string;
+  premium: number;
+  previousPolicyId: string;
+  rootPolicyId: string;
+  renewalSequence: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PolicyForm {

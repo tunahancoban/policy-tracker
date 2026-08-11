@@ -55,12 +55,9 @@
             </template>
         </PolicyTable>
 
-        <!-- Yeni Poliçe Oluşturma Modalı -->
-        <NewPolicyModal v-model="isCreateModalOpen" @created="handlePolicyCreate" />
-
-        <!-- Poliçe Yenileme Modalı -->
-        <NewPolicyModal v-if="selectedPolicy" v-model="isRenewModalOpen" :isRenewal="true" :policyData="selectedPolicy"
-            @created="handlePolicyRenew" />
+        <!-- Yeni Poliçe Oluşturma ve Yenileme Ortak Modalı -->
+        <NewPolicyModal v-model="isCreateModalOpen" :is-renewal="isRenewal" :policy-data="selectedPolicy"
+            @created="handlePolicyCreate" @renewed="handlePolicyRenew" />
 
         <!-- Poliçe Düzenleme Modalı -->
         <EditPolicyModal v-if="selectedPolicy" v-model="isEditModalOpen" :policyData="selectedPolicy"
@@ -70,7 +67,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import type { Policy } from '@/types/policy.types';
+import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/policy.types';
 import { policyTypeOptions, SORT_FIELD_MAP } from '@/types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
@@ -99,10 +96,10 @@ const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
 const { confirm } = useConfirmDialog();
 
-// Modal States
+// Modal State'leri
 const isCreateModalOpen = ref<boolean>(false);
-const isRenewModalOpen = ref<boolean>(false);
 const isEditModalOpen = ref<boolean>(false);
+const isRenewal = ref<boolean>(false);
 const selectedPolicy = ref<Policy | null>(null);
 
 const sortByColumn = ref<string | null>('endDate');
@@ -185,13 +182,15 @@ const onRequest = async (requestProp: {
 
 // Modal Açma Fonksiyonları
 const openCreateDialog = () => {
+    isRenewal.value = false;
     selectedPolicy.value = null;
     isCreateModalOpen.value = true;
 };
 
 const openRenewDialog = (policy: Policy) => {
+    isRenewal.value = true;
     selectedPolicy.value = policy;
-    isRenewModalOpen.value = true;
+    isCreateModalOpen.value = true;
 };
 
 const openEditDialog = (policy: Policy) => {
@@ -199,10 +198,10 @@ const openEditDialog = (policy: Policy) => {
     isEditModalOpen.value = true;
 };
 
-// İşlem Handlers
-const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
+// Sıfırdan Poliçe Oluşturma
+const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
     try {
-        await createPolicy(newPolicy);
+        await createPolicy(newPolicyPayload);
         Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
         void loadPolicies(buildQueryParams());
@@ -212,11 +211,12 @@ const handlePolicyCreate = async (newPolicy: Omit<Policy, 'policyId'>) => {
     }
 };
 
-const handlePolicyRenew = async (newPolicy: Omit<Policy, 'policyId'>) => {
+// Poliçe Yenileme
+const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
     try {
-        await renewPolicy(newPolicy);
+        await renewPolicy(renewPayload);
         Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
-        isRenewModalOpen.value = false;
+        isCreateModalOpen.value = false;
         void loadPolicies(buildQueryParams());
     } catch (err) {
         Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });

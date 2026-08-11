@@ -1,7 +1,7 @@
 // src/stores/policy.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { Policy } from '../types/policy.types';
+import type { CreatePolicyRequest, Policy, RenewPolicyRequest } from '../types/policy.types';
 import type { CustomerSummary } from '../types/dashboard.types';
 import { policyService } from '@/restservices/policyService';
 import { dashboardService } from '@/restservices/dashboardService';
@@ -88,7 +88,7 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  const addPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
+  const addPolicy = async (newPolicy: CreatePolicyRequest) => {
     isLoading.value = true;
     try {
       const addedPolicy = await policyService.addPolicy(newPolicy);
@@ -131,13 +131,13 @@ export const usePolicyStore = defineStore('policy', () => {
     }
   };
 
-  const renewPolicy = async (newPolicy: Omit<Policy, 'policyId'>) => {
+  const renewPolicy = async (newPolicy: RenewPolicyRequest) => {
     isLoading.value = true;
     try {
-      const addedPolicy = await policyService.addPolicy(newPolicy);
-      policies.value.push(addedPolicy);
+      const renewedPolicy = await policyService.renewPolicy(newPolicy);
+      policies.value.push(renewedPolicy);
     } catch (error) {
-      console.error('Poliçe eklenirken hata oluştu:', error);
+      console.error('Poliçe yenilenirken hata oluştu:', error);
       throw error;
     } finally {
       isLoading.value = false;

@@ -35,8 +35,6 @@ public class Policy {
     @Indexed
     private String customerId;
 
-    private String previousPolicyId;      // For renewal
-
     private String note;
 
     private InstallmentOptions installment;
@@ -53,9 +51,20 @@ public class Policy {
     @Positive
     private BigDecimal premium;
 
+    //Renewal Metadata
+    private String previousPolicyId;
+
+    private String rootPolicyId;
+
+    @Builder.Default
+    private Integer renewalSequence = 0;
+
     //Metadata
+    @Builder.Default
     @CreatedDate
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Builder.Default
     @LastModifiedDate
     private LocalDateTime updatedAt = LocalDateTime.now();
     public String toString() {

@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.mapper;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import org.mapstruct.*;
@@ -21,6 +22,17 @@ public interface PolicyMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Policy toEntity(CreatePolicyRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "policyId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "customerId", ignore = true)
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "rootPolicyId", ignore = true)
+    @Mapping(target = "renewalSequence", ignore = true)
+    Policy toEntity(RenewPolicyRequest request);
+
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "policyId", ignore = true)

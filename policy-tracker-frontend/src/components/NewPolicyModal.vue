@@ -103,7 +103,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useCustomerStore } from '../stores/customer';
-import { policyTypeOptions, type PolicyForm, type Policy } from '../types/policy.types';
+import {
+    policyTypeOptions,
+    type PolicyForm,
+    type Policy,
+    type CreatePolicyRequest,
+    type RenewPolicyRequest
+} from '../types/policy.types';
 import { QPopupProxy } from 'quasar';
 
 interface Props {
@@ -123,7 +129,12 @@ const props = withDefaults(defineProps<Props>(), {
     policyData: null,
 });
 
-const emit = defineEmits(['update:modelValue', 'created']);
+// Created ve Renewed event'leri ayrıldı
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'created', payload: CreatePolicyRequest): void;
+    (e: 'renewed', payload: RenewPolicyRequest): void;
+}>();
 
 const customerStore = useCustomerStore();
 const loading = ref(false);
@@ -264,13 +275,37 @@ const onModalShow = async () => {
 const onSubmit = () => {
     loading.value = true;
     try {
-        const payload = {
-            ...form.value,
-            startDate: form.value.startDate.replace(/\//g, '-'),
-            endDate: form.value.endDate.replace(/\//g, '-'),
-        };
+        const formattedStartDate = form.value.startDate.replace(/\//g, '-');
+        const formattedEndDate = form.value.endDate.replace(/\//g, '-');
 
-        emit('created', payload);
+        if (props.isRenewal && props.policyData) {
+
+            const renewPayload: RenewPolicyRequest = {
+                previousPolicyId: props.policyData.policyId,
+                startDate: formattedStartDate,
+                endDate: formattedEndDate,
+                premium: form.value.premium,
+                installment: form.value.installment,
+                note: form.value.note
+            };
+
+            emit('renewed', renewPayload);
+        } else {
+
+            const createPayload: CreatePolicyRequest = {
+                customerId: form.value.customerId,
+                type: form.value.type,
+                startDate: formattedStartDate,
+                endDate: formattedEndDate,
+                premium: form.value.premium,
+                installment: form.value.installment,
+                note: form.value.note
+            };
+
+            emit('created', createPayload);
+        }
+
+        isOpen.value = false;
     } catch (error) {
         console.error('Poliçe kaydedilirken hata oluştu:', error);
     } finally {

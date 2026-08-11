@@ -6,6 +6,7 @@ import com.tunahancoban.policy_tracker.model.DTO.events.PolicyCreatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.events.PolicyDeletedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
@@ -54,7 +55,10 @@ public class PolicyServiceImp implements PolicyService {
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT)
+                .withIgnorePaths("renewalSequence", "createdAt", "updatedAt", "premium",
+                        "note", "startDate", "endDate", "installment",
+                        "previousPolicyId", "rootPolicyId");
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
         Page<Policy> result = policyRepository.findAll(example, pageable);
@@ -77,11 +81,11 @@ public class PolicyServiceImp implements PolicyService {
     @LogActivity(type = "POLICE", detail = "'Poliçe oluşturuldu ID: ' + #result.policyId")
     @Override
     public Policy createPolicy(CreatePolicyRequest request) {
-        log.info("Creating policy - customerId: {}, type: {}, premium: {}",
+        log.info("Renewing policy - customerId: {}, type: {}, premium: {}",
                 request.getCustomerId(), request.getType(), request.getPremium());
 
         if (!customerService.existById(request.getCustomerId())) {
-            log.warn("Policy creation failed - customer not found: {}", request.getCustomerId());
+            log.warn("Policy renew failed - customer not found: {}", request.getCustomerId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Müşteri ID bulunamadı: " + request.getCustomerId());
         }
 
@@ -89,6 +93,8 @@ public class PolicyServiceImp implements PolicyService {
         Policy policy = policyMapper.toEntity(request);
 
         policy.setPolicyId(idGeneratorService.generatePolicyId(request.getType()));
+        policy.setPreviousPolicyId(null); //Policy is created now so it does not have any prev policy
+        policy.setRootPolicyId(policy.getPolicyId()); // Root PolicyID itself
 
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
@@ -134,6 +140,43 @@ public class PolicyServiceImp implements PolicyService {
         log.info("Policy successfully updated - policyId: {}", policyID);
         eventPublisher.publishEvent(PolicyCreatedEvent.from(updatedPolicy));
         return updatedPolicy;
+    }
+
+    @Transactional
+    @LogActivity(type = "POLICE", detail = "'Poliçe yenilendi. ID: ' + #result.policyId")
+    @Override
+    public Policy renewPolicy(RenewPolicyRequest request) {
+
+        Policy previousPolicy = policyRepository.getPolicyByPolicyId(request.getPreviousPolicyId()).orElseThrow(() ->
+        {log.warn("Policy update failed - policy not found: {}", request.getPreviousPolicyId());
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + request.getPreviousPolicyId());});
+
+        log.info("Creating policy - customerId: {}, type: {}, premium: {}",
+                previousPolicy.getCustomerId(), previousPolicy.getType(), request.getPremium());
+
+        if (!customerService.existById(previousPolicy.getCustomerId())) {
+            log.warn("Policy creation failed - customer not found: {}", previousPolicy.getCustomerId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Müşteri ID bulunamadı: " + previousPolicy.getCustomerId());
+        }
+
+        Policy policy = policyMapper.toEntity(request);
+
+        policy.setPolicyId(idGeneratorService.generatePolicyId(previousPolicy.getType()));
+
+        policy.setCustomerId(previousPolicy.getCustomerId());
+        policy.setType(previousPolicy.getType());
+
+        policy.setRenewalSequence(previousPolicy.getRenewalSequence()+1);
+        policy.setRootPolicyId(previousPolicy.getRootPolicyId());
+
+        installmentService.createInstallment(policy, request.getInstallment().getValue());
+        Policy savedPolicy = policyRepository.save(policy);
+
+        eventPublisher.publishEvent(PolicyUpdatedEvent.from(savedPolicy));
+
+        log.info("Policy successfully created - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
+        return savedPolicy;
+
     }
 
 }

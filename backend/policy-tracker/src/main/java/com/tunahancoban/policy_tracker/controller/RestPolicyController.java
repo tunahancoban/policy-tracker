@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
@@ -62,6 +63,13 @@ public class RestPolicyController {
     public ResponseEntity<Policy> createPolicy(@Valid @RequestBody CreatePolicyRequest policyRequest){
 
         Policy policy = policyService.createPolicy(policyRequest);
+        return ResponseEntity.ok(policy);
+
+    }
+
+    @PostMapping(path = "/renew-policy")
+    public ResponseEntity<Policy> renewPolicy(@Valid @RequestBody RenewPolicyRequest policyRequest){
+        Policy policy = policyService.renewPolicy(policyRequest);
         return ResponseEntity.ok(policy);
 
     }
