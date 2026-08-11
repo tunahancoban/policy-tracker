@@ -175,16 +175,26 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* --- Chart container responsive --- */
 .chart-grid-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-    margin-bottom: 16px;
+    width: 100%;
 }
 
-@media (min-width: 1024px) {
-    .chart-grid-row {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
+.chart-container-responsive {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    max-height: 360px;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+}
+
+.chart-container-responsive canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
 }
 </style>

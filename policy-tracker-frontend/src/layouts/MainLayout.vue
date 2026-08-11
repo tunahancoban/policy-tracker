@@ -6,8 +6,7 @@
         <q-toolbar-title> Policy Tracker Panel </q-toolbar-title>
 
         <!-- WS Bağlantı Göstergesi -->
-        <div :class="['ws-indicator', isConnected ? 'ws-indicator--online' : 'ws-indicator--offline']"
-          class="q-mr-md">
+        <div :class="['ws-indicator', isConnected ? 'ws-indicator--online' : 'ws-indicator--offline']" class="q-mr-md">
           <span class="ws-indicator__dot" />
           {{ isConnected ? 'Bağlı' : 'Bağlantı Yok' }}
         </div>
@@ -139,3 +138,22 @@ const toggleLogout = async (): Promise<void> => {
   }
 };
 </script>
+
+<style scoped>
+/* --- Sidebar Styles --- */
+.sidebar-item--active {
+  background-color: #f0f4ff !important;
+  border-left: 3px solid var(--q-primary) !important;
+  color: var(--q-primary) !important;
+  font-weight: 600 !important;
+}
+
+.sidebar-item--active .q-icon {
+  color: var(--q-primary) !important;
+}
+
+.sidebar-separator {
+  margin: 8px 16px;
+  border-color: #e5e7eb;
+}
+</style>

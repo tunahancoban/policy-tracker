@@ -138,40 +138,31 @@ const onRequest = (requestProp: {
 </script>
 
 <style scoped>
-.responsive-table {
-    width: 100%;
-    table-layout: fixed;
+/* --- Table Styles --- */
+.q-table thead th {
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #4b5563 !important;
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #e5e7eb !important;
 }
 
-.responsive-table :deep(th),
-.responsive-table :deep(td) {
-    padding: 6px 4px !important;
-    font-size: 0.78rem !important;
-    white-space: normal !important;
-    word-break: break-word;
+.q-table tbody tr:nth-child(even) {
+    background-color: #fafbfc;
 }
 
-.responsive-table :deep(th) {
-    font-weight: 700;
-    line-height: 1.1;
+.q-table tbody tr {
+    transition: background-color var(--transition-fast);
 }
 
-.compact-chip {
-    font-size: 0.7rem !important;
-    height: 20px !important;
-    padding: 0 6px !important;
-    margin: 0 !important;
+.q-table tbody tr:hover {
+    background-color: #f0f4ff !important;
 }
 
-.action-cells {
-    padding: 2px !important;
-}
-
-@media (max-width: 599px) {
-    .responsive-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
+/* Clickable table rows */
+.clickable-table :deep(.q-table tbody tr) {
+    cursor: pointer;
 }
 </style>

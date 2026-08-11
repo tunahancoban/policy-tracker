@@ -89,26 +89,9 @@ const getIconBgColor = (type: string): string => {
 </script>
 
 <style scoped>
-.activity-item {
-    background: #f8f9fa;
-    border: 1px solid #eef0f2;
-    transition: all 0.2s ease;
-    padding: 10px 14px;
-}
-
-.activity-item:hover {
-    background: #ffffff;
-    border-color: #d1d5db;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transform: translateY(-1px);
-}
-
-.activity-scroll-area::-webkit-scrollbar {
-    width: 5px;
-}
-
-.activity-scroll-area::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+/* --- Timeline (q-timeline overrides) --- */
+.activity-timeline .q-timeline__subtitle {
+    font-size: 0.75rem;
+    opacity: 0.7;
 }
 </style>

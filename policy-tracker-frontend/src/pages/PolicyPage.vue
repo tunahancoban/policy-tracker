@@ -211,7 +211,6 @@ const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
     }
 };
 
-// Poliçe Yenileme
 const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
     try {
         await renewPolicy(renewPayload);

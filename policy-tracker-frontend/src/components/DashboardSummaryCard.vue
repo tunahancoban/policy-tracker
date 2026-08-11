@@ -21,9 +21,7 @@
                 :class="card.delayClass">
                 <q-card class="summary-card q-pa-md full-height">
                     <div class="row items-center no-wrap q-gutter-md">
-                        <div class="summary-card__icon-area" :style="{ backgroundColor: card.bgColor }">
-                            <q-icon :name="card.icon" :color="card.iconColor" size="24px" />
-                        </div>
+                        <q-icon :name="card.icon" :color="card.iconColor" size="24px" />
                         <div class="col">
                             <div class="summary-card__value">{{ card.value }}</div>
                             <div class="summary-card__label">{{ card.label }}</div>
@@ -51,7 +49,6 @@ const cards = computed(() => [
         value: props.summary.totalCustomers,
         icon: 'people',
         iconColor: 'primary',
-        bgColor: '#e8f0fe',
         delayClass: '',
     },
     {
@@ -60,7 +57,6 @@ const cards = computed(() => [
         value: props.summary.activePolicyNumber,
         icon: 'verified',
         iconColor: 'positive',
-        bgColor: '#e6f9ee',
         delayClass: 'fade-in-up-delay-1',
     },
     {
@@ -69,7 +65,6 @@ const cards = computed(() => [
         value: props.summary.expiringSoonPolicies,
         icon: 'schedule',
         iconColor: 'warning',
-        bgColor: '#fff8e1',
         delayClass: 'fade-in-up-delay-2',
     },
     {
@@ -78,7 +73,6 @@ const cards = computed(() => [
         value: props.summary.expiredPolicies,
         icon: 'warning',
         iconColor: 'negative',
-        bgColor: '#fdecea',
         delayClass: 'fade-in-up-delay-3',
     },
 ]);

@@ -29,8 +29,7 @@
                 <span class="current">{{ customer.firstName }} {{ customer.lastName }}</span>
             </div>
 
-            <div class="row items-center justify-between q-mb-md">
-                <q-btn flat color="primary" icon="arrow_back" label="Müşteri Listesine Dön" to="/customers" />
+            <div class="row items-center justify-end q-py-sm q-mb-md">
                 <q-btn color="secondary" icon="edit" label="Müşteriyi Düzenle" @click="showModal = true" />
             </div>
 
@@ -68,7 +67,6 @@
             </div>
             <div class="empty-state__title">Müşteri bulunamadı</div>
             <div class="empty-state__description">Aradığınız müşteri kaydına erişilemiyor.</div>
-            <q-btn outline color="primary" label="Müşteri Listesine Dön" to="/customers" icon="arrow_back" no-caps />
         </div>
     </q-page>
 </template>

@@ -4,10 +4,9 @@
             <q-page class="login-bg flex flex-center q-pa-md">
                 <q-card class="login-form-card q-pa-lg">
                     <q-card-section class="text-center q-pb-none">
-                        <!-- Marka İkonu -->
-                        <div
-                            style="width: 64px; height: 64px; border-radius: 14px; background-color: var(--q-primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <q-icon name="shield" size="32px" color="white" />
+
+                        <div class="login-brand-icon">
+                            <q-icon name="shield" size="96px" color="primary" />
                         </div>
                         <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">
                             Sigorta Poliçe Takip
@@ -41,7 +40,6 @@
                             </q-input>
 
                             <div class="q-mt-xl">
-                                <!-- unevaluated -> unelevated olarak düzeltildi -->
                                 <q-btn label="Giriş Yap" type="submit" color="primary"
                                     class="full-width text-weight-bold q-py-sm shadow-2" rounded unelevated
                                     :loading="isLoading" />
@@ -69,7 +67,7 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const handleLogin = async () => {
-    isLoading.value = true; // Yükleniyor durumunu başlat
+    isLoading.value = true;
     try {
         await authStore.login(email.value, password.value);
         await router.push({ name: 'dashboard' });
@@ -91,13 +89,22 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+/* --- Login page --- */
 .login-bg {
-    background-image: url('../assets/login_background.jpg');
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('../assets/login_background.jpg');
     background-size: cover;
-    background-position: center;
 }
 
-.tracking-wide {
-    letter-spacing: 0.7px;
+.login-form-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    border: 4px solid #c1c0c0;
 }
 </style>
