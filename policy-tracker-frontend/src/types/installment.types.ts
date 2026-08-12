@@ -7,6 +7,7 @@ export interface Installment {
   status: paymentStatus; //Fix here
   paidAt: string;
   dueDate: string;
+  notifiedThresholds: number[];
 }
 
 export const paymentStatusOptions = ['PAID', 'UNPAID', 'DUE'] as const;

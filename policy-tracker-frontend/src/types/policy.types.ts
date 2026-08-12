@@ -32,6 +32,7 @@ export interface Policy {
   renewalSequence: number;
   createdAt: string;
   updatedAt: string;
+  notifiedThresholds: number[];
 }
 
 export interface PolicyForm {

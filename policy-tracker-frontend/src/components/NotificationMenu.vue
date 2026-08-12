@@ -17,10 +17,11 @@
                         <q-item v-for="notification in notificationStore.notifications" :key="notification.id" clickable
                             v-close-popup
                             :class="['notification-item', { 'notification-item--unread': !notification.read }]"
-                            @click="handleClick(notification)">
+                            @click="handleClick($event, notification)">
                             <q-item-section avatar>
-                                <q-icon :name="iconForType(notification.notificationType.toString())"
-                                    :color="!notification.read ? 'primary' : 'grey-6'" />
+                                <q-btn flat round :icon="iconForType(notification.notificationType.toString())"
+                                    :color="!notification.read ? 'primary' : 'grey-6'"
+                                    @click="markAsRead(notification)" />
                             </q-item-section>
 
                             <q-item-section>
@@ -59,18 +60,19 @@
 import { useNotificationStore } from '@/stores/notification';
 import type { Notification } from '@/types/notification.types';
 import type { QScrollArea } from 'quasar';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const notificationStore = useNotificationStore();
 
-// Menü ilk açıldığında liste boşsa yükle (MainLayout zaten mount'ta ilk sayfayı çekiyor,
-// bu sadece güvenlik amaçlı — menü hiç açılmadan da veri hazır olacak zaten)
+
 function handleMenuShow() {
     if (notificationStore.notifications.length === 0 && !notificationStore.isLoading) {
         void notificationStore.fetchNotifications();
     }
 }
 
-// Scroll alanı sonuna yaklaşınca sonraki sayfayı yükle (infinite scroll)
 function handleScroll(info: Parameters<NonNullable<QScrollArea['onScroll']>>[0]) {
     const { verticalPercentage } = info;
     if (verticalPercentage > 0.9 && !notificationStore.isLastPage && !notificationStore.isLoading) {
@@ -78,7 +80,11 @@ function handleScroll(info: Parameters<NonNullable<QScrollArea['onScroll']>>[0])
     }
 }
 
-function handleClick(notification: Notification) {
+function handleClick(evt: unknown, notification: Notification) {
+    void router.push({ name: 'policy-detail', params: { id: notification.policyId } });
+}
+
+function markAsRead(notification: Notification) {
     void notificationStore.markAsRead(notification.id);
 }
 

@@ -38,7 +38,6 @@ public interface PolicyMapper {
     @Mapping(target = "policyId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "note", ignore = true)
     @Mapping(target = "installment", ignore = true)
     void updateEntityFromRequest(UpdatePolicyRequest request, @MappingTarget Policy policy);
 

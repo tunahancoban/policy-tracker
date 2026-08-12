@@ -73,7 +73,4 @@ public class Policy {
 
     private Set<Integer> notifiedThresholds = new HashSet<>(); //30-15-7 day
 
-    public String toString() {
-        return "Policy.PolicyBuilder(id=" + this.id + ", policyId=" + this.policyId + ", customerId=" + this.customerId + ", type=" + this.type + ", startDate=" + this.startDate + ", endDate=" + this.endDate + ", premium=" + this.premium + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt + ")";
-    }
 }

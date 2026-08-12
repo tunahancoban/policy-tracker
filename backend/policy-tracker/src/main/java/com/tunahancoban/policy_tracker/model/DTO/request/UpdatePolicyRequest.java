@@ -25,4 +25,6 @@ public class UpdatePolicyRequest {
     private JsonNullable<LocalDate> endDate = JsonNullable.undefined();
 
     private JsonNullable<BigDecimal> premium = JsonNullable.undefined();
+
+    private JsonNullable<String> note = JsonNullable.undefined();
 }

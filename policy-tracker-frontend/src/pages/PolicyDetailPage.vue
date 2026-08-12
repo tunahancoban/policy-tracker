@@ -30,20 +30,22 @@
                 <span class="current">{{ policy.policyId }}</span>
             </div>
 
-            <div class="row items-center justify-between q-mb-md">
-                <q-btn flat color="primary" icon="arrow_back" label="Poliçe Listesine Dön" to="/policy" />
-            </div>
-
             <div class="row q-col-gutter-md">
                 <!-- Sol Kolon: Poliçe Bilgisi -->
                 <div class="col-12 col-md-4">
                     <q-card flat bordered class="full-height">
-                        <q-card-section class="bg-primary text-white row items-center q-pa-lg">
-                            <q-icon name="description" size="40px" class="q-mr-md" />
-                            <div>
-                                <div class="text-h6 text-weight-bold">{{ policy.policyId }}</div>
-                                <div class="text-caption text-blue-2">{{ policy.type }}</div>
+                        <q-card-section class="bg-primary text-white row items-center justify-between q-pa-lg">
+                            <div class="row items-center">
+                                <q-icon name="description" size="40px" class="q-mr-md" />
+                                <div>
+                                    <div class="text-h6 text-weight-bold">{{ policy.policyId }}</div>
+                                    <div class="text-caption text-blue-2">{{ policy.type }}</div>
+                                </div>
                             </div>
+
+                            <q-btn flat round dense icon="edit" color="white" @click="openEditDialog(policy)">
+                                <q-tooltip>Poliçeyi Düzenle</q-tooltip>
+                            </q-btn>
                         </q-card-section>
 
                         <q-separator />
@@ -86,7 +88,7 @@
                                     </q-item-section>
                                 </q-item>
 
-                                <q-item v-if="policy.note" class="q-py-sm">
+                                <q-item class="q-py-sm">
                                     <q-item-section avatar><q-icon name="notes" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Not</q-item-label>
@@ -163,8 +165,11 @@
             </div>
             <div class="empty-state__title">Poliçe bulunamadı</div>
             <div class="empty-state__description">Aradığınız poliçe kaydına erişilemiyor.</div>
-            <q-btn outline color="primary" label="Poliçe Listesine Dön" to="/policy" icon="arrow_back" no-caps />
         </div>
+
+        <!-- Poliçe Düzenleme Modalı -->
+        <EditPolicyModal v-if="selectedPolicy" v-model="isEditModalOpen" :policyData="selectedPolicy"
+            @updated="handlePolicyUpdate" />
     </q-page>
 </template>
 
@@ -172,10 +177,13 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePolicyDetail } from '@/composables/usePolicyDetail';
+import { usePolicyList } from '@/composables/usePolicyList';
 import { useInstallmentStore } from '@/stores/installment';
-import type { Installment, paymentStatus } from '@/types/installment.types'; // Dosya konumunuza göre ayarlayınız
+import type { Installment, paymentStatus } from '@/types/installment.types';
+import type { Policy } from '@/types/policy.types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { Notify } from 'quasar';
+import EditPolicyModal from '@/components/EditPolicyModal.vue';
 
 const route = useRoute();
 const policyId = route.params.id as string;
@@ -194,7 +202,43 @@ const {
     loadAllData,
 } = usePolicyDetail(policyId);
 
+const { updatePolicy } = usePolicyList();
+
 const paymentLoadingNo = ref<number | null>(null);
+
+// Düzenleme Modalı State'i
+const isEditModalOpen = ref<boolean>(false);
+const selectedPolicy = ref<Policy | null>(null);
+
+const openEditDialog = (targetPolicy: Policy) => {
+    selectedPolicy.value = targetPolicy;
+    isEditModalOpen.value = true;
+};
+
+const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
+    try {
+        await updatePolicy(event.id, event.data);
+        Notify.create({
+            message: 'Poliçe başarıyla güncellendi.',
+            color: 'positive',
+            icon: 'check_circle',
+            position: 'top-right',
+            timeout: 4000
+        });
+        isEditModalOpen.value = false;
+        await loadAllData(); // güncel veriyi tekrar çek
+    } catch (error) {
+        Notify.create({
+            message: 'Poliçe güncellenirken bir hata oluştu.',
+            color: 'negative',
+            icon: 'error',
+            position: 'top-right',
+            timeout: 5000
+        });
+        console.error('Policy Update Error:', error);
+        throw error;
+    }
+};
 
 const formatDateOnly = (dateStr: string | null | undefined): string => {
     if (!dateStr) return '—';
@@ -207,7 +251,6 @@ const formatCurrency = (value: number | null | undefined): string => {
     return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
 };
 
-// Statü Renk Tanımlamaları
 const getStatusColor = (status: paymentStatus): string => {
     switch (status) {
         case 'PAID':
@@ -220,7 +263,6 @@ const getStatusColor = (status: paymentStatus): string => {
     }
 };
 
-// Statü Metin Tanımlamaları
 const getStatusLabel = (status: paymentStatus): string => {
     switch (status) {
         case 'PAID':

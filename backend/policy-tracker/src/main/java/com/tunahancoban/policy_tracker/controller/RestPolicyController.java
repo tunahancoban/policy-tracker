@@ -56,7 +56,7 @@ public class RestPolicyController {
     @GetMapping(path = "/get-policy/{id}")
     public ResponseEntity<Policy> getPolicyById(@PathVariable String id){
         Policy policy = policyService.getPolicyById(id);
-        return ResponseEntity.ok( policy);
+        return ResponseEntity.ok(policy);
     }
 
     @PostMapping(path = "/create-policy")
