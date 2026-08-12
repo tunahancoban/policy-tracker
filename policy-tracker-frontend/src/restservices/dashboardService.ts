@@ -1,5 +1,5 @@
 import { api } from '../boot/axios';
-import { type DashboardSummary } from '@/types/dashboard.types';
+import type { DashboardSummary } from '@/types/dashboard.types';
 import type { CustomerSummary, ChartResponse } from '@/types/dashboard.types';
 import type { Activity } from '@/types/dashboard.types';
 

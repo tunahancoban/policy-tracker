@@ -16,6 +16,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Document(collection = "policies")
 @Getter
@@ -45,6 +47,7 @@ public class Policy {
     @NotNull
     private LocalDate startDate;
 
+    @Indexed
     @NotNull
     private LocalDate endDate; //Policy end date
 
@@ -67,6 +70,9 @@ public class Policy {
     @Builder.Default
     @LastModifiedDate
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    private Set<Integer> notifiedThresholds = new HashSet<>(); //30-15-7 day
+
     public String toString() {
         return "Policy.PolicyBuilder(id=" + this.id + ", policyId=" + this.policyId + ", customerId=" + this.customerId + ", type=" + this.type + ", startDate=" + this.startDate + ", endDate=" + this.endDate + ", premium=" + this.premium + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt + ")";
     }

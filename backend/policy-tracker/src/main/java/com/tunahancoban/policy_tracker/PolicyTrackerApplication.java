@@ -3,8 +3,10 @@ package com.tunahancoban.policy_tracker;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class PolicyTrackerApplication {
 	public static void main(String[] args) {
 		try {

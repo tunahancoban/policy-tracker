@@ -165,40 +165,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-/* --- WS Connection Indicator --- */
-.ws-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 12px;
-    letter-spacing: 0.2px;
-}
-
-.ws-indicator--online {
-    color: #15803d;
-    background-color: rgba(34, 197, 94, 0.12);
-}
-
-.ws-indicator--offline {
-    color: #b91c1c;
-    background-color: rgba(239, 68, 68, 0.1);
-}
-
-.ws-indicator__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-}
-
-.ws-indicator--online .ws-indicator__dot {
-    background-color: #22c55e;
-}
-
-.ws-indicator--offline .ws-indicator__dot {
-    background-color: #ef4444;
-}
-</style>
+<style scoped></style>

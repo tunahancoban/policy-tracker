@@ -6,7 +6,7 @@
                     <q-card-section class="text-center q-pb-none">
 
                         <div class="login-brand-icon">
-                            <q-icon name="shield" size="96px" color="primary" />
+                            <q-icon name="las la-shield-alt " size="96px" color="primary" />
                         </div>
                         <div class="text-h5 text-weight-bold text-grey-9 tracking-wide">
                             Sigorta Poliçe Takip

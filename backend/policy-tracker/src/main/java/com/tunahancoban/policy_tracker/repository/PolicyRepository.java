@@ -44,6 +44,10 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
 
     long countByEndDateBetweenAndCustomerId(LocalDate start, LocalDate end, String customerId);
 
+    List<Policy> findByEndDateAndNotifiedThresholdsNotContaining(
+            LocalDate endDate, Integer threshold
+    );
+
     @Aggregation(pipeline = {
             "{ '$group': { '_id': '$type', 'totalCount': { '$sum': 1 } } }"
     })

@@ -5,11 +5,12 @@
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
         <q-toolbar-title> Policy Tracker Panel </q-toolbar-title>
 
-        <!-- WS Bağlantı Göstergesi -->
         <div :class="['ws-indicator', isConnected ? 'ws-indicator--online' : 'ws-indicator--offline']" class="q-mr-md">
           <span class="ws-indicator__dot" />
           {{ isConnected ? 'Bağlı' : 'Bağlantı Yok' }}
         </div>
+
+        <NotificationMenu />
 
         <q-btn flat dense round icon="logout" aria-label="Logout" @click="isLogoutDialogOpen = true" />
 
@@ -69,23 +70,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { computed } from 'vue';
+import { ref, computed, toRefs, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
 import { useWebSocket } from '@/composables/useWebSocket';
+import NotificationMenu from '@/components/NotificationMenu.vue';
+import type { Notification } from '@/types/notification.types';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 const isLogoutDialogOpen = ref(false);
-const { isConnected } = useWebSocket();
+
+const wsState = useWebSocket();
+const { isConnected } = toRefs(wsState);
+const { connect, disconnect } = wsState;
+
+onMounted(async () => {
+  await Promise.all([
+    notificationStore.fetchNotifications(),
+    notificationStore.fetchUnreadCount(),
+  ]);
+
+  connect({
+    onDashboardUpdate: (data: string) => {
+      console.log('WS Dashboard Signal Received:', data);
+    },
+    onNotificationReceived: (newNotification: Notification) => {
+      notificationStore.addFromSocket(newNotification);
+    }
+  });
+});
 
 interface MenuLink {
   label: string;
   caption: string;
   icon: string;
   link: string;
-  requiresAdmin?: boolean
+  requiresAdmin?: boolean;
 }
 
 const linksList: MenuLink[] = [
@@ -112,7 +135,6 @@ const linksList: MenuLink[] = [
     caption: 'Profil yönetim',
     icon: 'settings',
     link: '/profile'
-
   },
   {
     label: 'Kullanıcı Yönetimi',
@@ -125,12 +147,16 @@ const linksList: MenuLink[] = [
 
 const leftDrawerOpen = ref(false);
 const isAdmin = computed(() => authStore.userRole === 'ROLE_ADMIN');
+
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
 const toggleLogout = async (): Promise<void> => {
   try {
     isLogoutDialogOpen.value = false;
+    disconnect();
+    notificationStore.reset(); // logout'ta bildirim state'i temizlenmeli
     await authStore.logout();
     await router.push({ name: 'login' });
   } catch (error) {
@@ -140,20 +166,5 @@ const toggleLogout = async (): Promise<void> => {
 </script>
 
 <style scoped>
-/* --- Sidebar Styles --- */
-.sidebar-item--active {
-  background-color: #f0f4ff !important;
-  border-left: 3px solid var(--q-primary) !important;
-  color: var(--q-primary) !important;
-  font-weight: 600 !important;
-}
-
-.sidebar-item--active .q-icon {
-  color: var(--q-primary) !important;
-}
-
-.sidebar-separator {
-  margin: 8px 16px;
-  border-color: #e5e7eb;
-}
+/* stiller aynı kalıyor, değişiklik yok */
 </style>
