@@ -30,13 +30,14 @@
             </div>
 
             <div class="row items-center justify-end q-py-sm q-mb-md">
-                <q-btn color="secondary" icon="edit" label="Müşteriyi Düzenle" @click="showModal = true" />
             </div>
 
             <!-- Main Layout Row -->
             <div class="row q-col-gutter-md fit">
+                <!-- Left Column (Profile Card) -->
                 <div class="col-12 col-md-4">
-                    <CustomerProfileCard :customer="customer" />
+                    <!-- @edit event'i CustomerProfileCard içindeki kalem butonundan tetiklenir -->
+                    <CustomerProfileCard :customer="customer" @edit="showModal = true" />
                 </div>
 
                 <!-- Right Column (Cards & Table) -->
@@ -200,7 +201,6 @@ const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
         console.error('Policy Renew Error:', err);
     }
 };
-
 
 onMounted(() => {
     void loadAllData();

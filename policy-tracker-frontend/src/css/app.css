@@ -19,6 +19,27 @@
   --q-secondary: #22ad1d !important;
 }
 
+/* --- Card Colors --- */
+.bg-soft-primary {
+  background-color: rgba(25, 118, 210, 0.12) !important;
+  color: #1976d2;
+}
+
+.bg-soft-positive {
+  background-color: rgba(33, 186, 69, 0.12) !important;
+  color: #21ba45;
+}
+
+.bg-soft-warning {
+  background-color: rgba(242, 192, 55, 0.18) !important;
+  color: #b98e00; /* Sarı üzeri yazı okunabilsin diye biraz koyulaştırıldı */
+}
+
+.bg-soft-negative {
+  background-color: rgba(193, 0, 21, 0.12) !important;
+  color: #c10015;
+}
+
 /* --- Typography Override --- */
 body,
 .q-page,

@@ -90,6 +90,28 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
+  const searchCustomer = async (searchParams: Record<string, string>) => {
+    isLoading.value = true;
+    try {
+      const result = await customerService.getCustomer({
+        ...searchParams,
+        page: '0',
+        size: String(pageSize.value),
+      });
+      customerData.value = result.content;
+      totalElements.value = result.totalElements;
+      totalPages.value = result.totalPages;
+      currentPage.value = 0;
+    } catch (error) {
+      console.error('Müşteri arama hatası:', error);
+      customerData.value = [];
+      totalElements.value = 0;
+      totalPages.value = 0;
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
   return {
     customerData,
     selectedCustomer,
@@ -102,6 +124,7 @@ export const useCustomerStore = defineStore('customer', () => {
     fetchCustomerData,
     fetchCustomerById,
     addCustomer,
+    searchCustomer,
     updateCustomer,
     deleteCustomer,
   };

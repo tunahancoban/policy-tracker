@@ -4,6 +4,7 @@ export interface CreatePolicyRequest {
   endDate: string;
   premium: number;
   customerId: string;
+  responsibleUserId: string;
   note: string;
   installment: number;
 }
@@ -14,6 +15,7 @@ export interface RenewPolicyRequest {
   endDate: string;
   premium: number;
   installment: number;
+  responsibleUserId: string;
   note?: string;
 }
 
@@ -30,6 +32,7 @@ export interface Policy {
   previousPolicyId: string;
   rootPolicyId: string;
   renewalSequence: number;
+  responsibleUserId: string;
   createdAt: string;
   updatedAt: string;
   notifiedThresholds: number[];
@@ -43,6 +46,7 @@ export interface PolicyForm {
   premium: number;
   startDate: string;
   endDate: string;
+  responsibleUserId: string;
 }
 
 export const SORT_FIELD_MAP: Record<string, string> = {

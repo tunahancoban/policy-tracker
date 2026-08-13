@@ -72,3 +72,56 @@ export const formatDate = (dateString: string): string => {
     date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
   );
 };
+
+// ---------------------------------------------------------------------------
+// Policy-form date helpers (previously duplicated in NewPolicyModal)
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates a slash-separated date string in YYYY/MM/DD format.
+ * Returns true only when the parsed date components round-trip correctly.
+ */
+export const isValidDate = (dateStr: string | null | undefined): boolean => {
+  if (!dateStr || dateStr.length !== 10) return false;
+
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return false;
+
+  const year  = parseInt(parts[0] as string, 10);
+  const month = parseInt(parts[1] as string, 10) - 1;
+  const day   = parseInt(parts[2] as string, 10);
+
+  const date = new Date(year, month, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth()    === month &&
+    date.getDate()     === day
+  );
+};
+
+/**
+ * Converts an ISO dash-separated date (YYYY-MM-DD) to slash-separated (YYYY/MM/DD).
+ * Returns an empty string for falsy input.
+ */
+export const formatDateToSlash = (dateStr?: string): string =>
+  dateStr ? dateStr.replace(/-/g, '/') : '';
+
+/** Returns today's date as a YYYY/MM/DD string. */
+export const getTodayFormatted = (): string => {
+  const today = new Date();
+  const year  = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day   = String(today.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
+};
+
+/**
+ * Given a YYYY/MM/DD start date, returns the same day one year later.
+ * Returns an empty string if the input is malformed.
+ */
+export const getNextYearFormatted = (startDateFormatted: string): string => {
+  const parts = startDateFormatted.split('/');
+  if (parts.length !== 3) return '';
+  const year = parseInt(parts[0] as string, 10) + 1;
+  return `${year}/${parts[1]}/${parts[2]}`;
+};

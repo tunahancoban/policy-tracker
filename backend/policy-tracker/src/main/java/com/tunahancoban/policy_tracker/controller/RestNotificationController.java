@@ -18,7 +18,7 @@ public class RestNotificationController {
     private final NotificationService notificationService;
 
     @GetMapping(path = "/get-notifications")
-    public ResponseEntity<Page<Notification>> getNotifications(@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.ASC)
+    public ResponseEntity<Page<Notification>> getNotifications(@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC)
                                                Pageable pageable){
 
         Page<Notification> notificationList = notificationService.getNotifications(pageable);

@@ -19,7 +19,7 @@
         <template v-else>
             <div v-for="card in cards" :key="card.key" class="col-12 col-sm-6 col-md-3 fade-in-up"
                 :class="card.delayClass">
-                <q-card class="summary-card q-pa-md full-height">
+                <q-card :class="card.backgroundColor" class="summary-card q-pa-md">
                     <div class="row items-center no-wrap q-gutter-md">
                         <q-icon :name="card.icon" :color="card.iconColor" size="24px" />
                         <div class="col">
@@ -47,6 +47,7 @@ const cards = computed(() => [
         key: 'customers',
         label: 'Toplam Müşteri',
         value: props.summary.totalCustomers,
+        backgroundColor: 'bg-soft-primary',
         icon: 'people',
         iconColor: 'primary',
         delayClass: '',
@@ -55,6 +56,7 @@ const cards = computed(() => [
         key: 'active',
         label: 'Aktif Poliçe',
         value: props.summary.activePolicyNumber,
+        backgroundColor: 'bg-soft-positive',
         icon: 'verified',
         iconColor: 'positive',
         delayClass: 'fade-in-up-delay-1',
@@ -63,6 +65,7 @@ const cards = computed(() => [
         key: 'expiring',
         label: 'Yakında Sona Erecek',
         value: props.summary.expiringSoonPolicies,
+        backgroundColor: 'bg-soft-warning',
         icon: 'schedule',
         iconColor: 'warning',
         delayClass: 'fade-in-up-delay-2',
@@ -71,6 +74,7 @@ const cards = computed(() => [
         key: 'expired',
         label: 'Süresi Dolmuş',
         value: props.summary.expiredPolicies,
+        backgroundColor: 'bg-soft-negative',
         icon: 'warning',
         iconColor: 'negative',
         delayClass: 'fade-in-up-delay-3',

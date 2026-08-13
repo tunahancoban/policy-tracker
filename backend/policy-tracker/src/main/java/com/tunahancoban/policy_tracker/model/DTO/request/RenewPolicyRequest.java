@@ -30,6 +30,9 @@ public class RenewPolicyRequest {
     private BigDecimal premium;
 
     @NotNull
+    private String responsibleUserId;
+
+    @NotNull
     private InstallmentOptions installment;
 
     @NotBlank

@@ -42,7 +42,7 @@ public class PolicyServiceImp implements PolicyService {
 
 
     @Override
-    public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable) {
+    public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type,  String responsibleUserId,Pageable pageable) {
         log.debug("Searching policies - customerId: {}, policyId: {}, type: {}, page: {}",
                 customerId, policyId, type, pageable);
 
@@ -50,6 +50,7 @@ public class PolicyServiceImp implements PolicyService {
         Policy searchCriteria = Policy.builder()
                 .policyId(policyId)
                 .customerId(customerId)
+                .responsibleUserId(responsibleUserId)
                 .type(type).build();
 
         ExampleMatcher matcher = ExampleMatcher.matching()

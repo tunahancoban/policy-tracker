@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface PolicyService {
 
-    Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, Pageable pageable);
+    Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type,String responsibleUserId ,Pageable pageable);
     Policy getPolicyById(String policyId);
     Policy createPolicy(CreatePolicyRequest request);
     void deletePolicy(String policyID);

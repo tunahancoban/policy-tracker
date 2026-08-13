@@ -106,98 +106,54 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useUserList } from '@/composables/useUserList';
+import { useNotify } from '@/composables/useNotify';
+import { useUserForm } from '@/composables/useUserForm';
 import { userColumns, userRoleOptions } from '@/types/user.types';
-import type { User, RegisterRequest, UserForm, UpdateUserRequest } from '@/types/user.types';
+import type { User } from '@/types/user.types';
 
 const { users, isLoading, loadUsers, addUser, updateUser, deleteUser } = useUserList();
-const $q = useQuasar();
-const wantsPasswordChange = ref(false);
+const { notifySuccess, notifyError } = useNotify();
+const $q = useQuasar(); // artık sadece $q.dialog (silme onayı) için kullanılıyor
 
+const {
+    form,
+    newPassword,
+    wantsPasswordChange,
+    isEditMode,
+    resetForCreate,
+    resetForEdit,
+    buildCreatePayload,
+    buildUpdatePayload,
+} = useUserForm();
 
-const originalUser = ref<User | null>(null);
 const showDialog = ref(false);
-const isEditMode = ref(false);
-const newPassword = ref('');
-
-
-const initialForm: UserForm = {
-    id: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    role: 'ROLE_USER',
-};
-
-const form = ref<UserForm>({ ...initialForm });
 
 const openCreateDialog = () => {
-    isEditMode.value = false;
-    form.value = { ...initialForm };
-    newPassword.value = '';
-    wantsPasswordChange.value = false; // eklendi
+    resetForCreate();
     showDialog.value = true;
 };
 
-
 const openEditDialog = (user: User) => {
-    isEditMode.value = true;
-    originalUser.value = user; // orijinali sakla
-    form.value = {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-    };
-    newPassword.value = '';
-    wantsPasswordChange.value = false;
+    resetForEdit(user);
     showDialog.value = true;
 };
 
 const handleCreateUser = async () => {
-    const payload: RegisterRequest = {
-        firstName: form.value.firstName,
-        lastName: form.value.lastName,
-        email: form.value.email,
-        password: form.value.password!,
-        role: form.value.role,
-    };
-    await addUser(payload);
-    $q.notify({ message: 'Yeni kullanıcı başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+    await addUser(buildCreatePayload());
+    notifySuccess('Yeni kullanıcı başarıyla oluşturuldu.');
 };
 
 const handleUpdateUser = async () => {
-    if (!form.value.id || !originalUser.value) {
-        throw new Error('Güncellenecek kullanıcı bilgisi eksik.');
-    }
-
-    const patchData: UpdateUserRequest = {};
-
-    if (form.value.firstName !== originalUser.value.firstName) {
-        patchData.firstName = form.value.firstName;
-    }
-    if (form.value.lastName !== originalUser.value.lastName) {
-        patchData.lastName = form.value.lastName;
-    }
-    if (form.value.email !== originalUser.value.email) {
-        patchData.email = form.value.email;
-    }
-    if (form.value.role !== originalUser.value.role) {
-        patchData.role = form.value.role;
-    }
-    if (wantsPasswordChange.value && form.value.password) {
-        patchData.password = form.value.password;
-    }
+    const patchData = buildUpdatePayload();
 
     // Hiçbir şey değişmemişse gereksiz istek atma
-    if (Object.keys(patchData).length === 0) {
+    if (!patchData) {
         showDialog.value = false;
         return;
     }
 
     await updateUser(patchData, form.value.id);
-    $q.notify({ message: 'Kullanıcı bilgileri başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+    notifySuccess('Kullanıcı bilgileri başarıyla güncellendi.');
 };
 
 const saveUser = async () => {
@@ -210,7 +166,7 @@ const saveUser = async () => {
         showDialog.value = false;
     } catch (error) {
         console.error('Kullanıcı işlemi başarısız:', error);
-        $q.notify({ message: 'İşlem sırasında bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        notifyError('İşlem sırasında bir hata oluştu.');
     }
 };
 
@@ -228,10 +184,10 @@ const confirmDelete = (user: User) => {
 const handleDelete = async (user: User) => {
     try {
         await deleteUser(user.id);
-        $q.notify({ message: 'Kullanıcı başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+        notifySuccess('Kullanıcı başarıyla silindi.');
     } catch (error) {
         console.error('Kullanıcı silinirken hata:', error);
-        $q.notify({ message: 'Kullanıcı silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        notifyError('Kullanıcı silinirken bir hata oluştu.');
     }
 };
 

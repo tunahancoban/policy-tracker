@@ -36,12 +36,13 @@ public class RestPolicyController {
             @RequestParam(name = "policyId", required = false) String policyId,
             @RequestParam(name = "customerId", required = false) String customerId,
             @RequestParam(name = "type", required = false) PolicyType type,
+            @RequestParam(name = "responsibleUserId", required = false) String responsibleUserId,
             @PageableDefault(size = 5, sort = "endDate", direction = Sort.Direction.ASC)
             Pageable pageable) {
 
         validateSort(pageable);
 
-        Page<Policy> policyList = policyService.getPolicyWithParams(customerId, policyId, type, pageable);
+        Page<Policy> policyList = policyService.getPolicyWithParams(customerId, policyId, type,  responsibleUserId ,pageable);
         return ResponseEntity.ok( policyList);
     }
 

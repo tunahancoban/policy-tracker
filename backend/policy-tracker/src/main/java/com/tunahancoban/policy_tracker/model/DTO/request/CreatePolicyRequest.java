@@ -34,6 +34,9 @@ public class CreatePolicyRequest {
     @NotNull
     private LocalDate endDate; //Policy end date
 
+    @NotBlank
+    private String responsibleUserId;
+
     @Positive
     private BigDecimal premium;
 

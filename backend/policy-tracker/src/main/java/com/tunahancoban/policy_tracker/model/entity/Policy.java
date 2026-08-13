@@ -54,10 +54,13 @@ public class Policy {
     @Positive
     private BigDecimal premium;
 
+    private String responsibleUserId;
+
     //Renewal Metadata
     private String previousPolicyId;
 
     private String rootPolicyId;
+
 
     @Builder.Default
     private Integer renewalSequence = 0;

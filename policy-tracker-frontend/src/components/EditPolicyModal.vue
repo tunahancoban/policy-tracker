@@ -33,6 +33,10 @@
                             val => val !== null && val !== undefined || 'Prim tutarı zorunludur',
                             val => val > 0 || 'Prim tutarı 0\'dan büyük olmalıdır'
                         ]" />
+                    <!-- Sorumlu User-->
+                    <q-select v-model="form.responsibleUserId" :options="filteredUserOptions" option-value="userId"
+                        option-label="fullName" emit-value map-options label="Sorumlu Kullanıcı *" outlined dense
+                        :rules="[val => !!val || 'Sorumlu kullanıcı seçimi zorunludur']" />
 
                     <!-- Tarih Alanları -->
                     <q-input v-model="form.startDate" label="Başlangıç Tarihi *" outlined dense stack-label
@@ -76,7 +80,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useCustomerStore } from '../stores/customer';
+import { useUserStore } from '../stores/user';
 import { policyTypeOptions, type Policy, type PolicyForm } from '../types/policy.types';
+
+
+const userStore = useUserStore();
 
 interface Props {
     modelValue: boolean;
@@ -108,7 +116,8 @@ const form = ref<PolicyForm>({
     note: '',
     installment: 0,
     startDate: '',
-    endDate: ''
+    endDate: '',
+    responsibleUserId: ''
 });
 
 const originalForm = ref<PolicyForm>({ ...form.value });
@@ -122,6 +131,20 @@ const filteredCustomerOptions = computed<CustomerOption[]>(() => {
 
         return {
             customerId: customer.customerId,
+            fullName: `${namePart} ${identityPart}`
+        };
+    });
+});
+
+const filteredUserOptions = computed(() => {
+    const data = Array.isArray(userStore.users) ? userStore.users : [];
+
+    return data.map(user => {
+        const namePart = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'İsimsiz Kullanıcı';
+        const identityPart = `(ID: ${user.id})`;
+
+        return {
+            userId: user.id,
             fullName: `${namePart} ${identityPart}`
         };
     });
@@ -158,6 +181,7 @@ const onModalShow = () => {
         type: props.policyData.type || '',
         premium: props.policyData.premium || 0,
         installment: props.policyData.installment || 0,
+        responsibleUserId: props.policyData.responsibleUserId || '',
         note: props.policyData.note || '',
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
         endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : ''
