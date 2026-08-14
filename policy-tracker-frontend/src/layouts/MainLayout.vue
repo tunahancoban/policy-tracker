@@ -12,6 +12,17 @@
 
         <NotificationMenu />
 
+        <!-- Dark Mode Toggle -->
+        <q-btn
+          flat dense round
+          :icon="isDarkMode ? 'light_mode' : 'dark_mode'"
+          :aria-label="isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'"
+          @click="toggleDarkMode"
+          class="dark-mode-btn q-mr-xs"
+        >
+          <q-tooltip>{{ isDarkMode ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç' }}</q-tooltip>
+        </q-btn>
+
         <q-btn flat dense round icon="logout" aria-label="Logout" @click="isLogoutDialogOpen = true" />
 
         <q-dialog v-model="isLogoutDialogOpen">
@@ -66,11 +77,27 @@
         </transition>
       </router-view>
     </q-page-container>
+
+    <!-- Scroll to Top FAB -->
+    <transition name="scroll-top-fade">
+      <q-btn
+        v-show="showScrollTop"
+        fab
+        icon="keyboard_arrow_up"
+        color="primary"
+        class="scroll-to-top-btn"
+        aria-label="Yukarı Çık"
+        @click="scrollToTop"
+      >
+        <q-tooltip>Yukarı Çık</q-tooltip>
+      </q-btn>
+    </transition>
+
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRefs, onMounted } from 'vue';
+import { ref, computed, toRefs, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
@@ -87,7 +114,41 @@ const wsState = useWebSocket();
 const { isConnected } = toRefs(wsState);
 const { connect, disconnect } = wsState;
 
+// --- Dark Mode ---
+const isDarkMode = ref(localStorage.getItem('darkMode') === 'true');
+
+function applyDarkMode(value: boolean) {
+  if (value) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+}
+
+function toggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value;
+  localStorage.setItem('darkMode', String(isDarkMode.value));
+  applyDarkMode(isDarkMode.value);
+}
+
+// --- Scroll to Top ---
+const showScrollTop = ref(false);
+
+function handleScroll() {
+  showScrollTop.value = window.scrollY > 300;
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 onMounted(async () => {
+  // Dark mode başlangıç uygulaması
+  applyDarkMode(isDarkMode.value);
+
+  // Scroll dinleyici
+  window.addEventListener('scroll', handleScroll);
+
   await Promise.all([
     notificationStore.fetchNotifications(),
     notificationStore.fetchUnreadCount(),
@@ -101,6 +162,10 @@ onMounted(async () => {
       notificationStore.addFromSocket(newNotification);
     }
   });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 
 interface MenuLink {
@@ -166,5 +231,40 @@ const toggleLogout = async (): Promise<void> => {
 </script>
 
 <style scoped>
-/* stiller aynı kalıyor, değişiklik yok */
+/* Dark mode toggle butonu hover efekti */
+.dark-mode-btn {
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+.dark-mode-btn:hover {
+  transform: rotate(20deg);
+  opacity: 0.85;
+}
+
+/* Scroll to top butonu konumu */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.scroll-to-top-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* Scroll top butonunun giriş/çıkış animasyonu */
+.scroll-top-fade-enter-active,
+.scroll-top-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.scroll-top-fade-enter-from,
+.scroll-top-fade-leave-to {
+  opacity: 0;
+  transform: translateY(12px);
+}
 </style>
