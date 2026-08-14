@@ -1,8 +1,8 @@
 <template>
     <q-card flat bordered class="col responsive-card">
         <q-card-section class="row items-center justify-between q-py-md responsive-header">
-            <div class="text-h6 text-grey-8 row items-center text-weight-bold">
-                <q-icon name="description" color="secondary" class="q-mr-sm" size="24px" />
+            <div class="text-h6  row items-center text-weight-bold">
+                <q-icon name="description" class="q-mr-sm" size="24px" />
                 {{ title }}
             </div>
             <q-btn v-if="showAddButton" outline color="secondary" icon="add" :label="addButtonLabel" dense
@@ -34,7 +34,7 @@
                 <template v-slot:body-cell-customerId="props">
                     <q-td :props="props">
                         <div class="row items-center no-wrap">
-                            <span class="text-weight-medium text-grey-9">
+                            <span class="text-weight-medium ">
                                 {{ props.row.customerFullName }}
                             </span>
                         </div>

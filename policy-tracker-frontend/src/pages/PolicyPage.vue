@@ -7,28 +7,30 @@
             <span class="current">Poliçeler</span>
         </div>
 
-        <div class="row items-center justify-between q-mb-md">
-            <div class="text-h5 text-weight-bold text-grey-8 row items-center">
-                <q-icon name="description" color="primary" class="q-mr-sm" size="32px" />
-                Genel Poliçe Yönetimi
-            </div>
-            <q-btn color="primary" icon="add" label="Yeni Poliçe Oluştur" @click="openCreateDialog" />
-        </div>
+        <q-card flat bordered class="my-card">
+            <!-- Kart İçi Başlık ve Aksiyon Butonu -->
+            <q-card-section class="row items-center q-pb-none">
+                <div class="text-h6 text-weight-bold">Genel Poliçe Yönetimi</div>
+                <q-space />
+                <q-btn color="primary" icon="add" label="Yeni Poliçe Oluştur" @click="openCreateDialog" />
+            </q-card-section>
 
-        <q-card flat bordered class="q-mb-md">
+            <q-separator class="q-mt-md" />
+
+            <!-- Filtreleme Alanı -->
             <q-card-section class="q-pb-none">
-                <div class="text-subtitle2 text-grey-7 q-mb-sm">Esnek Filtreleme Seçenekleri</div>
                 <div class="row q-col-gutter-sm items-center">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         <q-input v-model="searchQuery" outlined dense label="Poliçe No veya Müşteri ID ile Ara"
-                            placeholder="Örn: TRF2026... veya CST-000002" clearable @keyup.enter="onSearch">
+                            placeholder="Örn: TRF2026... veya CST-000002" clearable @keyup.enter="onSearch"
+                            @clear="onSearch">
                             <template v-slot:append>
-                                <q-icon name="search" />
+                                <q-icon name="search" @click="onSearch" class="cursor-pointer" />
                             </template>
                         </q-input>
                     </div>
 
-                    <div class="col-12 col-md-2">
+                    <div class="col-12 col-md-3">
                         <q-select v-model="selectedType" outlined dense :options="policyTypeOptions"
                             label="Poliçe Türü Filtresi" emit-value map-options clearable />
                     </div>
@@ -38,27 +40,30 @@
                             label="Aktiflik Durumu" emit-value map-options />
                     </div>
 
-                    <div class="col-12 col-md-2 row q-gutter-x-sm justify-end">
+                    <div class="col-12 col-md-2">
                         <q-btn label="Temizle" color="primary" outline @click="resetFilters" />
                     </div>
                 </div>
             </q-card-section>
-        </q-card>
 
-        <!-- POLICY TABLE -->
-        <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
-            title="Genel Poliçe Yönetimi" :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest"
-            class="clickable-table">
-            <template v-slot:row-actions="{ policy }">
-                <q-btn flat round color="primary" icon="account_circle" size="sm" :to="`/customer/${policy.customerId}`"
-                    @click.stop />
-                <q-btn flat round color="secondary" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
-                <q-btn flat round color="secondary" icon="autorenew" size="sm" @click.stop="openRenewDialog(policy)">
-                    <q-tooltip>Poliçeyi Yenile</q-tooltip>
-                </q-btn>
-                <q-btn flat round color="red" icon="delete" size="sm" @click.stop="handlePolicyDelete(policy)" />
-            </template>
-        </PolicyTable>
+            <!-- Tablo Alanı -->
+            <q-card-section>
+                <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
+                    :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest" class="clickable-table">
+                    <template v-slot:row-actions="{ policy }">
+                        <q-btn flat round color="white" icon="account_circle" size="sm"
+                            :to="`/customer/${policy.customerId}`" @click.stop />
+                        <q-btn flat round color="blue" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
+                        <q-btn flat round color="green" icon="autorenew" size="sm"
+                            @click.stop="openRenewDialog(policy)">
+                            <q-tooltip>Poliçeyi Yenile</q-tooltip>
+                        </q-btn>
+                        <q-btn flat round color="red" icon="delete" size="sm"
+                            @click.stop="handlePolicyDelete(policy)" />
+                    </template>
+                </PolicyTable>
+            </q-card-section>
+        </q-card>
 
         <!-- Yeni Poliçe Oluşturma ve Yenileme Ortak Modalı -->
         <NewPolicyModal v-model="isCreateModalOpen" :is-renewal="isRenewal" :policy-data="selectedPolicy"

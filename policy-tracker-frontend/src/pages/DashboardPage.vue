@@ -1,10 +1,7 @@
 <template>
     <q-page class="q-pa-md fade-in-up">
 
-        <!-- Breadcrumb -->
-        <div class="app-breadcrumb">
-            <span class="current">Dashboard</span>
-        </div>
+
 
         <q-card class="my-card">
             <q-card-section>

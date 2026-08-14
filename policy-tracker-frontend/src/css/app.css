@@ -15,364 +15,303 @@
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
 
-  --q-primary: #1e88e5 !important;
-  --q-secondary: #22ad1d !important;
+  --q-primary: #76abae;
+  --q-secondary: #31363f;
 
-  /* --- Light mode tokens (default) --- */
-  --bg-base: #f5f6f8;
-  --bg-surface: #ffffff;
-  --bg-elevated: #f8f9fa;
-  --bg-hover: #f1f3f5;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --text-primary: #1f2937;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
-  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.1);
-  --accent-active-bg: rgba(30, 136, 229, 0.12);
-  --accent-active-text: #1e88e5;
-  --header-bg: #ffffff;
-  --scrollbar-thumb: #c1c1c1;
-  --scrollbar-thumb-hover: #a8a8a8;
+  /* --- Light Mode Tokens (#EEEEEE, #76ABAE, #31363F, #222831) --- */
+  --bg-base: #eeeeee; /* rgb(238, 238, 238) - Temel açık zemin */
+  --bg-surface: #f7f7f7; /* Kartlar ve paneller için aydınlık temiz yüzey */
+  --bg-elevated: #e2e5e8; /* Yükseltilmiş yüzeyler / Form alanları */
+  --bg-hover: #d5dade; /* Hover arka planı */
+  --border-color: rgba(34, 40, 49, 0.12);
+  --border-focus: rgba(118, 171, 174, 0.6);
+
+  --text-primary: #222831; /* rgb(34, 40, 49) - Net koyu ana metin */
+  --text-secondary: #31363f; /* rgb(49, 54, 63) - İkincil metin */
+  --text-muted: #5c6470; /* Soluk detaylar / İkonlar */
+
+  --shadow-card: 0 2px 6px rgba(34, 40, 49, 0.06);
+  --shadow-card-hover: 0 8px 20px rgba(34, 40, 49, 0.12);
+
+  --accent-active-bg: rgba(118, 171, 174, 0.16);
+  --accent-active-text: #4f878a; /* Açık modda okunabilirliği artırılmış Teal tonu */
+  --header-bg: #f7f7f7;
+  --scrollbar-thumb: #c2c9cf;
+  --scrollbar-thumb-hover: #76abae;
+
+  /* Status Colors (Light) */
+  --badge-pos-bg: rgba(33, 186, 69, 0.14);
+  --badge-pos-text: #1b8a37;
+  --badge-warn-bg: rgba(242, 192, 55, 0.2);
+  --badge-warn-text: #946f00;
+  --badge-neg-bg: rgba(219, 68, 85, 0.15);
+  --badge-neg-text: #c0293b;
 }
 
-/* --- Dark mode tokens (override) --- */
-body.dark-mode {
-  --bg-base: #121212;
-  --bg-surface: #1e1e1e;
-  --bg-elevated: #2a2a2a;
-  --bg-hover: #333333;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --text-primary: #e8e8e8;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5);
-  --shadow-card-hover: 0 6px 24px rgba(0, 0, 0, 0.65);
-  --accent-active-bg: rgba(30, 136, 229, 0.18);
-  --accent-active-text: #90caf9;
-  --header-bg: #1a1a2e;
-  --scrollbar-thumb: #333333;
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+/* --- Dark Mode Tokens (Slate Charcoal & Mint Teal) --- */
+body.body--dark {
+  --bg-base: #222831; /* rgb(34, 40, 49) - Siyaha kaçmayan mat kömür zemin */
+  --bg-surface: #31363f; /* rgb(49, 54, 63) - Kartlar, Drawer, Menüler */
+  --bg-elevated: #3d434d; /* Inputlar ve yükseltilmiş yüzeyler */
+  --bg-hover: #484e59; /* Hover arka planı */
+  --border-color: rgba(238, 238, 238, 0.1);
+  --border-focus: rgba(118, 171, 174, 0.6);
+
+  --text-primary: #eeeeee; /* rgb(238, 238, 238) - Yüksek kontrastlı açık ana metin */
+  --text-secondary: #b8c1c8; /* İkincil metin */
+  --text-muted: #808b96; /* Soluk gri detaylar */
+
+  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --accent-active-bg: rgba(118, 171, 174, 0.2);
+  --accent-active-text: #76abae; /* rgb(118, 171, 174) - Karanlıkta parlayan Teal vurgusu */
+  --header-bg: #282e37;
+  --scrollbar-thumb: #484e59;
+  --scrollbar-thumb-hover: #76abae;
+
+  /* Status Colors (Dark Overrides) */
+  --badge-pos-bg: rgba(102, 187, 106, 0.18);
+  --badge-pos-text: #81c784;
+  --badge-warn-bg: rgba(255, 183, 77, 0.18);
+  --badge-warn-text: #ffb74d;
+  --badge-neg-bg: rgba(239, 83, 80, 0.2);
+  --badge-neg-text: #ef9a9a;
 }
 
 /* ============================
    Base / Layout
    ============================ */
 body {
-  background-color: var(--bg-base) !important;
-  color: var(--text-primary) !important;
+  font-family: var(--font-family-base);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
 }
 
 .q-layout,
 .q-page,
 .q-page-container {
-  background-color: var(--bg-base) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
 .q-header {
-  background-color: var(--header-bg) !important;
+  background-color: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
 }
 
 .q-toolbar {
-  background-color: transparent !important;
+  background-color: transparent;
 }
 
-/* Toolbar başlık metni — aydınlık modda koyu, karanlık modda açık */
 .q-toolbar-title,
 .q-toolbar .q-toolbar__title {
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .q-separator {
-  background-color: var(--border-color) !important;
+  background-color: var(--border-color);
 }
 
 /* ============================
    Typography
    ============================ */
-body,
-.q-page,
-.q-card,
-.q-dialog,
-.q-toolbar,
-.q-item,
-.q-table,
-.q-btn,
-.q-input,
-.q-select {
-  font-family: var(--font-family-base) !important;
-}
-
 .text-h4 {
-  font-weight: 700 !important;
+  font-weight: 700;
   letter-spacing: -0.3px;
 }
 .text-h5 {
-  font-weight: 700 !important;
+  font-weight: 700;
   letter-spacing: -0.2px;
 }
 .text-h6 {
-  font-weight: 600 !important;
+  font-weight: 600;
   letter-spacing: -0.1px;
 }
 .text-subtitle1 {
-  font-weight: 500 !important;
+  font-weight: 500;
 }
 .text-subtitle2 {
-  font-weight: 500 !important;
-  font-size: 0.825rem !important;
+  font-weight: 500;
+  font-size: 0.825rem;
 }
 
 .text-grey-6 {
-  color: var(--text-muted) !important;
+  color: var(--text-muted);
 }
 .text-grey-7,
 .text-grey-8,
 .text-grey-9 {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 /* ============================
    Drawer / Sidebar
    ============================ */
 .q-drawer {
-  background-color: var(--bg-surface) !important;
-  border-right: 1px solid var(--border-color) !important;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border-color);
 }
 
 .q-drawer .q-item-label--header {
-  color: var(--text-muted) !important;
+  color: var(--text-muted);
 }
 
 .q-drawer .q-item {
-  color: var(--text-secondary) !important;
-  border-radius: 8px;
+  color: var(--text-secondary);
+  border-radius: var(--border-radius-sm);
   margin: 2px 8px;
 }
 
 .q-drawer .q-item:hover {
-  background-color: var(--bg-hover) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .q-drawer .sidebar-item--active {
-  background-color: var(--accent-active-bg) !important;
-  border-radius: 8px;
+  background-color: var(--accent-active-bg);
+  border-radius: var(--border-radius-sm);
 }
 
 .q-drawer .sidebar-item--active .q-item__label,
 .q-drawer .sidebar-item--active .q-icon {
-  color: var(--accent-active-text) !important;
+  color: var(--accent-active-text);
 }
 
 /* ============================
    Cards
    ============================ */
 .q-card {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-  border-radius: var(--border-radius-md) !important;
-  box-shadow: var(--shadow-card) !important;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-card);
   transition:
     box-shadow var(--transition-normal),
-    transform var(--transition-normal),
-    background-color 0.3s ease,
-    color 0.3s ease;
+    transform var(--transition-normal);
 }
 
 .q-card:hover {
-  box-shadow: var(--shadow-card-hover) !important;
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* ============================
    Tables
    ============================ */
-.q-table__container {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-  transition: background-color 0.3s ease;
-}
-
+.q-table__container,
 .q-table {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
-.q-table thead tr {
-  background-color: var(--bg-elevated) !important;
-}
-
+.q-table thead tr,
 .q-table thead th {
-  color: var(--text-secondary) !important;
-  background-color: var(--bg-elevated) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  background-color: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .q-table tbody tr {
-  color: var(--text-primary) !important;
-  background-color: var(--bg-surface) !important;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
 }
 
 .q-table tbody tr:hover {
-  background-color: var(--bg-hover) !important;
+  background-color: var(--bg-hover);
 }
 
 .q-table tbody td {
-  color: var(--text-primary) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Karanlık modda tablo — Quasar kendi renklerini override edebilir */
-body.dark-mode .q-table__container,
-body.dark-mode .q-table {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-}
-
-body.dark-mode .q-table thead th {
-  color: #a0aec0 !important;
-  background-color: var(--bg-elevated) !important;
-}
-
-body.dark-mode .q-table tbody tr {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
-}
-
-body.dark-mode .q-table tbody td {
-  color: var(--text-primary) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
-}
-
-body.dark-mode .q-table tbody tr:hover td {
-  background-color: var(--bg-hover) !important;
-}
-
-/* Tablo bottom bar (satır sayısı seçici vb.) */
-body.dark-mode .q-table__bottom {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-secondary) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+.q-table__bottom {
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
 }
 
 /* ============================
    Inputs & Selects
    ============================ */
 .q-field__control {
-  background-color: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated);
 }
 
 .q-field__native,
 .q-field__input,
-.q-field__label,
 .q-field__marginal {
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
+  caret-color: var(--accent-active-text);
+}
+
+.q-field__label {
+  color: var(--text-secondary);
 }
 
 .q-field--outlined .q-field__control {
-  border-color: var(--border-color) !important;
+  border-color: var(--border-color);
 }
 
 .q-field--outlined:hover .q-field__control {
-  border-color: rgba(128, 128, 128, 0.4) !important;
+  border-color: var(--border-focus);
 }
 
 .q-field--focused .q-field__control {
-  border-color: var(--accent-active-text) !important;
-}
-
-/* Karanlık modda input placeholder ve metin */
-body.dark-mode .q-field__native,
-body.dark-mode .q-field__input {
-  color: var(--text-primary) !important;
-  caret-color: var(--text-primary) !important;
-}
-
-body.dark-mode .q-field__label {
-  color: var(--text-secondary) !important;
-}
-
-body.dark-mode .q-field__control {
-  background-color: #2a2a2a !important;
-}
-
-body.dark-mode .q-field--outlined .q-field__control {
-  border-color: rgba(255, 255, 255, 0.14) !important;
-}
-
-body.dark-mode .q-field--outlined:hover .q-field__control {
-  border-color: rgba(255, 255, 255, 0.28) !important;
+  border-color: var(--accent-active-text);
 }
 
 /* ============================
    Menus & Popups
    ============================ */
 .q-menu {
-  background-color: var(--bg-elevated) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-card) !important;
+  box-shadow: var(--shadow-card);
 }
 
 .q-item {
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
 }
 
 .q-item:hover {
-  background-color: var(--bg-hover) !important;
+  background-color: var(--bg-hover);
 }
 
 /* ============================
    Dialogs / Modals
    ============================ */
 .q-dialog .q-card {
-  background-color: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated);
   border: 1px solid var(--border-color);
 }
 
-.q-dialog .q-card-section {
-  color: var(--text-primary) !important;
-}
-
-/* Karanlık modda modal içerik renkleri */
-body.dark-mode .q-dialog .q-card {
-  background-color: #252525 !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-body.dark-mode .q-dialog .q-card-section,
-body.dark-mode .q-dialog .q-card-actions {
-  color: var(--text-primary) !important;
-}
-
-/* Karanlık modda dialog'daki flat butonlar */
-body.dark-mode .q-dialog .q-btn.q-btn--flat {
-  color: var(--text-secondary) !important;
-}
-
-body.dark-mode .q-dialog .q-btn.q-btn--flat[color='negative'] {
-  color: #ef9a9a !important;
-}
-
-body.dark-mode .q-dialog .q-btn.q-btn--flat[color='grey'] {
-  color: #9ca3af !important;
+.q-dialog .q-card-section,
+.q-dialog .q-card-actions {
+  color: var(--text-primary);
 }
 
 .modal-card {
   min-width: 450px;
   max-width: 600px;
-  border-radius: var(--border-radius-lg) !important;
+  border-radius: var(--border-radius-lg);
 }
 
 @media (max-width: 599px) {
   .modal-card {
-    min-width: auto !important;
+    min-width: auto;
     width: 95vw;
   }
 }
@@ -380,106 +319,47 @@ body.dark-mode .q-dialog .q-btn.q-btn--flat[color='grey'] {
 /* ============================
    Chips & Badges
    ============================ */
-
-/*
-  UYARI: .q-chip'e genel color override UYGULANMIYOR.
-  Quasar'ın color/text-color prop'ları (color="primary", text-color="white" vb.)
-  bileşen seviyesinde inline stil olarak gelir; !important ile ezersek
-  tüm renkli chip'ler bozulur.
-  Yalnızca renksiz (nötr) chip'ler için minimal stil uygulanır.
-*/
-
-/* Renk prop'u VERİLMEMİŞ nötr chip'ler için arka plan düzeltmesi */
-.q-chip:not([class*='bg-']) {
+.q-chip {
   background-color: var(--bg-hover);
   color: var(--text-primary);
 }
 
-/* Karanlık modda nötr chip'ler */
-body.dark-mode .q-chip:not([class*='bg-']) {
-  background-color: var(--bg-elevated);
-  color: var(--text-primary);
-}
-
-.policy-type-chip {
-  font-weight: 600 !important;
-  font-size: 0.72rem !important;
-  letter-spacing: 0.3px;
-  border-radius: 4px !important;
-}
-
+.policy-type-chip,
 .status-chip {
-  font-weight: 600 !important;
-  font-size: 0.72rem !important;
+  font-weight: 600;
+  font-size: 0.72rem;
   letter-spacing: 0.3px;
+  border-radius: 4px;
 }
 
-/* Soft renk chip'leri (bg-soft-* sınıfı kullananlar) */
 .bg-soft-primary {
-  background-color: rgba(30, 136, 229, 0.12) !important;
-  color: var(--accent-active-text) !important;
+  background-color: var(--accent-active-bg);
+  color: var(--accent-active-text);
 }
 
 .bg-soft-positive {
-  background-color: rgba(33, 186, 69, 0.12) !important;
-  color: #21ba45;
+  background-color: var(--badge-pos-bg);
+  color: var(--badge-pos-text);
 }
 
 .bg-soft-warning {
-  background-color: rgba(242, 192, 55, 0.18) !important;
-  color: #b98e00;
+  background-color: var(--badge-warn-bg);
+  color: var(--badge-warn-text);
 }
 
 .bg-soft-negative {
-  background-color: rgba(193, 0, 21, 0.12) !important;
-  color: #c10015;
-}
-
-body.dark-mode .bg-soft-primary {
-  color: #90caf9 !important;
-}
-body.dark-mode .bg-soft-positive {
-  background-color: rgba(102, 187, 106, 0.15) !important;
-  color: #81c784 !important;
-}
-body.dark-mode .bg-soft-warning {
-  background-color: rgba(255, 183, 77, 0.15) !important;
-  color: #ffb74d !important;
-}
-body.dark-mode .bg-soft-negative {
-  background-color: rgba(229, 115, 115, 0.15) !important;
-  color: #ef9a9a !important;
+  background-color: var(--badge-neg-bg);
+  color: var(--badge-neg-text);
 }
 
 /* ============================
    Buttons
    ============================ */
-
-/*
-  UYARI: .q-btn'e genel color override UYGULANMIYOR.
-  color='negative', color='primary' gibi prop'lar Quasar tarafından
-  inline class olarak eklenir; !important ile ezmek renkli butonları bozar.
-  Yalnızca color prop'u VERİLMEMİŞ flat butonlara (ikon butonlar vb.) stil uygulanır.
-*/
-
-/* Aydınlık mod — header/toolbar'daki renksiz flat butonlar (menu, logout, dark-mode-btn) */
-.q-header .q-btn--flat:not(.q-btn--actionable[class*='text-']),
-.q-toolbar .q-btn--flat:not(.q-btn--actionable[class*='text-']) {
+.q-btn.q-btn--flat {
   color: var(--text-secondary);
 }
 
-.q-header .q-btn--flat:not(.q-btn--actionable[class*='text-']):hover,
-.q-toolbar .q-btn--flat:not(.q-btn--actionable[class*='text-']):hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-/* Karanlık modda — renksiz flat butonlar */
-body.dark-mode .q-btn--flat:not([class*='text-']) {
-  color: var(--text-secondary);
-}
-
-body.dark-mode .q-btn--flat:not([class*='text-']):hover {
+.q-btn.q-btn--flat:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
 }
@@ -488,41 +368,30 @@ body.dark-mode .q-btn--flat:not([class*='text-']):hover {
    Pagination
    ============================ */
 .q-pagination .q-btn {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
+  background-color: transparent;
 }
 
 .q-pagination .q-btn--active {
-  color: var(--accent-active-text) !important;
-}
-
-/* Karanlık modda pagination buton renkleri */
-body.dark-mode .q-pagination .q-btn {
-  color: var(--text-secondary) !important;
-  background-color: transparent !important;
-}
-
-body.dark-mode .q-pagination .q-btn--active {
-  color: var(--accent-active-text) !important;
-  background-color: var(--accent-active-bg) !important;
+  color: #ffffff;
+  background-color: var(--accent-active-text);
 }
 
 /* ============================
    Tabs
    ============================ */
 .q-tabs {
-  background-color: var(--bg-surface) !important;
+  background-color: var(--bg-surface);
 }
 
 .q-tab {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
-.q-tab--active {
-  color: var(--accent-active-text) !important;
-}
-
+.q-tab--active,
 .q-tab-indicator {
-  background-color: var(--accent-active-text) !important;
+  color: var(--accent-active-text);
+  background-color: var(--accent-active-text);
 }
 
 /* ============================
@@ -541,7 +410,7 @@ body.dark-mode .q-pagination .q-btn--active {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background-color: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -551,13 +420,13 @@ body.dark-mode .q-pagination .q-btn--active {
 .empty-state__title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .empty-state__description {
   font-size: 0.875rem;
-  color: var(--text-muted) !important;
+  color: var(--text-muted);
   max-width: 320px;
   margin-bottom: 20px;
 }
@@ -575,7 +444,7 @@ body.dark-mode .q-pagination .q-btn--active {
 }
 
 .app-breadcrumb a {
-  color: var(--q-primary);
+  color: var(--accent-active-text);
   text-decoration: none;
   font-weight: 500;
   transition: color var(--transition-fast);
@@ -609,7 +478,7 @@ body.dark-mode .q-pagination .q-btn--active {
     var(--bg-hover) 50%,
     var(--bg-elevated) 75%
   );
-  background-size: 800px 100%;
+  background-size: 200% 100%;
   animation: shimmer 1.6s infinite linear;
 }
 
@@ -631,7 +500,7 @@ body.dark-mode .q-pagination .q-btn--active {
    Notifications
    ============================ */
 .q-notification {
-  border-radius: var(--border-radius-sm) !important;
+  border-radius: var(--border-radius-sm);
 }
 
 /* ============================
@@ -671,10 +540,10 @@ body.dark-mode .q-pagination .q-btn--active {
 
 @keyframes shimmer {
   0% {
-    background-position: -400px 0;
+    background-position: 200% 0;
   }
   100% {
-    background-position: 400px 0;
+    background-position: -200% 0;
   }
 }
 
@@ -705,21 +574,4 @@ body.dark-mode .q-pagination .q-btn--active {
 }
 .page-fade-leave-to {
   opacity: 0;
-}
-
-/* ============================
-   Transition helpers for theme switch
-   ============================ */
-.q-card,
-.q-drawer,
-.q-header,
-.q-menu,
-.q-dialog .q-card,
-.q-table__container,
-.q-field__control {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
 }

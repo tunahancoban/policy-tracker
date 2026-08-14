@@ -3,23 +3,15 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-        <q-toolbar-title> Policy Tracker Panel </q-toolbar-title>
+        <q-toolbar-title> Poliçe </q-toolbar-title>
 
-        <div :class="['ws-indicator', isConnected ? 'ws-indicator--online' : 'ws-indicator--offline']" class="q-mr-md">
-          <span class="ws-indicator__dot" />
-          {{ isConnected ? 'Bağlı' : 'Bağlantı Yok' }}
-        </div>
 
         <NotificationMenu />
 
         <!-- Dark Mode Toggle -->
-        <q-btn
-          flat dense round
-          :icon="isDarkMode ? 'light_mode' : 'dark_mode'"
-          :aria-label="isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'"
-          @click="toggleDarkMode"
-          class="dark-mode-btn q-mr-xs"
-        >
+        <q-btn flat dense round :icon="isDarkMode ? 'light_mode' : 'dark_mode'"
+          :aria-label="isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'" @click="toggleDarkMode"
+          class="dark-mode-btn q-mr-xs">
           <q-tooltip>{{ isDarkMode ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç' }}</q-tooltip>
         </q-btn>
 
@@ -48,7 +40,7 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header class="text-weight-bold text-uppercase text-grey-7">
+        <q-item-label header class="text-weight-bold text-uppercase">
           Yönetim Paneli
         </q-item-label>
 
@@ -63,7 +55,7 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ link.label }}</q-item-label>
-              <q-item-label caption class="text-grey-6">{{ link.caption }}</q-item-label>
+              <q-item-label caption>{{ link.caption }}</q-item-label>
             </q-item-section>
           </q-item>
         </template>
@@ -80,15 +72,8 @@
 
     <!-- Scroll to Top FAB -->
     <transition name="scroll-top-fade">
-      <q-btn
-        v-show="showScrollTop"
-        fab
-        icon="keyboard_arrow_up"
-        color="primary"
-        class="scroll-to-top-btn"
-        aria-label="Yukarı Çık"
-        @click="scrollToTop"
-      >
+      <q-btn v-show="showScrollTop" fab icon="keyboard_arrow_up" color="primary" class="scroll-to-top-btn"
+        aria-label="Yukarı Çık" @click="scrollToTop">
         <q-tooltip>Yukarı Çık</q-tooltip>
       </q-btn>
     </transition>
@@ -97,7 +82,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRefs, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { useAuthStore } from '../stores/auth';
 import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
@@ -109,26 +95,19 @@ const router = useRouter();
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 const isLogoutDialogOpen = ref(false);
+const $q = useQuasar();
 
 const wsState = useWebSocket();
-const { isConnected } = toRefs(wsState);
 const { connect, disconnect } = wsState;
 
 // --- Dark Mode ---
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true');
 
-function applyDarkMode(value: boolean) {
-  if (value) {
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
-}
+
 
 function toggleDarkMode() {
+  $q.dark.set(!$q.dark.isActive)
   isDarkMode.value = !isDarkMode.value;
-  localStorage.setItem('darkMode', String(isDarkMode.value));
-  applyDarkMode(isDarkMode.value);
 }
 
 // --- Scroll to Top ---
@@ -143,10 +122,6 @@ function scrollToTop() {
 }
 
 onMounted(async () => {
-  // Dark mode başlangıç uygulaması
-  applyDarkMode(isDarkMode.value);
-
-  // Scroll dinleyici
   window.addEventListener('scroll', handleScroll);
 
   await Promise.all([
