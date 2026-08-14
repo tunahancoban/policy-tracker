@@ -9,6 +9,7 @@ import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
@@ -42,7 +43,7 @@ public class PolicyServiceImp implements PolicyService {
 
 
     @Override
-    public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type,  String responsibleUserId,Pageable pageable) {
+    public Page<Policy> getPolicyWithParams(String customerId, String policyId, PolicyType type, String responsibleUserId, PolicyStatus active, Pageable pageable) {
         log.debug("Searching policies - customerId: {}, policyId: {}, type: {}, page: {}",
                 customerId, policyId, type, pageable);
 
@@ -50,6 +51,7 @@ public class PolicyServiceImp implements PolicyService {
         Policy searchCriteria = Policy.builder()
                 .policyId(policyId)
                 .customerId(customerId)
+                .active(active)
                 .responsibleUserId(responsibleUserId)
                 .type(type).build();
 
@@ -59,7 +61,7 @@ public class PolicyServiceImp implements PolicyService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT)
                 .withIgnorePaths("renewalSequence", "createdAt", "updatedAt", "premium",
                         "note", "startDate", "endDate", "installment",
-                        "previousPolicyId", "rootPolicyId");
+                        "previousPolicyId", "rootPolicyId" , "deletedAt" , "renewalSequence" , "notifiedThresholds");
         Example<Policy> example = Example.of(searchCriteria, matcher);
 
         Page<Policy> result = policyRepository.findAll(example, pageable);
@@ -116,7 +118,14 @@ public class PolicyServiceImp implements PolicyService {
             log.warn("Policy deletion failed - policy not found: {}", policyID);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "This policy does not exist: " + policyID);
         });
-        policyRepository.deleteByPolicyId(policyID);
+        //policyRepository.deleteByPolicyId(policyID);
+
+        policy.setActive(PolicyStatus.PASSIVE);
+        policy.setDeletedAt(LocalDateTime.now());
+        installmentService.deleteInstallment(policyID);
+
+        policyRepository.save(policy);
+
         eventPublisher.publishEvent(PolicyDeletedEvent.from(policy));
 
         log.info("Policy successfully deleted - policyId: {}", policyID);

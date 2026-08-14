@@ -4,7 +4,7 @@ import { ref, computed } from 'vue';
 import { useCustomerStore } from '../stores/customer';
 import { useUserStore } from '../stores/user';
 import { useCustomerSearch } from './useCustomerSearch';
-import { useUserSearch } from './useUserSearch';
+import { useUserBackendSearch } from './useUserSearch';
 import {
   isValidDate,
   formatDateToSlash,
@@ -53,6 +53,7 @@ export function usePolicyForm(
     note: '',
     installment: 1,
     responsibleUserId: '',
+    active: 'ACTIVE',
   });
 
   const form = ref<PolicyForm>(initialFormState());
@@ -107,17 +108,33 @@ export function usePolicyForm(
     });
   };
 
-  const { filterUserFn: _filterUserFn } = useUserSearch(() => userOptions.value);
+  const userSearchQuery = ref('');
+  const { onSearch: triggerUserSearch } = useUserBackendSearch(userSearchQuery, userStore);
 
-  const filterUserFn = (val: string, update: (callback: () => void) => void): void => {
-    _filterUserFn(val, update, (options) => {
-      filteredUserOptions.value = options;
+  const filterUserFn = async (
+    val: string,
+    update: (callback: () => void) => void,
+  ): Promise<void> => {
+    const needle = val.trim();
+
+    if (needle.length < 2) {
+      update(() => {
+        filteredUserOptions.value = [];
+      });
+      return;
+    }
+
+    userSearchQuery.value = needle;
+    await triggerUserSearch();
+
+    update(() => {
+      filteredUserOptions.value = userOptions.value;
     });
   };
 
   const onModalShow = async (): Promise<void> => {
     if (!customerStore.customerData?.length) await customerStore.fetchCustomerData();
-    if (!userStore.users?.length) await userStore.fetchUsers();
+    if (!userStore.users?.length) await userStore.fetchUserById('');
 
     customerSearchQuery.value = '';
     filteredCustomerOptions.value = [];
@@ -139,10 +156,12 @@ export function usePolicyForm(
       type: policy.type || '',
       premium: policy.premium ?? 0,
       installment: policy.installment ?? 1,
-      responsibleUserId: policy.responsibleUserId || '',
+      responsibleUserId:
+        userStore.users.find((u) => u.id === policy.responsibleUserId)?.firstName || '',
       startDate: start,
       endDate: end,
       note: policy.note ? `${policy.note} (Yenileme)` : 'Poliçe Yenileme',
+      active: policy.active || '',
     };
 
     const matchedCustomer = customerOptions.value.find((c) => c.customerId === policy.customerId);
@@ -161,6 +180,7 @@ export function usePolicyForm(
     installment: form.value.installment,
     responsibleUserId: form.value.responsibleUserId,
     note: form.value.note,
+    active: form.value.active,
   });
 
   const buildRenewPayload = (policy: Policy): RenewPolicyRequest => ({
@@ -190,6 +210,8 @@ export function usePolicyForm(
     loading,
     filteredCustomerOptions,
     filteredUserOptions,
+    customerOptions,
+    userOptions,
     customerStore,
     policyTypeOptions,
     isValidDate,

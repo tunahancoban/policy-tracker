@@ -20,6 +20,19 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const fetchUserById = async (id: string): Promise<User> => {
+    isLoading.value = true;
+    try {
+      const user = await userService.getUsers({ id });
+      return user.content.at(0) as User;
+    } catch (error) {
+      console.error(`Kullanıcı ${id} getirilirken hata:`, error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const fetchProfile = async (): Promise<User | null> => {
     isLoading.value = true;
     try {
@@ -66,6 +79,20 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const searchUser = async (searchParams: Record<string, string>) => {
+    isLoading.value = true;
+    try {
+      const result = await userService.searchUsers(searchParams);
+      users.value = result.content;
+    } catch (error) {
+      console.error('Kullanıcı araması başarısız:', error);
+      users.value = [];
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const deleteUser = async (id: string) => {
     try {
       await userService.deleteUser(id);
@@ -92,6 +119,8 @@ export const useUserStore = defineStore('user', () => {
     users,
     isLoading,
     fetchUsers,
+    fetchUserById,
+    searchUser,
     updateUser,
     deleteUser,
     addUser,

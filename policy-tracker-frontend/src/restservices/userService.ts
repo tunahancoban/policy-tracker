@@ -23,6 +23,13 @@ export const userService = {
   async deleteUser(userId: string) {
     await api.delete<void>(`/rest/api/user/delete-user/${userId}`);
   },
+  async searchUsers(params: Record<string, string>): Promise<Page<User>> {
+    const response = await api.get<Page<User>>(`/rest/api/user/with-params`, {
+      params: { ...params, page: '0', size: '20' },
+    });
+    return response.data;
+  },
+
   async getProfile(): Promise<User | undefined> {
     const response = await api.get<User>('/rest/api/profile/get-profile');
     return response.data;

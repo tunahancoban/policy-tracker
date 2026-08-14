@@ -4,6 +4,7 @@ export interface CreatePolicyRequest {
   endDate: string;
   premium: number;
   customerId: string;
+  active: string;
   responsibleUserId: string;
   note: string;
   installment: number;
@@ -29,12 +30,14 @@ export interface Policy {
   startDate: string;
   endDate: string;
   premium: number;
+  active: string;
   previousPolicyId: string;
   rootPolicyId: string;
   renewalSequence: number;
   responsibleUserId: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
   notifiedThresholds: number[];
 }
 
@@ -47,6 +50,7 @@ export interface PolicyForm {
   startDate: string;
   endDate: string;
   responsibleUserId: string;
+  active: string;
 }
 
 export const SORT_FIELD_MAP: Record<string, string> = {
@@ -68,6 +72,13 @@ export const policyColumns = [
   },
   { name: 'type', label: 'Poliçe Türü', field: 'type', align: 'left' as const },
   {
+    name: 'customerId',
+    label: 'Müşteri',
+    field: 'customerId',
+    align: 'left' as const,
+    sortable: false,
+  },
+  {
     name: 'startDate',
     label: 'Başlangıç Tarihi',
     field: 'startDate',
@@ -76,7 +87,7 @@ export const policyColumns = [
   },
   {
     name: 'endDate',
-    label: 'Bitiş Tarihi',
+    label: 'Bitiş Tarihi ',
     field: 'endDate',
     align: 'left' as const,
     sortable: true,

@@ -19,7 +19,7 @@
             <q-card-section class="q-pb-none">
                 <div class="text-subtitle2 text-grey-7 q-mb-sm">Esnek Filtreleme Seçenekleri</div>
                 <div class="row q-col-gutter-sm items-center">
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-4">
                         <q-input v-model="searchQuery" outlined dense label="Poliçe No veya Müşteri ID ile Ara"
                             placeholder="Örn: TRF2026... veya CST-000002" clearable @keyup.enter="onSearch">
                             <template v-slot:append>
@@ -28,12 +28,17 @@
                         </q-input>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-2">
                         <q-select v-model="selectedType" outlined dense :options="policyTypeOptions"
                             label="Poliçe Türü Filtresi" emit-value map-options clearable />
                     </div>
 
-                    <div class="col-12 col-md-3 row q-gutter-x-sm justify-end">
+                    <div class="col-12 col-md-2">
+                        <q-select v-model="selectedActive" outlined dense :options="activeOptions"
+                            label="Aktiflik Durumu" emit-value map-options />
+                    </div>
+
+                    <div class="col-12 col-md-2 row q-gutter-x-sm justify-end">
                         <q-btn label="Temizle" color="primary" outline @click="resetFilters" />
                     </div>
                 </div>
@@ -78,6 +83,12 @@ import { useRouter } from 'vue-router';
 import NewPolicyModal from '@/components/NewPolicyModal.vue';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
 
+
+const activeOptions = [
+    { value: 'ACTIVE', label: 'Aktif' },
+    { value: 'PASSIVE', label: 'Pasif' },
+    { value: null, label: 'Tümü' }
+];
 const {
     policies,
     isLoading,
@@ -94,6 +105,7 @@ const {
 const router = useRouter();
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
+const selectedActive = ref<string | null>('ACTIVE');
 const { confirm } = useConfirmDialog();
 
 // Modal State'leri
@@ -120,6 +132,9 @@ const buildQueryParams = (
 
     if (selectedType.value) {
         params.type = selectedType.value;
+    }
+    if (selectedActive.value) {
+        params.active = selectedActive.value;
     }
     if (query) {
         if (query.toUpperCase().startsWith('CST')) {
@@ -148,14 +163,14 @@ const onSearch = () => {
 const resetFilters = () => {
     searchQuery.value = '';
     selectedType.value = null;
+    selectedActive.value = 'ACTIVE';
     currentPage.value = 0;
     void loadPolicies(buildQueryParams(0));
 };
 
-watch(selectedType, () => {
+watch([selectedType, selectedActive], () => {
     onSearch();
 });
-
 const onRequest = async (requestProp: {
     pagination: {
         page: number;

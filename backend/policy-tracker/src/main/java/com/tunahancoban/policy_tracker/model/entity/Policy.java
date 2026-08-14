@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.model.entity;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
+import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,9 +38,10 @@ public class Policy {
     @Indexed
     private String customerId;
 
-    private String note;
-
     private InstallmentOptions installment;
+
+    @Builder.Default
+    private PolicyStatus active = PolicyStatus.ACTIVE;
 
     @NotNull
     private PolicyType type;
@@ -55,6 +57,8 @@ public class Policy {
     private BigDecimal premium;
 
     private String responsibleUserId;
+
+    private String note;
 
     //Renewal Metadata
     private String previousPolicyId;
@@ -73,6 +77,9 @@ public class Policy {
     @Builder.Default
     @LastModifiedDate
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Builder.Default
+    private LocalDateTime deletedAt=null;
 
     private Set<Integer> notifiedThresholds = new HashSet<>(); //30-15-7 day
 

@@ -51,6 +51,18 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
+  const getCustomerById = async (customerId: string): Promise<Customer | null> => {
+    isLoading.value = true;
+    try {
+      const customer = await customerService.getCustomerById(customerId);
+      return customer;
+    } catch (error) {
+      console.error('Müşteri bilgisi çekilemedi', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
   const addCustomer = async (newCustomer: Customer) => {
     isLoading.value = true;
     try {
@@ -123,6 +135,7 @@ export const useCustomerStore = defineStore('customer', () => {
     pageSize,
     fetchCustomerData,
     fetchCustomerById,
+    getCustomerById,
     addCustomer,
     searchCustomer,
     updateCustomer,

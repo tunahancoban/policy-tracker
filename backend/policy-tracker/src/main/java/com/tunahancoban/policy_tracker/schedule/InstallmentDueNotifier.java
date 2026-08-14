@@ -46,6 +46,9 @@ public class InstallmentDueNotifier {
             log.info("Threshold {} için {} adet taksit bulundu", threshold, targets.size());
 
             for (Installment installment : targets) {
+                if(installment.getStatus()==PaymentStatus.CANCELLED){
+                    break;
+                }
                 createNotification(installment, threshold);
                 installment.getNotifiedThresholds().add(threshold);
                 installment.setUpdatedAt(LocalDateTime.now());

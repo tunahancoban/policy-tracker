@@ -31,7 +31,7 @@
             </div>
 
             <div class="row q-col-gutter-md">
-                <!-- Sol Kolon: Poliçe Bilgisi -->
+
                 <div class="col-12 col-md-4">
                     <q-card flat bordered class="full-height">
                         <q-card-section class="bg-primary text-white row items-center justify-between q-pa-lg">
@@ -66,7 +66,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Başlangıç Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -75,7 +75,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Bitiş Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -84,7 +84,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Prim Tutarı</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 

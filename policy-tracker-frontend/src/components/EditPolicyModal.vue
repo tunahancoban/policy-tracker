@@ -17,15 +17,24 @@
             <q-form @submit="onSubmit">
                 <q-card-section class="q-gutter-md">
 
-                    <!-- Müşteri Seçimi (Artık Aktif) -->
+                    <!-- Müşteri Seçimi  -->
                     <q-select v-model="form.customerId" :options="filteredCustomerOptions" option-value="customerId"
-                        option-label="fullName" emit-value map-options label="Müşteri *" outlined dense
-                        :rules="[val => !!val || 'Müşteri seçimi zorunludur']" />
+                        option-label="fullName" emit-value map-options label="Müşteri *" outlined dense disable />
+
+                    <!-- Sorumlu User-->
+                    <q-select v-model="form.responsibleUserId" :options="filteredUserOptions" option-value="userId"
+                        option-label="fullName" emit-value map-options label="Sorumlu Kullanıcı *" outlined dense
+                        use-input input-debounce="300" @filter="filterUserFn"
+                        :rules="[val => !!val || 'Sorumlu kullanıcı seçimi zorunludur']" />
 
                     <!-- Poliçe Türü -->
                     <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
-                        emit-value map-options label="Poliçe Türü *" outlined dense
-                        :rules="[val => !!val || 'Poliçe türü zorunludur']" />
+                        emit-value map-options label="Poliçe Türü *" outlined dense disable />
+
+                    <!-- Aktiflik Durumu -->
+                    <q-select v-model="form.active" :options="activeOptions" option-value="value" option-label="label"
+                        emit-value map-options label="Aktiflik Durumu *" outlined dense
+                        :rules="[val => !!val || 'Aktiflik durumu zorunludur']" />
 
                     <!-- Prim Tutarı -->
                     <q-input v-model.number="form.premium" type="number" label="Prim Tutarı (TL) *" outlined dense
@@ -33,10 +42,6 @@
                             val => val !== null && val !== undefined || 'Prim tutarı zorunludur',
                             val => val > 0 || 'Prim tutarı 0\'dan büyük olmalıdır'
                         ]" />
-                    <!-- Sorumlu User-->
-                    <q-select v-model="form.responsibleUserId" :options="filteredUserOptions" option-value="userId"
-                        option-label="fullName" emit-value map-options label="Sorumlu Kullanıcı *" outlined dense
-                        :rules="[val => !!val || 'Sorumlu kullanıcı seçimi zorunludur']" />
 
                     <!-- Tarih Alanları -->
                     <q-input v-model="form.startDate" label="Başlangıç Tarihi *" outlined dense stack-label
@@ -79,78 +84,46 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useCustomerStore } from '../stores/customer';
-import { useUserStore } from '../stores/user';
-import { policyTypeOptions, type Policy, type PolicyForm } from '../types/policy.types';
-
-
-const userStore = useUserStore();
+import { usePolicyForm } from '../composables/usePolicyForm';
+import { type Policy, type PolicyForm } from '../types/policy.types';
 
 interface Props {
     modelValue: boolean;
     policyData: Policy;
 }
 
-interface CustomerOption {
-    customerId: string;
-    fullName: string;
-}
+const activeOptions = [
+    { value: 'ACTIVE', label: 'Aktif' },
+    { value: 'PASSIVE', label: 'Pasif' }
+];
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
     (e: 'updated', payload: { id: string; data: Partial<PolicyForm> }): Promise<void> | void;
 }>();
-const customerStore = useCustomerStore();
-const loading = ref(false);
 
 const isOpen = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
 });
 
-const form = ref<PolicyForm>({
-    customerId: '',
-    type: '',
-    premium: 0,
-    note: '',
-    installment: 0,
-    startDate: '',
-    endDate: '',
-    responsibleUserId: ''
-});
+
+const {
+    form,
+    loading,
+    filteredCustomerOptions,
+    filteredUserOptions,
+    customerOptions,
+    userOptions,
+    policyTypeOptions,
+    onModalShow: baseOnModalShow,
+    filterUserFn,
+} = usePolicyForm({ isRenewal: false, policyData: null });
 
 const originalForm = ref<PolicyForm>({ ...form.value });
 
-const filteredCustomerOptions = computed<CustomerOption[]>(() => {
-    const data = Array.isArray(customerStore.customerData) ? customerStore.customerData : [];
-
-    return data.map(customer => {
-        const namePart = `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'İsimsiz Müşteri';
-        const identityPart = customer.identityNumber ? `(TC: ${customer.identityNumber})` : `(ID: ${customer.customerId})`;
-
-        return {
-            customerId: customer.customerId,
-            fullName: `${namePart} ${identityPart}`
-        };
-    });
-});
-
-const filteredUserOptions = computed(() => {
-    const data = Array.isArray(userStore.users) ? userStore.users : [];
-
-    return data.map(user => {
-        const namePart = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'İsimsiz Kullanıcı';
-        const identityPart = `(ID: ${user.id})`;
-
-        return {
-            userId: user.id,
-            fullName: `${namePart} ${identityPart}`
-        };
-    });
-});
-
-const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', 'startDate', 'endDate'];
+const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', 'startDate', 'endDate', 'active'];
 
 function assignIfChanged<K extends keyof PolicyForm>(
     target: Partial<PolicyForm>,
@@ -175,7 +148,11 @@ const getChangedFields = (): Partial<PolicyForm> => {
 
 const hasChanges = computed(() => Object.keys(getChangedFields()).length > 0);
 
-const onModalShow = () => {
+const onModalShow = async () => {
+    // usePolicyForm'un mevcut onModalShow'u: müşteri/kullanıcı verisini çeker,
+    // arama state'ini sıfırlar, formu initial state'e döndürür.
+    await baseOnModalShow();
+
     form.value = {
         customerId: props.policyData.customerId || '',
         type: props.policyData.type || '',
@@ -184,11 +161,19 @@ const onModalShow = () => {
         responsibleUserId: props.policyData.responsibleUserId || '',
         note: props.policyData.note || '',
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
-        endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : ''
+        endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : '',
+        active: props.policyData.active || ''
     };
 
     originalForm.value = { ...form.value };
+
+    const matchedCustomer = customerOptions.value.find((c) => c.customerId === form.value.customerId);
+    filteredCustomerOptions.value = matchedCustomer ? [matchedCustomer] : [];
+
+    const matchedUser = userOptions.value.find((u) => u.userId === form.value.responsibleUserId);
+    filteredUserOptions.value = matchedUser ? [matchedUser] : [];
 };
+
 const onSubmit = async () => {
     const patchData = getChangedFields();
 

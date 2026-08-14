@@ -31,7 +31,7 @@
 
                     <div class="col-12 col-md-3">
                         <q-select v-model="selectedActive" outlined dense :options="activeOptions"
-                            label="Durum Filtresi" emit-value map-options clearable />
+                            label="Durum Filtresi" emit-value map-options />
                     </div>
 
                     <div class="col-12 col-md-3">
@@ -90,13 +90,14 @@ const showModal = ref(false);
 const editingCustomer = ref<Customer | undefined>(undefined);
 
 const searchQuery = ref<string>('');
-const selectedActive = ref<string | null>(null);
+const selectedActive = ref<string | null>('true');
 const sortByColumn = ref<string | null>(null);
 const sortDescending = ref<boolean>(false);
 
 const activeOptions = [
     { label: 'Aktif', value: 'true' },
     { label: 'Pasif', value: 'false' },
+    { label: 'Tümü', value: null },
 ];
 
 const pagination = ref({

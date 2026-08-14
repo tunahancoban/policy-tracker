@@ -114,8 +114,13 @@ public class InstallmentServiceImp implements InstallmentService {
         }
 
         for (Installment installment: installments){
-            installmentRepository.deleteById(installment.getId());
+            if(installment.getStatus()==PaymentStatus.UNPAID){
+                installment.setStatus(PaymentStatus.CANCELLED);
+            }
+            //installmentRepository.deleteById(installment.getId());
         }
+
+        installmentRepository.saveAll(installments);
         log.info("Installments successfully deleted - policyId: {}", policyId);
     }
 }

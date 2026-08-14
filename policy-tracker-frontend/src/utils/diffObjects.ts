@@ -1,12 +1,5 @@
 // src/utils/diffObjects.ts
 
-/**
- * İki obje arasında değeri farklılaşan alanları bulur ve
- * sadece değişen alanları içeren yeni bir obje döndürür (PATCH payload'ı gibi).
- *
- * Yeni bir form alanı eklendiğinde bu fonksiyonun değişmesine gerek yoktur;
- * `keys` listesine eklemek yeterlidir. (OCP)
- */
 export function diffObjects<T extends object>(
   original: T,
   updated: Partial<T>,

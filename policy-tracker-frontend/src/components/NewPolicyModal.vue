@@ -117,21 +117,6 @@
 </template>
 
 <script setup lang="ts">
-/**
- * NewPolicyModal — thin orchestration layer.
- *
- * This component is responsible ONLY for:
- *   1. Declaring props / emits (interface contract)
- *   2. Wiring the v-model open/close computed
- *   3. Delegating date-picker proxy close calls (pure UI concern)
- *   4. Calling usePolicyForm and forwarding its result to the template
- *
- * All business logic lives in composables:
- *   - usePolicyForm   → form state, data loading, payload building
- *   - useCustomerSearch → backend customer search (inside usePolicyForm)
- *   - useUserSearch     → local user filtering (inside usePolicyForm)
- *   - dateHelper        → date utilities (isValidDate etc.)
- */
 
 import { ref, computed } from 'vue';
 import { QPopupProxy } from 'quasar';

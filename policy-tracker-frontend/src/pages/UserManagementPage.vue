@@ -22,7 +22,7 @@
                 no-data-label="Sistemde kayıtlı kullanıcı bulunamadı." loading-label="Kullanıcı listesi getiriliyor...">
                 <template v-slot:body-cell-role="props">
                     <q-td :props="props" class="text-center">
-                        <q-chip color='primary' text-color="white" dense square class="text-weight-bold text-caption">
+                        <q-chip color="primary" text-color="white" dense square class="status-chip">
                             {{ props.row.role }}
                         </q-chip>
                     </q-td>

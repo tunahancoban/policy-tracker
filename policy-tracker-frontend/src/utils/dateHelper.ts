@@ -87,16 +87,12 @@ export const isValidDate = (dateStr: string | null | undefined): boolean => {
   const parts = dateStr.split('/');
   if (parts.length !== 3) return false;
 
-  const year  = parseInt(parts[0] as string, 10);
+  const year = parseInt(parts[0] as string, 10);
   const month = parseInt(parts[1] as string, 10) - 1;
-  const day   = parseInt(parts[2] as string, 10);
+  const day = parseInt(parts[2] as string, 10);
 
   const date = new Date(year, month, day);
-  return (
-    date.getFullYear() === year &&
-    date.getMonth()    === month &&
-    date.getDate()     === day
-  );
+  return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day;
 };
 
 /**
@@ -106,13 +102,13 @@ export const isValidDate = (dateStr: string | null | undefined): boolean => {
 export const formatDateToSlash = (dateStr?: string): string =>
   dateStr ? dateStr.replace(/-/g, '/') : '';
 
-/** Returns today's date as a YYYY/MM/DD string. */
+/** Returns today's date as a DD/MM/YYYY string. */
 export const getTodayFormatted = (): string => {
   const today = new Date();
-  const year  = today.getFullYear();
+  const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day   = String(today.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${day}/${month}/${year}`;
 };
 
 /**
@@ -123,5 +119,5 @@ export const getNextYearFormatted = (startDateFormatted: string): string => {
   const parts = startDateFormatted.split('/');
   if (parts.length !== 3) return '';
   const year = parseInt(parts[0] as string, 10) + 1;
-  return `${year}/${parts[1]}/${parts[2]}`;
+  return `${parts[2]}/${parts[1]}/${year}`;
 };

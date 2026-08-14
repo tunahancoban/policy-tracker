@@ -12,10 +12,10 @@
         <q-separator />
 
         <q-card-section class="q-pa-none">
-            <!-- responsive-table sınıfı eklendi -->
-            <q-table flat :rows="policies" :columns="policyColumns" row-key="policyId" :loading="loading"
-                v-model:pagination="internalPagination" class="responsive-table" @request="onRequest"
+            <q-table flat :rows="enrichedPolicies" :columns="policyColumns" row-key="policyId" :loading="loading"
+                v-model:pagination="internalPagination" class="responsive-table clickable-table" @request="onRequest"
                 @row-click="onRowClick">
+
                 <template v-slot:no-data>
                     <div class="empty-state">
                         <div class="empty-state__icon">
@@ -30,6 +30,18 @@
                     </div>
                 </template>
 
+                <!-- 1. customer name (Doğrudan formatlanmış metin basılıyor) -->
+                <template v-slot:body-cell-customerId="props">
+                    <q-td :props="props">
+                        <div class="row items-center no-wrap">
+                            <span class="text-weight-medium text-grey-9">
+                                {{ props.row.customerFullName }}
+                            </span>
+                        </div>
+                    </q-td>
+                </template>
+
+                <!-- Kalan Gün Rozeti -->
                 <template v-slot:body-cell-remainingDays="props">
                     <q-td :props="props" class="text-center">
                         <q-chip :color="getRemainingDaysColor(props.row.endDate)" text-color="white" dense
@@ -39,6 +51,7 @@
                     </q-td>
                 </template>
 
+                <!-- Aksiyon Butonları -->
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center action-cells" @click.stop>
                         <slot name="row-actions" :policy="props.row">
@@ -60,6 +73,10 @@
 import { ref, watch } from 'vue';
 import { policyColumns, type Policy } from '@/types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '@/utils/dateHelper';
+import { useCustomerStore } from '@/stores/customer';
+
+// Müşteri tam adı alanını satıra ekleyen genişletilmiş tip
+export type EnrichedPolicy = Policy & { customerFullName: string };
 
 interface Props {
     policies: Policy[];
@@ -102,6 +119,43 @@ const emit = defineEmits<{
     'row-click': [evt: Event, row: Policy];
 }>();
 
+const customerStore = useCustomerStore();
+
+// Zenginleştirilmiş satır listesi
+const enrichedPolicies = ref<EnrichedPolicy[]>([]);
+
+watch(
+    () => props.policies,
+    async (newPolicies) => {
+        if (!newPolicies || newPolicies.length === 0) {
+            enrichedPolicies.value = [];
+            return;
+        }
+
+        enrichedPolicies.value = await Promise.all(
+            newPolicies.map(async (policy) => {
+                let customerFullName = policy.customerId;
+
+                if (policy.customerId) {
+                    const customer = await customerStore.getCustomerById(policy.customerId);
+                    if (customer) {
+                        customerFullName =
+                            `${customer.firstName || ''} ${customer.lastName || ''}`.trim() ||
+                            customer.email ||
+                            'İsimsiz Müşteri';
+                    }
+                }
+
+                return {
+                    ...policy,
+                    customerFullName,
+                };
+            })
+        );
+    },
+    { immediate: true, deep: true }
+);
+
 const onRowClick = (evt: Event, row: Policy) => {
     emit('row-click', evt, row);
 };
@@ -136,33 +190,3 @@ const onRequest = (requestProp: {
     emit('request', requestProp);
 };
 </script>
-
-<style scoped>
-/* --- Table Styles --- */
-.q-table thead th {
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #4b5563 !important;
-    background-color: #f8f9fa !important;
-    border-bottom: 2px solid #e5e7eb !important;
-}
-
-.q-table tbody tr:nth-child(even) {
-    background-color: #fafbfc;
-}
-
-.q-table tbody tr {
-    transition: background-color var(--transition-fast);
-}
-
-.q-table tbody tr:hover {
-    background-color: #f0f4ff !important;
-}
-
-/* Clickable table rows */
-.clickable-table :deep(.q-table tbody tr) {
-    cursor: pointer;
-}
-</style>
