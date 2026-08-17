@@ -51,6 +51,15 @@
                     </q-td>
                 </template>
 
+                <template v-slot:body-cell-active="props">
+                    <q-td :props="props" class="text-center">
+                        <q-chip :color="props.row.active === 'ACTIVE' ? 'positive' : 'negative'" text-color="white"
+                            dense class="text-weight-bold compact-chip">
+                            {{ getActiveLabel(props.row.active) }}
+                        </q-chip>
+                    </q-td>
+                </template>
+
                 <!-- Aksiyon Butonları -->
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="q-gutter-xs text-center action-cells" @click.stop>
@@ -71,7 +80,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { policyColumns, type Policy } from '@/types/policy.types';
+import { policyColumns, activeOptions, type Policy } from '@/types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '@/utils/dateHelper';
 import { useCustomerStore } from '@/stores/customer';
 
@@ -121,7 +130,10 @@ const emit = defineEmits<{
 
 const customerStore = useCustomerStore();
 
-// Zenginleştirilmiş satır listesi
+const getActiveLabel = (value: string) => {
+    return activeOptions.find((opt) => opt.value === value)?.label || value;
+};
+
 const enrichedPolicies = ref<EnrichedPolicy[]>([]);
 
 watch(

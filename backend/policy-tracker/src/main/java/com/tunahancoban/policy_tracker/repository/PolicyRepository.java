@@ -18,11 +18,7 @@ import java.util.Optional;
 @Repository
 public interface PolicyRepository extends MongoRepository<Policy, String> {
 
-    void deleteByPolicyId(String policyId);
-
     Optional<Policy> getPolicyByPolicyId(String policyId);
-
-    boolean existsByPolicyId(String policyId);
 
     long countByStartDateLessThanEqualAndEndDateGreaterThanEqual(Instant startDate, Instant endDate);
 
@@ -52,4 +48,5 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
             "{ '$group': { '_id': '$type', 'totalCount': { '$sum': 1 } } }"
     })
     List<Map<String, Object>> countPoliciesGroupedByType();
+
 }

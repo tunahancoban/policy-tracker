@@ -66,7 +66,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Başlangıç Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate)
-                                        }}</q-item-label>
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -75,16 +75,26 @@
                                     <q-item-section>
                                         <q-item-label caption>Bitiş Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate)
-                                        }}</q-item-label>
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
+                                <q-item class="q-py-sm">
+                                    <q-item-section avatar><q-icon name="account_circle"
+                                            color="primary" /></q-item-section>
+                                    <q-item-section>
+                                        <q-item-label caption>Acenta Sorumlusu</q-item-label>
+                                        <q-item-label class="text-weight-medium">{{ selectedUser?.email
+                                            }}</q-item-label>
+                                    </q-item-section>
+                                </q-item>
+
 
                                 <q-item class="q-py-sm">
                                     <q-item-section avatar><q-icon name="payments" color="primary" /></q-item-section>
                                     <q-item-section>
                                         <q-item-label caption>Prim Tutarı</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium)
-                                        }}</q-item-label>
+                                            }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -198,6 +208,8 @@ const {
     installments,
     isInstallmentsLoading,
     installmentsTotal,
+    selectedUser,
+    getUser,
     fetchInstallmentsOnly,
     loadAllData,
 } = usePolicyDetail(policyId);
@@ -214,6 +226,7 @@ const openEditDialog = (targetPolicy: Policy) => {
     selectedPolicy.value = targetPolicy;
     isEditModalOpen.value = true;
 };
+
 
 const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
     try {
@@ -262,6 +275,8 @@ const getStatusColor = (status: paymentStatus): string => {
             return 'warning';
     }
 };
+
+
 
 const getStatusLabel = (status: paymentStatus): string => {
     switch (status) {
@@ -337,6 +352,11 @@ const onInstallmentsRequest = async (requestProp: { pagination: { page: number; 
 
 onMounted(async () => {
     await loadAllData();
+
+    if (policy.value?.responsibleUserId) {
+        await getUser(policy.value.responsibleUserId);
+    }
+
     pagination.value.rowsNumber = installmentsTotal.value;
 });
 </script>

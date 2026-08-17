@@ -1,11 +1,13 @@
 package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.PolicySearchRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
+import com.tunahancoban.policy_tracker.service.PolicySearchService;
 import com.tunahancoban.policy_tracker.service.interfaces.PolicyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RestPolicyController {
     private final PolicyService policyService;
+    private final PolicySearchService policySearchService;
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "endDate",
@@ -33,19 +36,8 @@ public class RestPolicyController {
     );
 
     @GetMapping(path = "/with-params")
-    public ResponseEntity<Page<Policy>> getPolicyWithParams(
-            @RequestParam(name = "policyId", required = false) String policyId,
-            @RequestParam(name = "customerId", required = false) String customerId,
-            @RequestParam(name = "type", required = false) PolicyType type,
-            @RequestParam(name = "active", required = false) PolicyStatus active,
-            @RequestParam(name = "responsibleUserId", required = false) String responsibleUserId,
-            @PageableDefault(size = 5, sort = "endDate", direction = Sort.Direction.ASC)
-            Pageable pageable) {
-
-        validateSort(pageable);
-
-        Page<Policy> policyList = policyService.getPolicyWithParams(customerId, policyId, type,  responsibleUserId, active ,pageable);
-        return ResponseEntity.ok( policyList);
+    public Page<Policy> getPolicyWithParams(PolicySearchRequest request) {
+        return policySearchService.search(request);
     }
 
     private void validateSort(Pageable pageable) {

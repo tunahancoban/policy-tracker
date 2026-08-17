@@ -8,8 +8,8 @@ import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDate;
+import com.tunahancoban.policy_tracker.model.indexes.PolicyIndex;
+ import java.time.LocalDate;
 
 @Mapper(
         componentModel = "spring",
@@ -33,6 +33,9 @@ public interface PolicyMapper {
     @Mapping(target = "renewalSequence", ignore = true)
     Policy toEntity(RenewPolicyRequest request);
 
+    PolicyIndex toDocument(Policy policy);
+
+    Policy toEntity(PolicyIndex document);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "policyId", ignore = true)

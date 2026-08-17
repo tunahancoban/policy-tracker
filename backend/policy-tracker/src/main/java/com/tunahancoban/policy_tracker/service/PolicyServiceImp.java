@@ -102,7 +102,7 @@ public class PolicyServiceImp implements PolicyService {
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
 
-        eventPublisher.publishEvent(PolicyUpdatedEvent.from(savedPolicy));
+        eventPublisher.publishEvent(PolicyCreatedEvent.from(savedPolicy));
 
         log.info("Policy successfully created - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
         return savedPolicy;
@@ -148,7 +148,7 @@ public class PolicyServiceImp implements PolicyService {
         Policy updatedPolicy = policyRepository.save(policy);
 
         log.info("Policy successfully updated - policyId: {}", policyID);
-        eventPublisher.publishEvent(PolicyCreatedEvent.from(updatedPolicy));
+        eventPublisher.publishEvent(PolicyUpdatedEvent.from(updatedPolicy));
         return updatedPolicy;
     }
 

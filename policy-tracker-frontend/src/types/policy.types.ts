@@ -100,6 +100,14 @@ export const policyColumns = [
     sortable: true,
   },
   {
+    name: 'active',
+    label: 'Aktif/Pasif',
+    field: (row: Policy) =>
+      activeOptions.find((opt) => opt.value === row.active)?.label || row.active,
+    align: 'center' as const,
+  },
+
+  {
     name: 'installment',
     label: 'Ödeme Sayısı',
     field: (row: Policy) => `${row.installment} `,
@@ -115,6 +123,11 @@ export const policyColumns = [
     sortable: true,
   },
   { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const },
+];
+
+export const activeOptions = [
+  { value: 'ACTIVE', label: 'Aktif' },
+  { value: 'PASSIVE', label: 'Pasif' },
 ];
 
 export const policyTypeOptions = [
