@@ -32,7 +32,9 @@ export const useNotificationStore = defineStore('notifications', {
         if (page === 0) {
           this.notifications = data.content;
         } else {
-          this.notifications.push(...data.content);
+          const existingIds = new Set(this.notifications.map((n) => n.id));
+          const newItems = data.content.filter((n: Notification) => !existingIds.has(n.id));
+          this.notifications.push(...newItems);
         }
 
         this.currentPage = data.number;

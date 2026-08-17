@@ -7,6 +7,7 @@ import type { UserData } from '@/types/user.types';
 export const useAuthStore = defineStore('auth', () => {
   const userRole = ref<string | null>(null);
   const userEmail = ref<string | null>(null);
+  const id = ref<string | null>(null);
   const isInitialized = ref<boolean>(false);
 
   const isAuthenticated = computed(() => !!userEmail.value);
@@ -14,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const saveLoginData = (userData: UserData) => {
     userRole.value = userData.role;
+    id.value = userData.id;
     userEmail.value = userData.userEmail;
   };
 
@@ -27,8 +29,8 @@ export const useAuthStore = defineStore('auth', () => {
       const restResponse = await authService.login(email, password);
 
       if (restResponse) {
-        const { role, userEmail } = restResponse;
-        saveLoginData({ role, userEmail });
+        const { role, id, userEmail } = restResponse;
+        saveLoginData({ role, id, userEmail });
         isInitialized.value = true;
       }
     } catch (error) {
@@ -45,6 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (userData && userData.userEmail) {
         saveLoginData({
           role: userData.role,
+          id: userData.id,
           userEmail: userData.userEmail,
         });
       } else {
@@ -72,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   return {
+    id,
     userRole,
     userEmail,
     isInitialized,

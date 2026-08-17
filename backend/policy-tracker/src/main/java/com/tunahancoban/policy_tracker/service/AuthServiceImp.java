@@ -3,6 +3,7 @@ package com.tunahancoban.policy_tracker.service;
 import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
+import com.tunahancoban.policy_tracker.repository.UserRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
 import com.tunahancoban.policy_tracker.service.interfaces.TokenService;
 import com.tunahancoban.policy_tracker.service.interfaces.UserService;
@@ -21,6 +22,7 @@ public class AuthServiceImp implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     public LoginResponse authenticate(LoginRequest request) {
@@ -34,7 +36,7 @@ public class AuthServiceImp implements AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!");
         }
 
-        return new LoginResponse(jwtService.generateToken(user), user.getRole().toString(), user.getEmail());
+        return new LoginResponse(jwtService.generateToken(user), user.getRole().toString(), user.getId(),user.getEmail());
     }
 
     @Override
@@ -51,7 +53,9 @@ public class AuthServiceImp implements AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
                 .orElse("ROLE_USER");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Kullanıcı bulunamadı"));
 
-        return new LoginResponse(role, email);
+        return new LoginResponse(role, user.getId(), email);
     }
 }

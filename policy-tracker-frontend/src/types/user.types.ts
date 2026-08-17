@@ -9,6 +9,7 @@ export interface User {
 
 export interface UserData {
   role: string;
+  id: string;
   userEmail: string;
 }
 

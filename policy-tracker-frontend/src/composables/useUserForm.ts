@@ -51,11 +51,6 @@ export function useUserForm() {
     role: form.value.role,
   });
 
-  /**
-   * Değişen alanları hesaplar ve şifre değişikliği istenmişse patch'e ekler.
-   * Hiçbir şey değişmemişse null döner (component "gereksiz istek atma" kararını
-   * bu sinyale bakarak verir).
-   */
   const buildUpdatePayload = (): UpdateUserRequest | null => {
     if (!originalUser.value) {
       throw new Error('Güncellenecek kullanıcı bilgisi eksik.');

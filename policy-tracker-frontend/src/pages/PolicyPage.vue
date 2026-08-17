@@ -51,7 +51,7 @@
                 <PolicyTable :policies="policies" :loading="isLoading" :rows-number="totalElements"
                     :show-add-button="false" @row-click="goToPolicyDetail" @request="onRequest" class="clickable-table">
                     <template v-slot:row-actions="{ policy }">
-                        <q-btn flat round color="white" icon="account_circle" size="sm"
+                        <q-btn flat round color="primary" icon="account_circle" size="sm"
                             :to="`/customer/${policy.customerId}`" @click.stop />
                         <q-btn flat round color="blue" icon="edit" size="sm" @click.stop="openEditDialog(policy)" />
                         <q-btn flat round color="green" icon="autorenew" size="sm"
@@ -81,6 +81,7 @@ import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/po
 import { policyTypeOptions, SORT_FIELD_MAP } from '@/types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useAuthStore } from '@/stores/auth';
 import { Notify } from 'quasar';
 import PolicyTable from '@/components/PolicyTable.vue';
 import { useRouter } from 'vue-router';
@@ -88,7 +89,7 @@ import { useRouter } from 'vue-router';
 import NewPolicyModal from '@/components/NewPolicyModal.vue';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
 
-
+const authStore = useAuthStore();
 const activeOptions = [
     { value: 'ACTIVE', label: 'Aktif' },
     { value: 'PASSIVE', label: 'Pasif' },
@@ -126,7 +127,7 @@ const buildQueryParams = (
     overridePage?: number,
     overrideSize?: number,
     sortBy?: string | null,
-    descending?: boolean
+    descending?: boolean,
 ) => {
     const query = searchQuery.value?.trim() ?? '';
 
@@ -155,6 +156,10 @@ const buildQueryParams = (
     if (effectiveSortBy && SORT_FIELD_MAP[effectiveSortBy]) {
         const direction = effectiveDescending ? 'desc' : 'asc';
         params.sort = `${SORT_FIELD_MAP[effectiveSortBy]},${direction}`;
+    }
+
+    if (!authStore.isAdmin && authStore.id) {
+        params.responsibleUserId = authStore.id;
     }
 
     return params;
@@ -200,7 +205,6 @@ const onRequest = async (requestProp: {
     );
 };
 
-// Modal Açma Fonksiyonları
 const openCreateDialog = () => {
     isRenewal.value = false;
     selectedPolicy.value = null;

@@ -34,7 +34,7 @@ export function useWebSocket() {
 
       // 2. Notification Subscription
       if (callbacks.onNotificationReceived) {
-        stompClient?.subscribe('/topic/notifications', (message: IMessage) => {
+        stompClient?.subscribe('/user/queue/notifications', (message: IMessage) => {
           try {
             const notification: Notification = JSON.parse(message.body);
             callbacks.onNotificationReceived?.(notification);

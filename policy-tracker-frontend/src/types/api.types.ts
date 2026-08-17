@@ -37,5 +37,6 @@ export interface Page<T> {
 
 export interface LoginResponse {
   role: UserRole;
+  id: string;
   userEmail: string;
 }

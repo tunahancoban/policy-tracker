@@ -28,7 +28,7 @@ public class RestAuthController {
 
             response.addCookie(cookie);
 
-            LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getUserEmail());
+            LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getId(),loginResponse.getUserEmail());
             return ResponseEntity.ok(newLoginResponse);
     }
 

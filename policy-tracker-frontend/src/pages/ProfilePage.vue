@@ -10,7 +10,7 @@
             </div>
 
             <q-card flat bordered class="q-pa-md">
-                <div class="text-h6 text-grey-8 text-weight-bold q-mb-md">
+                <div class="text-h6  text-weight-bold q-mb-md">
                     <q-icon name="person" color="primary" class="q-mr-xs" size="28px" />
                     Profil Ayarlarım
                 </div>
@@ -25,8 +25,8 @@
 
                     <q-separator class="q-my-lg" />
 
-                    <div class="text-subtitle1 text-grey-7 text-weight-bold">Şifre Değiştir (İsteğe Bağlı)</div>
-                    <p class="text-caption text-grey-6 q-mt-none">Şifrenizi değiştirmek istemiyorsanız bu alanları boş
+                    <div class="text-subtitle1 text-weight-bold">Şifre Değiştir (İsteğe Bağlı)</div>
+                    <p class="text-caption q-mt-none">Şifrenizi değiştirmek istemiyorsanız bu alanları boş
                         bırakabilirsiniz.</p>
 
                     <q-input v-model="password" label="Yeni Şifre" outlined dense type="password" />

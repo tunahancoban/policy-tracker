@@ -22,6 +22,7 @@ public class Notification {
     private String policyId;
     private String installmentId;
     private String title;
+    private String userId;
     private String message;
     private boolean read = false;
     private LocalDateTime createdAt;

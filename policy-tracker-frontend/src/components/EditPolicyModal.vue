@@ -23,9 +23,17 @@
 
                     <!-- Sorumlu User-->
                     <q-select v-model="form.responsibleUserId" :options="filteredUserOptions" option-value="userId"
-                        option-label="fullName" emit-value map-options label="Sorumlu Kullanıcı *" outlined dense
-                        use-input input-debounce="300" @filter="filterUserFn"
-                        :rules="[val => !!val || 'Sorumlu kullanıcı seçimi zorunludur']" />
+                        option-label="fullName" emit-value map-options use-input fill-input hide-selected
+                        input-debounce="300" @filter="filterUserFn" label="Sorumlu Acente Personeli Seçin *" outlined
+                        dense :rules="[val => !!val || 'Sorumlu personel seçimi zorunludur']">
+                        <template v-slot:no-option>
+                            <q-item>
+                                <q-item-section class="text-grey">
+                                    Aradığınız kriterde (en az 2 karakter) personel bulunamadı.
+                                </q-item-section>
+                            </q-item>
+                        </template>
+                    </q-select>
 
                     <!-- Poliçe Türü -->
                     <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
@@ -85,8 +93,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { usePolicyForm } from '../composables/usePolicyForm';
+import { useUserStore } from '@/stores/user';
 import { type Policy, type PolicyForm } from '../types/policy.types';
 
+const userStore = useUserStore();
 interface Props {
     modelValue: boolean;
     policyData: Policy;
@@ -115,7 +125,6 @@ const {
     filteredCustomerOptions,
     filteredUserOptions,
     customerOptions,
-    userOptions,
     policyTypeOptions,
     onModalShow: baseOnModalShow,
     filterUserFn,
@@ -123,7 +132,7 @@ const {
 
 const originalForm = ref<PolicyForm>({ ...form.value });
 
-const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', 'startDate', 'endDate', 'active'];
+const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', "responsibleUserId", 'startDate', 'endDate', 'active'];
 
 function assignIfChanged<K extends keyof PolicyForm>(
     target: Partial<PolicyForm>,
@@ -149,16 +158,15 @@ const getChangedFields = (): Partial<PolicyForm> => {
 const hasChanges = computed(() => Object.keys(getChangedFields()).length > 0);
 
 const onModalShow = async () => {
-    // usePolicyForm'un mevcut onModalShow'u: müşteri/kullanıcı verisini çeker,
-    // arama state'ini sıfırlar, formu initial state'e döndürür.
     await baseOnModalShow();
+    const responsibleUser = await userStore.fetchUserById(props.policyData.responsibleUserId);
 
     form.value = {
         customerId: props.policyData.customerId || '',
         type: props.policyData.type || '',
         premium: props.policyData.premium || 0,
         installment: props.policyData.installment || 0,
-        responsibleUserId: props.policyData.responsibleUserId || '',
+        responsibleUserId: props.policyData.responsibleUserId || '', // <-- sadece ID
         note: props.policyData.note || '',
         startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
         endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : '',
@@ -170,8 +178,14 @@ const onModalShow = async () => {
     const matchedCustomer = customerOptions.value.find((c) => c.customerId === form.value.customerId);
     filteredCustomerOptions.value = matchedCustomer ? [matchedCustomer] : [];
 
-    const matchedUser = userOptions.value.find((u) => u.userId === form.value.responsibleUserId);
-    filteredUserOptions.value = matchedUser ? [matchedUser] : [];
+    filteredUserOptions.value = responsibleUser
+        ? [{
+            userId: responsibleUser.id,
+            email: responsibleUser.email || '',
+            fullName: `${responsibleUser.firstName || ''} ${responsibleUser.lastName || ''}`.trim()
+                + (responsibleUser.email ? ` (${responsibleUser.email})` : ''),
+        }]
+        : [];
 };
 
 const onSubmit = async () => {

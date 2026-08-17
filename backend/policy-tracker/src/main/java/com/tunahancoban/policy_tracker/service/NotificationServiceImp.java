@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,8 +21,9 @@ public class NotificationServiceImp implements NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public Page<Notification> getNotifications(Pageable pageable) {
-        Page<Notification> notificationList = notificationRepository.findAll(pageable);
+    public Page<Notification> getNotifications(String userId, Pageable pageable) {
+        Page<Notification> notificationList = notificationRepository.findNotificationsByUserId(userId, pageable);
+        System.out.println(userId);
         log.debug("Notification search completed - found {} record(s)", notificationList.getTotalElements());
         return notificationList;
     }
@@ -29,7 +32,11 @@ public class NotificationServiceImp implements NotificationService {
     public Notification send(Notification notification) {
         Notification saved = notificationRepository.save(notification);
         log.info("Notification is creted and  published ID: {}, Topic: {}", saved.getId(), saved.getTitle());
-        messagingTemplate.convertAndSend("/topic/notifications", saved);
+        messagingTemplate.convertAndSendToUser(
+                saved.getUserId(),
+                "/queue/notifications",
+                saved
+        );
         return saved;
     }
 
@@ -42,8 +49,9 @@ public class NotificationServiceImp implements NotificationService {
     }
 
     @Override
-    public Long getUnreadCount() {
-        return notificationRepository.countByReadIsFalse();
+    public Long getUnreadCount(String userId) {
+
+        return notificationRepository.countByUserIdAndReadIsFalse(userId);
     }
 
 }

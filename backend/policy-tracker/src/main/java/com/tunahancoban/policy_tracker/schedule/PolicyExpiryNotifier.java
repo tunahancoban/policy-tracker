@@ -61,6 +61,7 @@ public class PolicyExpiryNotifier {
                 .notificationType(NotificationTypes.POLICY_EXPIRING)
                 .policyId(policy.getPolicyId())
                 .title(title)
+                .userId(policy.getResponsibleUserId())
                 .message(message)
                 .read(false)
                 .createdAt(LocalDateTime.now())

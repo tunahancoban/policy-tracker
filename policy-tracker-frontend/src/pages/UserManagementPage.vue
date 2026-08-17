@@ -10,7 +10,7 @@
 
         <!-- Başlık Bölümü -->
         <div class="row items-center justify-between q-mb-md">
-            <div class="text-h5 text-weight-bold text-grey-8 row items-center">
+            <div class="text-h5 text-weight-bold  row items-center">
                 <q-icon name="manage_accounts" color="primary" class="q-mr-sm" size="32px" />
                 Sistem Kullanıcıları Yönetimi
             </div>

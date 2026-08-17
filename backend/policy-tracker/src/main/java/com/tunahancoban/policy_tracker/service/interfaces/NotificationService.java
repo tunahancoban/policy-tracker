@@ -5,8 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
-    Page<Notification> getNotifications(Pageable pageable);
+    Page<Notification> getNotifications(String userId, Pageable pageable);
     Notification send(Notification notification);
     void markAsRead(String notificationId);
-    Long getUnreadCount();
+    Long getUnreadCount(String userId);
 }

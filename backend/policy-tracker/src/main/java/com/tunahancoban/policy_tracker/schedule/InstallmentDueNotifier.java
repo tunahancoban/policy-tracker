@@ -6,6 +6,7 @@ import com.tunahancoban.policy_tracker.model.enums.NotificationTypes;
 import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.repository.NotificationRepository;
+import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class InstallmentDueNotifier {
 
     private final InstallmentRepository installmentRepository;
     private final NotificationRepository notificationRepository;
+    private final PolicyRepository policyRepository;
 
     private static final List<Integer> THRESHOLDS = List.of(3, 0, -1);
     private final NotificationService notificationService;
@@ -80,6 +82,7 @@ public class InstallmentDueNotifier {
                 .policyId(installment.getPolicyId())
                 .installmentId(installment.getId())
                 .title(title)
+                .userId(policyRepository.getPolicyByPolicyId(installment.getPolicyId()).get().getResponsibleUserId())
                 .message(message)
                 .read(false)
                 .createdAt(LocalDateTime.now())

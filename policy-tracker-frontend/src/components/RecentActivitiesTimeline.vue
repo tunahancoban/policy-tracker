@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-sm">
-        <div class="text-subtitle1 text-weight-bold text-grey-8 q-mb-md row items-center justify-between">
+        <div class="text-subtitle1  q-mb-md row items-center justify-between">
             <div class="row items-center">
                 <q-icon name="history" color="primary" size="22px" class="q-mr-xs" />
                 Son İşlemler
@@ -29,22 +29,21 @@
                         </q-avatar>
                     </q-item-section>
 
-                    <!-- Orta Taraf: İşlem Tipi ve Detayı -->
                     <q-item-section>
-                        <q-item-label class="text-weight-bold text-grey-9 row items-center justify-between">
+                        <q-item-label class="text-weight-bold  row items-center justify-between">
                             <span>{{ activity.type }}</span>
-                            <span class="text-caption text-grey-6 text-weight-regular">
+                            <span class="text-caption  text-weight-regular">
                                 {{ formatDate(activity.dateTime) }}
                             </span>
                         </q-item-label>
-                        <q-item-label caption class="text-grey-7 q-mt-xs">
+                        <q-item-label caption class=" q-mt-xs">
                             {{ activity.detail }}
                         </q-item-label>
                     </q-item-section>
 
                     <!-- Sağ Taraf: İşlemi Yapan Kullanıcı -->
                     <q-item-section side class="gt-xs">
-                        <q-chip dense flat color="grey-2" text-color="grey-8" icon="person" size="12px">
+                        <q-chip dense flat icon="person" size="12px">
                             {{ activity.user }}
                         </q-chip>
                     </q-item-section>
