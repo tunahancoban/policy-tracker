@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
+    path: '/login',
     name: 'login',
     component: () => import('../pages/LoginPage.vue'),
     meta: { requiresGuest: true },

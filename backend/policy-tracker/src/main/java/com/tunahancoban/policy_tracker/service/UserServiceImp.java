@@ -71,7 +71,7 @@ public class UserServiceImp implements UserService {
 
         //It saves user
         User user = userMapper.toEntity(registerRequest);
-
+        user.setPassword(hashedPassword);
         User savedUser = userRepository.save(user);
         log.info("User successfully created - id: {}, email: {}", savedUser.getId(), savedUser.getEmail());
 
