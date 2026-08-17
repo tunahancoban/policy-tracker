@@ -110,7 +110,6 @@ public class CustomerServiceImp implements CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
         Customer savedCustomer = customerRepository.save(customer);
 
-        customerRepository.save(savedCustomer);
         log.info("Customer successfully updated - customerId: {}", id);
 
         return savedCustomer;

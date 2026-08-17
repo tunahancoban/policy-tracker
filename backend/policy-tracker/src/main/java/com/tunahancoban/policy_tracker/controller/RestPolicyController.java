@@ -39,15 +39,7 @@ public class RestPolicyController {
     public Page<Policy> getPolicyWithParams(PolicySearchRequest request) {
         return policySearchService.search(request);
     }
-
-    private void validateSort(Pageable pageable) {
-        pageable.getSort().forEach(order -> {
-            if (!ALLOWED_SORT_FIELDS.contains(order.getProperty())) {
-                throw new IllegalArgumentException("Geçersiz sıralama alanı: " + order.getProperty());
-            }
-        });
-    }
-
+    
     @GetMapping(path = "/get-policy/{id}")
     public ResponseEntity<Policy> getPolicyById(@PathVariable String id){
         Policy policy = policyService.getPolicyById(id);

@@ -88,7 +88,7 @@ public class PolicyServiceImp implements PolicyService {
                 request.getCustomerId(), request.getType(), request.getPremium());
 
         if (!customerService.existById(request.getCustomerId())) {
-            log.warn("Policy renew failed - customer not found: {}", request.getCustomerId());
+            log.warn("Policy create failed - customer not found: {}", request.getCustomerId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Müşteri ID bulunamadı: " + request.getCustomerId());
         }
 
@@ -182,9 +182,9 @@ public class PolicyServiceImp implements PolicyService {
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
 
-        eventPublisher.publishEvent(PolicyUpdatedEvent.from(savedPolicy));
+        eventPublisher.publishEvent(PolicyCreatedEvent.from(savedPolicy));
 
-        log.info("Policy successfully created - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
+        log.info("Policy successfully renewed - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
         return savedPolicy;
 
     }
