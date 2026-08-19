@@ -1,4 +1,4 @@
-// composables/useCustomerDetail.ts
+// composables/usePolicyDetail.ts
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { usePolicyStore } from '@/stores/policy';

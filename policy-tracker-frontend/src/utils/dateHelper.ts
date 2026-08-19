@@ -108,7 +108,7 @@ export const getTodayFormatted = (): string => {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
-  return `${day}/${month}/${year}`;
+  return `${year}/${month}/${day}`;
 };
 
 /**
@@ -119,5 +119,5 @@ export const getNextYearFormatted = (startDateFormatted: string): string => {
   const parts = startDateFormatted.split('/');
   if (parts.length !== 3) return '';
   const year = parseInt(parts[0] as string, 10) + 1;
-  return `${parts[2]}/${parts[1]}/${year}`;
+  return `${year}/${parts[1]}/${parts[2]}`;
 };

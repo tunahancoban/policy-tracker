@@ -7,6 +7,11 @@ export interface ConnectCallbacks {
   onNotificationReceived?: (notification: Notification) => void;
 }
 
+// ── Paylaşımlı reaktif sinyal ───────────────────────────────────────────────
+// MainLayout WS üzerinden dashboard güncellemesi aldığında bu sayacı artırır.
+// DashboardPage bu ref'i watch ederek veri yeniler; kendi WS bağlantısı açmaz.
+export const dashboardSignal = ref<number>(0);
+
 export function useWebSocket() {
   const isConnected = ref(false);
   let stompClient: Client | null = null;
@@ -29,6 +34,8 @@ export function useWebSocket() {
       if (callbacks.onDashboardUpdate) {
         stompClient?.subscribe('/topic/dashboard-summary', (message: IMessage) => {
           callbacks.onDashboardUpdate?.(message.body);
+          // Paylaşımlı sinyali artır — DashboardPage bunu watch eder
+          dashboardSignal.value++;
         });
       }
 

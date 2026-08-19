@@ -90,9 +90,9 @@
                     <q-item-section>
                         <q-item-label caption>Sistem Durumu</q-item-label>
                         <q-item-label>
-                            <q-chip :color="customer.active ? 'positive' : 'negative'" text-color="white" dense
+                            <q-chip :color="customer.isActive ? 'positive' : 'negative'" text-color="white" dense
                                 class="text-weight-bold">
-                                {{ customer.active ? 'AKTİF' : 'PASİF' }}
+                                {{ customer.isActive ? 'AKTİF' : 'PASİF' }}
                             </q-chip>
                         </q-item-label>
                     </q-item-section>

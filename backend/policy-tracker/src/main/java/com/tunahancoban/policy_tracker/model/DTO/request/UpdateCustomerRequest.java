@@ -19,5 +19,5 @@ public class UpdateCustomerRequest {
     private JsonNullable<String> city = JsonNullable.undefined();
     private JsonNullable<String> district = JsonNullable.undefined();
     private JsonNullable<String> fullAddress = JsonNullable.undefined();
-    private JsonNullable<Boolean> active = JsonNullable.undefined();
+    private JsonNullable<Boolean> isActive = JsonNullable.undefined();
 }

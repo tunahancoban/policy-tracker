@@ -20,6 +20,8 @@ public class UpdateUserRequest {
 
     private JsonNullable<String> lastName = JsonNullable.undefined();
 
+    private JsonNullable<Boolean> isActive = JsonNullable.undefined();
+
     private JsonNullable<@Email(message = "This email is not valid. Enter a valid email.") String> email = JsonNullable.undefined();
 
     private JsonNullable<String> password = JsonNullable.undefined();

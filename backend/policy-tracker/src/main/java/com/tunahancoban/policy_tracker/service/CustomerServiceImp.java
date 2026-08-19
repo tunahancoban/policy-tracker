@@ -2,6 +2,10 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.mapper.CustomerMapper;
+import com.tunahancoban.policy_tracker.model.DTO.events.CustomerCreatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.CustomerDeletedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.CustomerUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserCreatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
@@ -10,6 +14,7 @@ import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
 import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -27,6 +32,7 @@ public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
     private final IdGeneratorService idGeneratorService;
     private final CustomerMapper customerMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
@@ -42,7 +48,7 @@ public class CustomerServiceImp implements CustomerService {
                 .identityNumber(identityNumber)
                 .email(email)
                 .phoneNumber(phoneNumber)
-                .active(active).build();
+                .isActive(active).build();
 
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreNullValues()
@@ -54,7 +60,6 @@ public class CustomerServiceImp implements CustomerService {
 
         Page<Customer> result = customerRepository.findAll(example, pageable);
         log.debug("Customer search completed - total records found: {}", result.getTotalElements());
-
         return result;
     }
 
@@ -89,6 +94,7 @@ public class CustomerServiceImp implements CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
 
         customerRepository.save(customer);
+        eventPublisher.publishEvent(CustomerCreatedEvent.from(customer));
         log.info("Customer successfully created - customerId: {}", customer.getCustomerId());
 
         return customer;
@@ -109,6 +115,7 @@ public class CustomerServiceImp implements CustomerService {
         customerMapper.updateEntityFromRequest(updates, customer);
         customer.setUpdatedAt(LocalDateTime.now());
         Customer savedCustomer = customerRepository.save(customer);
+        eventPublisher.publishEvent(CustomerUpdatedEvent.from(savedCustomer));
 
         log.info("Customer successfully updated - customerId: {}", id);
 
@@ -126,7 +133,9 @@ public class CustomerServiceImp implements CustomerService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
                 });
 
-        customerRepository.deleteById(customer.getId());
+        customer.setIsActive(false);
+        customerRepository.save(customer);
+        eventPublisher.publishEvent(CustomerDeletedEvent.from(customer));
         log.info("Customer successfully deleted - customerId: {}", id);
     }
 

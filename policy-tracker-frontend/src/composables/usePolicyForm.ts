@@ -44,6 +44,18 @@ export function usePolicyForm(
   const filteredCustomerOptions = ref<CustomerOption[]>([]);
   const filteredUserOptions = ref<UserOption[]>([]);
 
+  // ── Loading sarıcı ────────────────────────────────────────────────────────
+  // Submit işlemini composable içinden yöneterek loading state'ini tek yerde toplar.
+  // Bileşenin ayrıca loading.value = true/false yapmasına gerek kalmaz.
+  const withLoading = async <T>(fn: () => Promise<T>): Promise<T | undefined> => {
+    loading.value = true;
+    try {
+      return await fn();
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const initialFormState = (): PolicyForm => ({
     customerId: '',
     type: '',
@@ -134,7 +146,8 @@ export function usePolicyForm(
 
   const onModalShow = async (): Promise<void> => {
     if (!customerStore.customerData?.length) await customerStore.fetchCustomerData();
-    if (!userStore.users?.length) await userStore.fetchUserById('');
+    // Boş string yerine fetchUsers ile tüm aktif kullanıcı listesini çek
+    if (!userStore.users?.length) await userStore.fetchUsers();
 
     customerSearchQuery.value = '';
     filteredCustomerOptions.value = [];
@@ -193,6 +206,7 @@ export function usePolicyForm(
     note: form.value.note,
   });
 
+  // ── Submit: loading composable içinde yönetiliyor ──────────────────────────
   type SubmitResult =
     | { mode: 'created'; payload: CreatePolicyRequest }
     | { mode: 'renewed'; payload: RenewPolicyRequest }
@@ -204,6 +218,10 @@ export function usePolicyForm(
     }
     return { mode: 'created', payload: buildCreatePayload() };
   };
+
+  /** Submit işlemini loading sarıcı ile çalıştırır; bileşen sadece bunu çağırır. */
+  const submitWithLoading = (fn: () => Promise<void>): Promise<void | undefined> =>
+    withLoading(fn);
 
   return {
     form,
@@ -219,5 +237,6 @@ export function usePolicyForm(
     filterCustomerFn,
     filterUserFn,
     buildSubmitPayload,
+    submitWithLoading,
   };
 }

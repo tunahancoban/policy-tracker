@@ -10,7 +10,7 @@ export interface Customer {
   fullAddress: string;
   createdAt: string;
   updatedAt: string;
-  active: boolean;
+  isActive: boolean;
 }
 
 export const CUSTOMER_SORT_FIELD_MAP: Record<string, string> = {
@@ -41,7 +41,7 @@ export const customerColumns = [
   { name: 'email', label: 'E-posta', field: 'email', align: 'left' as const },
   { name: 'phoneNumber', label: 'Telefon', field: 'phoneNumber', align: 'left' as const },
   { name: 'city', label: 'Şehir', field: 'city', align: 'left' as const, sortable: true },
-  { name: 'active', label: 'Aktif/Pasif', field: 'active', align: 'center' as const },
+  { name: 'isActive', label: 'Aktif/Pasif', field: 'isActive', align: 'center' as const },
   { name: 'actions', label: 'İşlemler', field: 'actions', align: 'center' as const },
 ];
 
@@ -60,7 +60,7 @@ export const initialForm = {
   city: '',
   district: '',
   fullAddress: '',
-  active: true,
+  isActive: true,
   createdAt: '',
   updatedAt: '',
 };

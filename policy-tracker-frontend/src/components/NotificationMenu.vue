@@ -37,18 +37,18 @@
                             </q-item-section>
 
                             <q-item-section v-if="!notification.read" side>
-                                <q-badge rounded color="primary" style="width: 8px; height: 8px" />
+                                <q-badge rounded style="width: 8px; height: 8px" />
                             </q-item-section>
                         </q-item>
 
                         <div v-if="notificationStore.isLoading" class="row justify-center q-pa-sm">
-                            <q-spinner color="primary" size="24px" />
+                            <q-spinner size="24px" />
                         </div>
                     </q-list>
 
                     <div v-else-if="!notificationStore.isLoading" class="notification-panel__empty">
                         <q-icon name="notifications_none" size="40px" color="grey-4" />
-                        <div class="text-grey-6 q-mt-sm">Henüz bildirim yok</div>
+                        <div class="q-mt-sm">Henüz bildirim yok</div>
                     </div>
                 </q-scroll-area>
             </div>
@@ -119,10 +119,6 @@ function formatDate(dateStr: string): string {
 
 .notification-panel {
     width: 360px;
-}
-
-.notification-panel__header {
-    background-color: #fafafa;
 }
 
 .notification-panel__empty {

@@ -93,10 +93,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { usePolicyForm } from '../composables/usePolicyForm';
-import { useUserStore } from '@/stores/user';
-import { type Policy, type PolicyForm } from '../types/policy.types';
+import { useUserStore } from '../stores/user';
+import { useCustomerStore } from '../stores/customer';
+import type { CustomerOption } from '../composables/usePolicyForm';
+import { type Policy, type PolicyForm, policyTypeOptions } from '../types/policy.types';
 
 const userStore = useUserStore();
+const customerStore = useCustomerStore();
+
 interface Props {
     modelValue: boolean;
     policyData: Policy;
@@ -118,21 +122,24 @@ const isOpen = computed({
     set: (value) => emit('update:modelValue', value)
 });
 
-
+// Yalnızca form state, loading ve submit yönetimi için composable kullanılıyor.
+// "create" moduna özel onModalShow override'ı yapılmıyor.
 const {
     form,
     loading,
-    filteredCustomerOptions,
     filteredUserOptions,
-    customerOptions,
-    policyTypeOptions,
-    onModalShow: baseOnModalShow,
     filterUserFn,
+    submitWithLoading,
 } = usePolicyForm({ isRenewal: false, policyData: null });
+
+// EditPolicyModal'ın kendi customer seçenek listesi (sadece mevcut müşteri)
+const filteredCustomerOptions = ref<CustomerOption[]>([]);
 
 const originalForm = ref<PolicyForm>({ ...form.value });
 
-const trackedFields: (keyof PolicyForm)[] = ['customerId', 'type', 'premium', 'note', "responsibleUserId", 'startDate', 'endDate', 'active'];
+const trackedFields: (keyof PolicyForm)[] = [
+    'customerId', 'type', 'premium', 'note', 'responsibleUserId', 'startDate', 'endDate', 'active'
+];
 
 function assignIfChanged<K extends keyof PolicyForm>(
     target: Partial<PolicyForm>,
@@ -147,18 +154,21 @@ function assignIfChanged<K extends keyof PolicyForm>(
 
 const getChangedFields = (): Partial<PolicyForm> => {
     const changed: Partial<PolicyForm> = {};
-
     trackedFields.forEach((key) => {
         assignIfChanged(changed, key, form.value, originalForm.value);
     });
-
     return changed;
 };
 
 const hasChanges = computed(() => Object.keys(getChangedFields()).length > 0);
 
+// ── Modal açılışında formu mevcut poliçe verisiyle doldur ─────────────────────
+// baseOnModalShow yerine doğrudan customer/user store kullanılıyor.
 const onModalShow = async () => {
-    await baseOnModalShow();
+    // Müşteri listesi henüz yüklenmediyse çek (edit'te filtreleme için gerekli)
+    if (!customerStore.customerData?.length) await customerStore.fetchCustomerData();
+
+    // Sorumlu kullanıcıyı ID ile getir
     const responsibleUser = await userStore.fetchUserById(props.policyData.responsibleUserId);
 
     form.value = {
@@ -166,18 +176,32 @@ const onModalShow = async () => {
         type: props.policyData.type || '',
         premium: props.policyData.premium || 0,
         installment: props.policyData.installment || 0,
-        responsibleUserId: props.policyData.responsibleUserId || '', // <-- sadece ID
+        responsibleUserId: props.policyData.responsibleUserId || '',
         note: props.policyData.note || '',
-        startDate: props.policyData.startDate ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/') : '',
-        endDate: props.policyData.endDate ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/') : '',
+        startDate: props.policyData.startDate
+            ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/')
+            : '',
+        endDate: props.policyData.endDate
+            ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/')
+            : '',
         active: props.policyData.active || ''
     };
 
     originalForm.value = { ...form.value };
 
-    const matchedCustomer = customerOptions.value.find((c) => c.customerId === form.value.customerId);
-    filteredCustomerOptions.value = matchedCustomer ? [matchedCustomer] : [];
+    // Sadece bu müşteri seçenek olarak gösterilsin (değiştirilemiyor)
+    const matchedCustomer = customerStore.customerData.find(
+        (c) => c.customerId === form.value.customerId
+    );
+    filteredCustomerOptions.value = matchedCustomer
+        ? [{
+            customerId: matchedCustomer.customerId,
+            identityNumber: matchedCustomer.identityNumber || '',
+            fullName: `${matchedCustomer.firstName || ''} ${matchedCustomer.lastName || ''}`.trim(),
+        }]
+        : [];
 
+    // Sorumlu kullanıcı drop-down'ı
     filteredUserOptions.value = responsibleUser
         ? [{
             userId: responsibleUser.id,
@@ -196,18 +220,12 @@ const onSubmit = async () => {
         return;
     }
 
-    loading.value = true;
-    try {
+    await submitWithLoading(async () => {
         await emit('updated', {
             id: props.policyData.policyId,
             data: patchData
         });
-
         isOpen.value = false;
-    } catch (error) {
-        console.error('Poliçe güncellenirken hata oluştu:', error);
-    } finally {
-        loading.value = false;
-    }
+    });
 };
 </script>

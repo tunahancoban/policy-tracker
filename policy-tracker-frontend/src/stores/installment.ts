@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { installmentService } from '@/restservices/installmentService';
-import type { Installment } from '@/types/installment.types';
+import { installmentService } from '../restservices/installmentService';
+import type { Installment } from '../types/installment.types';
 
 export const useInstallmentStore = defineStore('installment', () => {
   const installments = ref<Installment[]>([]);

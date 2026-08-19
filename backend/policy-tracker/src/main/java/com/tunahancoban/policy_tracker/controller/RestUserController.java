@@ -2,8 +2,10 @@ package com.tunahancoban.policy_tracker.controller;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.UserSearchRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
+import com.tunahancoban.policy_tracker.service.UserSearchService;
 import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +22,13 @@ import org.springframework.web.bind.annotation.*;
 public class RestUserController {
 
     private final UserService userService;
+    private final UserSearchService searchService;
 
     // 1. FIND User
     @GetMapping(path= "/with-params")
-    public ResponseEntity<Page<User>> getUserWithParam(@RequestParam(name = "id", required = false) String id,
-                                                                     @RequestParam(name = "firstName", required = false) String firstName,
-                                                                     @RequestParam(name = "lastName", required = false) String lastName,
-                                                                     @RequestParam(name = "email", required = false) String email,
-                                                                     @RequestParam(name = "role", required = false) Role role,
-       @PageableDefault(size = 5, sort = "endDate", direction = Sort.Direction.ASC) Pageable pageable) {
+    public ResponseEntity<Page<User>> getUserWithParam(UserSearchRequest searchRequest) {
 
-        Page<User> users = userService.getUserWithParam(id, firstName, lastName, email, role, pageable);
+        Page<User> users = searchService.search(searchRequest);
         return ResponseEntity.ok(users);
     }
 

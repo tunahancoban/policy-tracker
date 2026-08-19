@@ -78,16 +78,20 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/policy.types';
-import { policyTypeOptions, SORT_FIELD_MAP } from '@/types/policy.types';
+import { policyTypeOptions } from '@/types/policy.types';
 import { usePolicyList } from '@/composables/usePolicyList';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useAuthStore } from '@/stores/auth';
 import { Notify } from 'quasar';
 import PolicyTable from '@/components/PolicyTable.vue';
 import { useRouter } from 'vue-router';
-
 import NewPolicyModal from '@/components/NewPolicyModal.vue';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
+import {
+    buildQueryParams,
+    resolvePolicySearchParam,
+    POLICY_SORT_FIELD_MAP,
+} from '@/composables/useQueryBuilder';
 
 const authStore = useAuthStore();
 const activeOptions = [
@@ -123,51 +127,38 @@ const selectedPolicy = ref<Policy | null>(null);
 const sortByColumn = ref<string | null>('endDate');
 const sortDescending = ref<boolean>(false);
 
-const buildQueryParams = (
+const buildParams = (
     overridePage?: number,
     overrideSize?: number,
     sortBy?: string | null,
     descending?: boolean,
 ) => {
-    const query = searchQuery.value?.trim() ?? '';
+    const extra: Record<string, string> = {};
+    if (!authStore.isAdmin && authStore.id) extra.responsibleUserId = authStore.id;
+    if (selectedType.value) extra.type = selectedType.value;
+    if (selectedActive.value) extra.active = selectedActive.value;
 
-    const params: Record<string, string> = {
-        page: String(overridePage ?? currentPage.value),
-        size: String(overrideSize ?? pageSize.value),
-    };
-
-    if (selectedType.value) {
-        params.type = selectedType.value;
-    }
-    if (selectedActive.value) {
-        params.active = selectedActive.value;
-    }
-    if (query) {
-        if (query.toUpperCase().startsWith('CST')) {
-            params.customerId = query;
-        } else {
-            params.policyId = query;
-        }
-    }
-
-    const effectiveSortBy = sortBy ?? sortByColumn.value;
-    const effectiveDescending = descending ?? sortDescending.value;
-
-    if (effectiveSortBy && SORT_FIELD_MAP[effectiveSortBy]) {
-        const direction = effectiveDescending ? 'desc' : 'asc';
-        params.sort = `${SORT_FIELD_MAP[effectiveSortBy]},${direction}`;
-    }
-
-    if (!authStore.isAdmin && authStore.id) {
-        params.responsibleUserId = authStore.id;
-    }
-
-    return params;
+    return buildQueryParams(
+        {
+            pageSize: pageSize.value,
+            currentPage: currentPage.value,
+            sortFieldMap: POLICY_SORT_FIELD_MAP,
+            resolveSearchParam: resolvePolicySearchParam,
+            extraParams: extra,
+        },
+        {
+            ...(overridePage !== undefined && { page: overridePage }),
+            ...(overrideSize !== undefined && { size: overrideSize }),
+            search: searchQuery.value,
+            sortBy: sortBy ?? sortByColumn.value,
+            descending: descending ?? sortDescending.value,
+        },
+    );
 };
 
 const onSearch = () => {
     currentPage.value = 0;
-    void loadPolicies(buildQueryParams(0));
+    void loadPolicies(buildParams(0));
 };
 
 const resetFilters = () => {
@@ -175,7 +166,7 @@ const resetFilters = () => {
     selectedType.value = null;
     selectedActive.value = 'ACTIVE';
     currentPage.value = 0;
-    void loadPolicies(buildQueryParams(0));
+    void loadPolicies(buildParams(0));
 };
 
 watch([selectedType, selectedActive], () => {
@@ -201,7 +192,7 @@ const onRequest = async (requestProp: {
     }
 
     await loadPolicies(
-        buildQueryParams(targetBackendPage, rowsPerPage, sortByColumn.value, sortDescending.value)
+        buildParams(targetBackendPage, rowsPerPage, sortByColumn.value, sortDescending.value)
     );
 };
 
@@ -222,13 +213,12 @@ const openEditDialog = (policy: Policy) => {
     isEditModalOpen.value = true;
 };
 
-// Sıfırdan Poliçe Oluşturma
 const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
     try {
         await createPolicy(newPolicyPayload);
         Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
-        void loadPolicies(buildQueryParams());
+        void loadPolicies(buildParams());
     } catch (err) {
         Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Create Error:', err);
@@ -240,7 +230,7 @@ const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
         await renewPolicy(renewPayload);
         Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
-        void loadPolicies(buildQueryParams());
+        void loadPolicies(buildParams());
     } catch (err) {
         Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Renew Error:', err);
@@ -251,7 +241,7 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
     try {
         await updatePolicy(event.id, event.data);
         Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
-        void loadPolicies(buildQueryParams());
+        void loadPolicies(buildParams());
     } catch (error) {
         Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Update Error:', error);
@@ -263,7 +253,7 @@ const handlePolicyDelete = async (policy: Policy) => {
     if (!policy?.policyId) return;
 
     const isConfirmed = await confirm({
-        title: 'Poliçe Silme Onayı',
+        title: 'Poliçe Silme Onayi',
         message: `${policy.policyId} numaralı poliçeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
         okLabel: 'Evet, Sil',
         cancelLabel: 'Vazgeç',
@@ -275,7 +265,7 @@ const handlePolicyDelete = async (policy: Policy) => {
     try {
         await deletePolicy(policy.policyId);
         Notify.create({ message: 'Poliçe başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
-        void loadPolicies(buildQueryParams());
+        void loadPolicies(buildParams());
     } catch (err) {
         Notify.create({ message: 'Poliçe silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Delete Error:', err);
@@ -287,6 +277,6 @@ const goToPolicyDetail = (evt: unknown, row: Policy) => {
 };
 
 onMounted(() => {
-    void loadPolicies(buildQueryParams());
+    void loadPolicies(buildParams());
 });
 </script>

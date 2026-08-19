@@ -45,11 +45,10 @@
                     v-model:pagination="pagination" :rows-number="totalElements"
                     no-data-label="Kayıtlı müşteri bulunamadı." loading-label="Veriler yükleniyor."
                     @row-click="goToCustomerDetail" @request="onTableRequest" class="clickable-table">
-                    <template v-slot:body-cell-active="props">
+                    <template v-slot:body-cell-isActive="props">
                         <q-td :props="props" class="text-center">
-                            <q-chip :color="props.row.active ? 'positive' : 'grey-5'" text-color="white" dense
-                                class="status-chip">
-                                {{ props.row.active ? 'Aktif' : 'Pasif' }}
+                            <q-chip :color="props.row.isActive ? 'positive' : 'negative'" dense class="status-chip">
+                                {{ props.row.isActive ? 'Aktif' : 'Pasif' }}
                             </q-chip>
                         </q-td>
                     </template>
@@ -126,7 +125,7 @@ const buildQueryParams = (
     };
 
     if (selectedActive.value !== null) {
-        params.active = selectedActive.value;
+        params.isActive = selectedActive.value;
     }
 
     if (query) {

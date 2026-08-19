@@ -9,22 +9,22 @@
 
             <q-form @submit.prevent="saveCustomer">
                 <q-card-section class="q-gutter-sm">
-                <q-input v-model="form.firstName" label="Ad *" outlined dense
-                    :rules="[val => !!val || 'Ad zorunludur']" />
-                <q-input v-model="form.lastName" label="Soyad *" outlined dense
-                    :rules="[val => !!val || 'Soyad zorunludur']" />
-                <q-input v-model="form.identityNumber" label="T.C *" outlined dense
-                    :rules="[val => !!val || 'T.C. zorunludur']" />
+                    <q-input v-model="form.firstName" label="Ad *" outlined dense
+                        :rules="[val => !!val || 'Ad zorunludur']" />
+                    <q-input v-model="form.lastName" label="Soyad *" outlined dense
+                        :rules="[val => !!val || 'Soyad zorunludur']" />
+                    <q-input v-model="form.identityNumber" label="T.C *" outlined dense
+                        :rules="[val => !!val || 'T.C. zorunludur']" />
 
-                <q-select v-model="form.active" :options="stateOptions" label="Sistem Durumu" emit-value map-options
-                    outlined dense />
+                    <q-select v-model="form.isActive" :options="stateOptions" label="Sistem Durumu" emit-value
+                        map-options outlined dense />
 
-                <q-input v-model="form.email" label="E-posta" outlined dense type="email" />
-                <q-input v-model="form.phoneNumber" label="Telefon" outlined dense mask="(###) ### ## ##"
-                    unmasked-value />
-                <q-input v-model="form.city" label="Şehir" outlined dense />
-                <q-input v-model="form.district" label="İlçe" outlined dense />
-                <q-input v-model="form.fullAddress" label="Adres" outlined dense type="textarea" rows="2" />
+                    <q-input v-model="form.email" label="E-posta" outlined dense type="email" />
+                    <q-input v-model="form.phoneNumber" label="Telefon" outlined dense mask="(###) ### ## ##"
+                        unmasked-value />
+                    <q-input v-model="form.city" label="Şehir" outlined dense />
+                    <q-input v-model="form.district" label="İlçe" outlined dense />
+                    <q-input v-model="form.fullAddress" label="Adres" outlined dense type="textarea" rows="2" />
                 </q-card-section>
 
                 <q-card-actions align="right" class="text-primary q-pt-none">

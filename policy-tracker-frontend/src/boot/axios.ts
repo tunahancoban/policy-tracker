@@ -1,9 +1,9 @@
 import axios from 'axios';
-console.log('BASE_URL:', import.meta.env.QCLI_BASE_URL);
-console.log('FULL ENV:', import.meta.env);
+
+const baseURL = 'http://localhost:8080';
 
 const api = axios.create({
-  baseURL: import.meta.env.QCLI_BASE_URL || '',
+  baseURL: baseURL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -11,9 +11,7 @@ const api = axios.create({
 });
 
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequestUrl = error.config?.url;
     if (error.response?.status === 401 && !originalRequestUrl?.includes('/auth/login-request')) {
@@ -31,14 +29,11 @@ api.interceptors.response.use(
     }
 
     const backendMessage = error.response?.data?.message;
-
     if (backendMessage) {
       return Promise.reject(new Error(backendMessage));
     }
 
-    const finalError = error instanceof Error ? error : new Error(String(error));
-
-    return Promise.reject(finalError);
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
   },
 );
 

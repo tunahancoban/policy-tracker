@@ -1,6 +1,10 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.mapper.UserMapper;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserCreatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserDeletedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserUpdatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.Role;
@@ -9,6 +13,7 @@ import com.tunahancoban.policy_tracker.repository.UserRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -16,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -26,6 +34,7 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable) {
@@ -54,6 +63,7 @@ public class UserServiceImp implements UserService {
         return result;
     }
 
+    @Transactional
     @Override
     public User createUser(RegisterRequest registerRequest) {
         log.info("Creating user - email: {}, role: {}", registerRequest.getEmail(), registerRequest.getRole());
@@ -73,21 +83,25 @@ public class UserServiceImp implements UserService {
         User user = userMapper.toEntity(registerRequest);
         user.setPassword(hashedPassword);
         User savedUser = userRepository.save(user);
+        eventPublisher.publishEvent(UserCreatedEvent.from(savedUser));
         log.info("User successfully created - id: {}, email: {}", savedUser.getId(), savedUser.getEmail());
-
         return savedUser;
     }
 
     //Delete user
+    @Transactional
     @Override
     public void deleteUser(String id) {
         log.info("Deleting user - id: {}", id);
 
-        if (!userRepository.existsById(id)) {
+        User user = userRepository.findById(id).orElseThrow(() -> {
             log.warn("User deletion failed - id not found: {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This id does not exist. ID: " + id);
-        }
-        userRepository.deleteById(id);
+            return new ResponseStatusException(HttpStatus.NOT_FOUND, "This id does not exist. ID: " + id);
+        });
+        user.setDeletedAt(LocalDateTime.now());
+        user.setActive(false);
+        userRepository.save(user);
+        eventPublisher.publishEvent(UserDeletedEvent.from(user));
         log.info("User successfully deleted - id: {}", id);
     }
 
@@ -133,6 +147,7 @@ public class UserServiceImp implements UserService {
         }
 
         User updatedUser = userRepository.save(user);
+        eventPublisher.publishEvent(UserUpdatedEvent.from(updatedUser));
         log.info("User successfully updated - id: {}", id);
 
         return updatedUser;

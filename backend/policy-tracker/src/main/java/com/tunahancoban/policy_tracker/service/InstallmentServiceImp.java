@@ -1,5 +1,7 @@
 package com.tunahancoban.policy_tracker.service;
 
+import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentCreatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentDeletedEvent;
 import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
@@ -7,6 +9,7 @@ import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,8 @@ import java.util.List;
 public class InstallmentServiceImp implements InstallmentService {
 
     private final InstallmentRepository installmentRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     public Page<Installment> getInstallment(String customerId, String policyId, Pageable pageable) {
@@ -91,7 +96,12 @@ public class InstallmentServiceImp implements InstallmentService {
             installments.add(installment);
         }
         log.info("Installments successfully saved - policyId: {}", policy.getPolicyId());
-        installmentRepository.saveAll(installments);
+            installmentRepository.saveAll(installments);
+
+        for (Installment installment: installments) {
+            eventPublisher.publishEvent(InstallmentCreatedEvent.from(installment));
+        }
+
     }
 
     @Override
@@ -100,7 +110,9 @@ public class InstallmentServiceImp implements InstallmentService {
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "Installment not found: " + installmentId);});
         installment.setStatus(status);
         installmentRepository.save(installment);
+        eventPublisher.publishEvent(InstallmentCreatedEvent.from(installment));
         log.info("Installments successfully updated - installmentId: {}", installmentId);
+
         return installment;
     }
 
@@ -120,6 +132,9 @@ public class InstallmentServiceImp implements InstallmentService {
         }
 
         installmentRepository.saveAll(installments);
+        for (Installment installment: installments) {
+            eventPublisher.publishEvent(InstallmentDeletedEvent.from(installment));
+        }
         log.info("Installments successfully deleted - policyId: {}", policyId);
     }
 }

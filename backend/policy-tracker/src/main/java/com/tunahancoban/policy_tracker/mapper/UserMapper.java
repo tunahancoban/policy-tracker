@@ -2,7 +2,10 @@ package com.tunahancoban.policy_tracker.mapper;
 
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
+import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.entity.User;
+import com.tunahancoban.policy_tracker.model.indexes.PolicyIndex;
+import com.tunahancoban.policy_tracker.model.indexes.UserIndex;
 import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 
@@ -17,6 +20,10 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
     void updateEntityFromRequest(UpdateUserRequest request, @MappingTarget User user);
+
+    UserIndex toIndex(User user);
+
+    User toEntity(UserIndex document);
 
 
     default <T> T mapJsonNullable(JsonNullable<T> jsonNullable) {

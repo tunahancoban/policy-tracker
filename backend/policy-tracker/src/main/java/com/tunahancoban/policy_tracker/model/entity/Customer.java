@@ -41,6 +41,7 @@ public class Customer {
     @NotBlank(message = "Phone number cannot be null")
     private String phoneNumber;
 
+
     private String city;
     private String district;
     private String fullAddress;
@@ -49,7 +50,7 @@ public class Customer {
     private LocalDateTime createdAt = LocalDateTime.now();
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
-    private Boolean active = true;
-
+    @Builder.Default
+    private Boolean isActive = true;
 
 }

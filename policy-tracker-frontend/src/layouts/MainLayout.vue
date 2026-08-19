@@ -101,13 +101,15 @@ const wsState = useWebSocket();
 const { connect, disconnect } = wsState;
 
 // --- Dark Mode ---
+// localStorage'dan mevcut durumu oku; Quasar'ı da buna göre başlat
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true');
-
-
+$q.dark.set(isDarkMode.value); // Sayfa ilk yüklendiğinde Quasar'a bildir
 
 function toggleDarkMode() {
-  $q.dark.set(!$q.dark.isActive)
-  isDarkMode.value = !isDarkMode.value;
+  const next = !$q.dark.isActive;
+  $q.dark.set(next);
+  isDarkMode.value = next;
+  localStorage.setItem('darkMode', String(next)); // localStorage ile senkronize et
 }
 
 // --- Scroll to Top ---

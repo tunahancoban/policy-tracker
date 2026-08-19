@@ -29,7 +29,7 @@
                 </template>
                 <template v-slot:body-cell-actions="props">
                     <q-td :props="props" class="text-center q-gutter-xs">
-                        <q-btn flat round color="secondary" icon="edit" size="sm" @click="openEditDialog(props.row)">
+                        <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
                             <q-tooltip>Kullanıcıyı Düzenle</q-tooltip>
                         </q-btn>
                         <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmDelete(props.row)">
@@ -92,7 +92,7 @@
                     </q-card-section>
 
                     <q-card-actions align="right" class="text-primary q-pb-md q-px-md">
-                        <q-btn flat label="Vazgeç" v-close-popup color="grey" class="text-weight-bold" />
+                        <q-btn flat label="Vazgeç" v-close-popup class="text-weight-bold" />
                         <q-btn unelevated type="submit" :label="isEditMode ? 'Güncelle' : 'Kaydet'" color="primary"
                             class="text-weight-bold q-px-md" :loading="isLoading" />
                     </q-card-actions>
@@ -104,16 +104,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
 import { useUserList } from '@/composables/useUserList';
 import { useNotify } from '@/composables/useNotify';
 import { useUserForm } from '@/composables/useUserForm';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { userColumns, userRoleOptions } from '@/types/user.types';
 import type { User } from '@/types/user.types';
 
 const { users, isLoading, loadUsers, addUser, updateUser, deleteUser } = useUserList();
 const { notifySuccess, notifyError } = useNotify();
-const $q = useQuasar(); // artık sadece $q.dialog (silme onayı) için kullanılıyor
+const { confirm } = useConfirmDialog();
 
 const {
     form,
@@ -170,15 +170,17 @@ const saveUser = async () => {
     }
 };
 
-const confirmDelete = (user: User) => {
-    $q.dialog({
+const confirmDelete = async (user: User) => {
+    const isConfirmed = await confirm({
         title: 'Kullanıcıyı Sil',
         message: `${user.firstName} ${user.lastName} adlı kullanıcıyı sistemden silmek istediğinize emin misiniz?`,
-        cancel: { label: 'Vazgeç', flat: true, color: 'grey' },
-        ok: { label: 'Sil', flat: true, color: 'negative' },
-    }).onOk(() => {
-        void handleDelete(user);
+        okLabel: 'Sil',
+        cancelLabel: 'Vazgeç',
+        color: 'negative',
     });
+
+    if (!isConfirmed) return;
+    void handleDelete(user);
 };
 
 const handleDelete = async (user: User) => {

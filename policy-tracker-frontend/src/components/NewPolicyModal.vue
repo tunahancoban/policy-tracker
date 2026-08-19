@@ -52,12 +52,10 @@
                         :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
                     <!-- Instalment Count -->
-                    <q-input v-model.number="form.installment" type="number" label="Taksit Sayısı(1-3-6) *" outlined
-                        dense :rules="[
-                            val => (val !== null && val !== undefined) || 'Taksit Sayısı Zorunludur',
-                            val => (val == 1 || val == 3 || val == 6) || '1-3-6 giriniz'
+                    <q-select v-model="form.installment" :options="installmentOptions" label="Taksit Sayısı *" outlined
+                        dense emit-value map-options :rules="[
+                            val => (val !== null && val !== undefined) || 'Taksit Sayısı Zorunludur'
                         ]" />
-
                     <!-- Premium Amount -->
                     <q-input v-model.number="form.premium" type="number" label="Prim Tutarı (TL) *" outlined dense
                         prefix="₺" :rules="[
@@ -122,6 +120,7 @@ import { ref, computed } from 'vue';
 import { QPopupProxy } from 'quasar';
 import { type Policy, type CreatePolicyRequest, type RenewPolicyRequest } from '../types/policy.types';
 import { usePolicyForm } from '../composables/usePolicyForm';
+import { installmentOptions } from '../types/installment.types'
 
 // ── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -173,15 +172,14 @@ const {
     filterCustomerFn,
     filterUserFn,
     buildSubmitPayload,
+    submitWithLoading,
 } = usePolicyForm(props);
 
-// ── Submit: composable builds the payload; modal emits the event ─────────────
 
 const onSubmit = () => {
-    loading.value = true;
-    try {
+    void submitWithLoading(() => {
         const result = buildSubmitPayload();
-        if (!result) return;
+        if (!result) return Promise.resolve();
 
         if (result.mode === 'renewed') {
             emit('renewed', result.payload);
@@ -190,10 +188,7 @@ const onSubmit = () => {
         }
 
         isOpen.value = false;
-    } catch (error) {
-        console.error('Poliçe kaydedilirken hata oluştu:', error);
-    } finally {
-        loading.value = false;
-    }
+        return Promise.resolve();
+    });
 };
 </script>

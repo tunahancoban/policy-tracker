@@ -189,11 +189,12 @@ import { useRoute } from 'vue-router';
 import { usePolicyDetail } from '@/composables/usePolicyDetail';
 import { usePolicyList } from '@/composables/usePolicyList';
 import { useInstallmentStore } from '@/stores/installment';
-import type { Installment, paymentStatus } from '@/types/installment.types';
+import type { Installment } from '@/types/installment.types';
 import type { Policy } from '@/types/policy.types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { Notify } from 'quasar';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
+import { formatDateOnly, formatCurrency, getStatusColor, getStatusLabel } from '@/utils/policyHelper';
 
 const route = useRoute();
 const policyId = route.params.id as string;
@@ -253,42 +254,7 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
     }
 };
 
-const formatDateOnly = (dateStr: string | null | undefined): string => {
-    if (!dateStr) return '—';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-};
 
-const formatCurrency = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) return '—';
-    return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
-};
-
-const getStatusColor = (status: paymentStatus): string => {
-    switch (status) {
-        case 'PAID':
-            return 'positive';
-        case 'DUE':
-            return 'negative';
-        case 'UNPAID':
-        default:
-            return 'warning';
-    }
-};
-
-
-
-const getStatusLabel = (status: paymentStatus): string => {
-    switch (status) {
-        case 'PAID':
-            return 'Ödendi';
-        case 'DUE':
-            return 'Vadesi Geçti';
-        case 'UNPAID':
-        default:
-            return 'Ödenmedi';
-    }
-};
 
 const installmentColumns = [
     { name: 'installmentNo', label: 'Taksit No', field: 'installmentNo', align: 'center' as const },

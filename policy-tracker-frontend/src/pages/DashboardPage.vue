@@ -44,14 +44,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useDashboardData } from '@/composables/useDashboardData';
 import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
 import DashboardCharts from '@/components/DashboardCharts.vue';
 import RecentActivitiesTimeline from '@/components/RecentActivitiesTimeline.vue';
 import type { ChartData } from 'chart.js';
 import { getPolicyTypeColor } from '@/utils/policyHelper';
-import { useWebSocket } from '@/composables/useWebSocket';
+import { dashboardSignal } from '@/composables/useWebSocket';
 import PolicyTable from '@/components/PolicyTable.vue';
 import { SORT_FIELD_MAP } from '@/types/policy.types';
 
@@ -61,7 +61,10 @@ const {
     loadDashboard, loadRenewalPolicies,
 } = useDashboardData();
 
-const { connect } = useWebSocket();
+// MainLayout'taki WS bağlantısı sinyal gönderdiğinde verileri yenile
+watch(dashboardSignal, () => {
+    void refreshAllData();
+});
 
 const isInitialLoading = ref<boolean>(true);
 const renewalSortBy = ref<string | null>('endDate');
@@ -155,11 +158,8 @@ onMounted(async () => {
     } finally {
         isInitialLoading.value = false;
     }
-    connect((_signal) => {
-        console.log(_signal);
-        void refreshAllData();
-    });
 });
+
 </script>
 
 <style scoped></style>
