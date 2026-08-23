@@ -1,4 +1,3 @@
-// src/stores/policy.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { CreatePolicyRequest, Policy, RenewPolicyRequest } from '../types/policy.types';
@@ -7,6 +6,7 @@ import { policyService } from '@/restservices/policyService';
 import { dashboardService } from '@/restservices/dashboardService';
 
 export const usePolicyStore = defineStore('policy', () => {
+  // Genel Liste State
   const policies = ref<Policy[]>([]);
   const isLoading = ref<boolean>(false);
   const totalElements = ref(0);
@@ -14,7 +14,7 @@ export const usePolicyStore = defineStore('policy', () => {
   const currentPage = ref(0);
   const pageSize = ref(5);
 
-  const selectedPolicy = ref<Policy | null>();
+  const selectedPolicy = ref<Policy | null>(null);
 
   const customerPolicies = ref<Policy[]>([]);
   const customerPoliciesLoading = ref<boolean>(false);
@@ -32,12 +32,12 @@ export const usePolicyStore = defineStore('policy', () => {
       policies.value = result.content;
       totalElements.value = result.totalElements;
       totalPages.value = result.totalPages;
-    } catch (error) {
-      console.error('Poliçeler yüklenirken hata oluştu:', error);
+      return result;
+    } catch (err) {
       policies.value = [];
       totalElements.value = 0;
       totalPages.value = 0;
-      throw error;
+      throw err;
     } finally {
       isLoading.value = false;
     }
@@ -48,10 +48,10 @@ export const usePolicyStore = defineStore('policy', () => {
     try {
       const policy = await policyService.getPolicyById(policyId);
       selectedPolicy.value = policy;
-    } catch (error) {
-      console.error('Poliçe bilgisi çekilemedi', error);
+      return policy;
+    } catch (err) {
       selectedPolicy.value = null;
-      throw error;
+      throw err;
     } finally {
       isLoading.value = false;
     }
@@ -75,13 +75,19 @@ export const usePolicyStore = defineStore('policy', () => {
         }),
         dashboardService.getCustomerSummary(customerId),
       ]);
+
       customerPolicies.value = policiesRes.content;
       customerPoliciesTotal.value = policiesRes.totalElements;
       customerPoliciesTotalPages.value = policiesRes.totalPages;
       summary.value = summaryRes;
-    } catch (error) {
-      console.error('Müşteri poliçeleri ve özeti yüklenirken hata oluştu:', error);
-      throw error;
+
+      return { policies: policiesRes, summary: summaryRes };
+    } catch (err) {
+      customerPolicies.value = [];
+      customerPoliciesTotal.value = 0;
+      customerPoliciesTotalPages.value = 0;
+      summary.value = null;
+      throw err;
     } finally {
       customerPoliciesLoading.value = false;
       isLoading.value = false;
@@ -92,10 +98,9 @@ export const usePolicyStore = defineStore('policy', () => {
     isLoading.value = true;
     try {
       const addedPolicy = await policyService.addPolicy(newPolicy);
-      policies.value.push(addedPolicy);
-    } catch (error) {
-      console.error('Poliçe eklenirken hata oluştu:', error);
-      throw error;
+      policies.value.unshift(addedPolicy);
+      totalElements.value += 1;
+      return addedPolicy;
     } finally {
       isLoading.value = false;
     }
@@ -112,33 +117,37 @@ export const usePolicyStore = defineStore('policy', () => {
 
       const customerIndex = customerPolicies.value.findIndex((c) => c.policyId === targetId);
       if (customerIndex !== -1) customerPolicies.value[customerIndex] = result;
-    } catch (error) {
-      console.error('Poliçe güncellenirken hata oluştu:', error);
-      throw error;
+
+      if (selectedPolicy.value?.policyId === targetId) {
+        selectedPolicy.value = result;
+      }
+
+      return result;
     } finally {
       isLoading.value = false;
     }
   };
 
   const deletePolicy = async (policyId: string) => {
+    isLoading.value = true;
     try {
       await policyService.deletePolicy(policyId);
       policies.value = policies.value.filter((c) => c.policyId !== policyId);
       customerPolicies.value = customerPolicies.value.filter((c) => c.policyId !== policyId);
-    } catch (error) {
-      console.error('Poliçe silinemedi: ', error);
-      throw error;
+      totalElements.value = Math.max(0, totalElements.value - 1);
+      customerPoliciesTotal.value = Math.max(0, customerPoliciesTotal.value - 1);
+    } finally {
+      isLoading.value = false;
     }
   };
 
-  const renewPolicy = async (newPolicy: RenewPolicyRequest) => {
+  const renewPolicy = async (renewData: RenewPolicyRequest) => {
     isLoading.value = true;
     try {
-      const renewedPolicy = await policyService.renewPolicy(newPolicy);
-      policies.value.push(renewedPolicy);
-    } catch (error) {
-      console.error('Poliçe yenilenirken hata oluştu:', error);
-      throw error;
+      const renewedPolicy = await policyService.renewPolicy(renewData);
+      policies.value.unshift(renewedPolicy);
+      totalElements.value += 1;
+      return renewedPolicy;
     } finally {
       isLoading.value = false;
     }
@@ -164,6 +173,7 @@ export const usePolicyStore = defineStore('policy', () => {
     customerPoliciesPageSize,
     fetchCustomerPoliciesAndSummary,
     summary,
+
     addPolicy,
     updatePolicy,
     deletePolicy,

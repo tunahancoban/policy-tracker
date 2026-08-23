@@ -57,8 +57,8 @@
 </template>
 
 <script setup lang="ts">
-import { useNotificationStore } from '@/stores/notification';
-import type { Notification } from '@/types/notification.types';
+import { useNotificationStore } from '../stores/notification';
+import type { Notification } from '../types/notification.types';
 import type { QScrollArea } from 'quasar';
 import { useRouter } from 'vue-router';
 

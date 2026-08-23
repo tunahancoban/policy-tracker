@@ -134,7 +134,7 @@ const initCharts = () => {
                 scales: {
                     x: {
                         beginAtZero: true,
-                        ticks: { stepSize: 1, precision: 0, color: textSecondary },
+                        ticks: { stepSize: 5, precision: 0, color: textSecondary },
                         grid: { display: false },
                     },
                     y: {

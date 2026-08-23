@@ -21,14 +21,14 @@ public class UpdatePolicyRequest {
 
     private JsonNullable<PolicyType> type = JsonNullable.undefined();
 
-    @JsonFormat(pattern = "yyyy/MM/dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private JsonNullable<LocalDate> startDate = JsonNullable.undefined();
-    @JsonFormat(pattern = "yyyy/MM/dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private JsonNullable<LocalDate> endDate = JsonNullable.undefined();
 
     private JsonNullable<BigDecimal> premium = JsonNullable.undefined();
 
-    private JsonNullable<PolicyStatus> active = JsonNullable.undefined();
+    private JsonNullable<PolicyStatus> isActive = JsonNullable.undefined();
 
     private JsonNullable<String> responsibleUserId =  JsonNullable.undefined();
 

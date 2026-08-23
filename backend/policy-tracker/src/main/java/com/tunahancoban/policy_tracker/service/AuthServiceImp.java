@@ -19,18 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {
-    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService jwtService;
     private final UserRepository userRepository;
 
     @Override
     public LoginResponse authenticate(LoginRequest request) {
-        User user = userService.getUserByEmail( request.getEmail());
-
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!");
-        }
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow((() ->
+         new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!")));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ya da şifre yanlış!");

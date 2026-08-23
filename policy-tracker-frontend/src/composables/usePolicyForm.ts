@@ -44,9 +44,6 @@ export function usePolicyForm(
   const filteredCustomerOptions = ref<CustomerOption[]>([]);
   const filteredUserOptions = ref<UserOption[]>([]);
 
-  // ── Loading sarıcı ────────────────────────────────────────────────────────
-  // Submit işlemini composable içinden yöneterek loading state'ini tek yerde toplar.
-  // Bileşenin ayrıca loading.value = true/false yapmasına gerek kalmaz.
   const withLoading = async <T>(fn: () => Promise<T>): Promise<T | undefined> => {
     loading.value = true;
     try {
@@ -65,7 +62,7 @@ export function usePolicyForm(
     note: '',
     installment: 1,
     responsibleUserId: '',
-    active: 'ACTIVE',
+    isActive: 'ACTIVE',
   });
 
   const form = ref<PolicyForm>(initialFormState());
@@ -170,11 +167,11 @@ export function usePolicyForm(
       premium: policy.premium ?? 0,
       installment: policy.installment ?? 1,
       responsibleUserId:
-        userStore.users.find((u) => u.id === policy.responsibleUserId)?.firstName || '',
+      userStore.users.find((u) => u.id === policy.responsibleUserId)?.firstName || '',
       startDate: start,
       endDate: end,
       note: policy.note ? `${policy.note} (Yenileme)` : 'Poliçe Yenileme',
-      active: policy.active || '',
+      isActive: policy.isActive || '',
     };
 
     const matchedCustomer = customerOptions.value.find((c) => c.customerId === policy.customerId);
@@ -187,13 +184,13 @@ export function usePolicyForm(
   const buildCreatePayload = (): CreatePolicyRequest => ({
     customerId: form.value.customerId,
     type: form.value.type,
-    startDate: form.value.startDate.replace(/\//g, '-'),
-    endDate: form.value.endDate.replace(/\//g, '-'),
+    startDate: form.value.startDate,
+    endDate: form.value.endDate,
     premium: form.value.premium,
     installment: form.value.installment,
     responsibleUserId: form.value.responsibleUserId,
     note: form.value.note,
-    active: form.value.active,
+    isActive: form.value.isActive,
   });
 
   const buildRenewPayload = (policy: Policy): RenewPolicyRequest => ({
@@ -206,7 +203,6 @@ export function usePolicyForm(
     note: form.value.note,
   });
 
-  // ── Submit: loading composable içinde yönetiliyor ──────────────────────────
   type SubmitResult =
     | { mode: 'created'; payload: CreatePolicyRequest }
     | { mode: 'renewed'; payload: RenewPolicyRequest }
@@ -219,9 +215,7 @@ export function usePolicyForm(
     return { mode: 'created', payload: buildCreatePayload() };
   };
 
-  /** Submit işlemini loading sarıcı ile çalıştırır; bileşen sadece bunu çağırır. */
-  const submitWithLoading = (fn: () => Promise<void>): Promise<void | undefined> =>
-    withLoading(fn);
+  const submitWithLoading = (fn: () => Promise<void>): Promise<void | undefined> => withLoading(fn);
 
   return {
     form,

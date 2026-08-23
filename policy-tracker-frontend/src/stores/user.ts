@@ -1,4 +1,3 @@
-// src/stores/user.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { userService } from '@/restservices/userService';
@@ -11,23 +10,22 @@ export const useUserStore = defineStore('user', () => {
   const fetchUsers = async (params?: Record<string, string>) => {
     isLoading.value = true;
     try {
-      users.value = (await userService.getUsers(params)).content;
-    } catch (error) {
-      console.error('Kullanıcılar getirilirken hata:', error);
-      throw error;
+      const response = await userService.getUsers(params);
+      users.value = response.content;
+      return response;
+    } catch (err) {
+      users.value = [];
+      throw err;
     } finally {
       isLoading.value = false;
     }
   };
 
-  const fetchUserById = async (id: string): Promise<User> => {
+  const fetchUserById = async (id: string): Promise<User | null> => {
     isLoading.value = true;
     try {
-      const user = await userService.getUsers({ id });
-      return user.content.at(0) as User;
-    } catch (error) {
-      console.error(`Kullanıcı ${id} getirilirken hata:`, error);
-      throw error;
+      const response = await userService.getUsers({ id });
+      return (response.content.at(0) as User) ?? null;
     } finally {
       isLoading.value = false;
     }
@@ -38,9 +36,6 @@ export const useUserStore = defineStore('user', () => {
     try {
       const profile = await userService.getProfile();
       return profile ?? null;
-    } catch (error) {
-      console.error('Profil getirilirken hata:', error);
-      throw error;
     } finally {
       isLoading.value = false;
     }
@@ -53,9 +48,7 @@ export const useUserStore = defineStore('user', () => {
       if (created) {
         users.value.push(created);
       }
-    } catch (error) {
-      console.error('addUser başarısız oldu:', error);
-      throw error;
+      return created;
     } finally {
       isLoading.value = false;
     }
@@ -71,35 +64,9 @@ export const useUserStore = defineStore('user', () => {
           users.value[index] = result;
         }
       }
-    } catch (error) {
-      console.error('updateUser başarısız oldu:', error);
-      throw error;
+      return result;
     } finally {
       isLoading.value = false;
-    }
-  };
-
-  const searchUser = async (searchParams: Record<string, string>) => {
-    isLoading.value = true;
-    try {
-      const result = await userService.searchUsers(searchParams);
-      users.value = result.content;
-    } catch (error) {
-      console.error('Kullanıcı araması başarısız:', error);
-      users.value = [];
-      throw error;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const deleteUser = async (id: string) => {
-    try {
-      await userService.deleteUser(id);
-      users.value = users.value.filter((u) => u.id !== id);
-    } catch (error) {
-      console.error('deleteUser başarısız oldu:', error);
-      throw error;
     }
   };
 
@@ -107,9 +74,29 @@ export const useUserStore = defineStore('user', () => {
     isLoading.value = true;
     try {
       return await userService.updateProfile(updates);
-    } catch (error) {
-      console.error('updateMyProfile başarısız oldu:', error);
-      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const searchUser = async (searchParams: Record<string, string>): Promise<void> => {
+    isLoading.value = true;
+    try {
+      const result = await userService.searchUsers(searchParams);
+      users.value = result.content;
+    } catch (err) {
+      users.value = [];
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const deleteUser = async (id: string) => {
+    isLoading.value = true;
+    try {
+      await userService.deleteUser(id);
+      users.value = users.value.filter((u) => u.id !== id);
     } finally {
       isLoading.value = false;
     }
@@ -120,11 +107,11 @@ export const useUserStore = defineStore('user', () => {
     isLoading,
     fetchUsers,
     fetchUserById,
-    searchUser,
-    updateUser,
-    deleteUser,
-    addUser,
-    updateMyProfile,
     fetchProfile,
+    addUser,
+    updateUser,
+    updateMyProfile,
+    searchUser,
+    deleteUser,
   };
 });

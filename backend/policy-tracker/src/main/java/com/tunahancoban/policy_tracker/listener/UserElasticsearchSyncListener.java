@@ -1,9 +1,7 @@
 package com.tunahancoban.policy_tracker.listener;
 
 import com.tunahancoban.policy_tracker.mapper.UserMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserEvent;
 import com.tunahancoban.policy_tracker.repository.UserElasticsearchRepository;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,20 +19,9 @@ public class UserElasticsearchSyncListener {
     private final UserMapper userMapper;
 
     @EventListener
-    public void onUserCreated(UserCreatedEvent event) {
-        syncUser(event.userId(), "CREATE");
+    public void onUserCreated(UserEvent event) {
+        syncUser(event.id(), event.eventType().toString());
     }
-
-    @EventListener
-    public void onUserUpdated(UserUpdatedEvent event) {
-        syncUser(event.userId(), "UPDATE");
-    }
-
-    @EventListener
-    public void onUserDeleted(UserDeletedEvent event) {
-        syncUser(event.userId(), "DELETE");
-    }
-
     private void syncUser(String userId, String operation) {
         userRepository.findById(userId).ifPresentOrElse(
                 user -> {

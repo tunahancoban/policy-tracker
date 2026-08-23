@@ -30,7 +30,6 @@ public class Policy {
     @Id
     private String id;
 
-
     @Indexed(unique = true)
     private String policyId;
 
@@ -41,7 +40,7 @@ public class Policy {
     private InstallmentOptions installment;
 
     @Builder.Default
-    private PolicyStatus active = PolicyStatus.ACTIVE;
+    private PolicyStatus isActive = PolicyStatus.ACTIVE;
 
     @NotNull
     private PolicyType type;

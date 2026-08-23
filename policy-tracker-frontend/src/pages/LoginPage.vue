@@ -56,7 +56,6 @@
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { Notify } from 'quasar';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -70,17 +69,11 @@ const handleLogin = async () => {
     isLoading.value = true;
     try {
         await authStore.login(email.value, password.value);
-        await router.push({ name: 'dashboard' });
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
 
-        Notify.create({
-            message: `Giriş yaparken bir hata oluştu: ${errorMessage}`,
-            color: 'negative',
-            icon: 'error',
-            position: 'top-right',
-            timeout: 5000,
-        });
+        if (await authStore.checkAuth()) {
+            await router.push({ name: 'dashboard' });
+        }
+    } catch (error) {
         console.error(error);
     } finally {
         isLoading.value = false;

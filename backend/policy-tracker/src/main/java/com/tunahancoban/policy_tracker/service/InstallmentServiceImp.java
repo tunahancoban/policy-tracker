@@ -1,9 +1,9 @@
 package com.tunahancoban.policy_tracker.service;
 
-import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentDeletedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentEvent;
 import com.tunahancoban.policy_tracker.model.entity.Installment;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.enums.EventTypes;
 import com.tunahancoban.policy_tracker.model.enums.PaymentStatus;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.InstallmentService;
@@ -99,7 +99,7 @@ public class InstallmentServiceImp implements InstallmentService {
             installmentRepository.saveAll(installments);
 
         for (Installment installment: installments) {
-            eventPublisher.publishEvent(InstallmentCreatedEvent.from(installment));
+            eventPublisher.publishEvent(InstallmentEvent.from(installment, EventTypes.CREATE));
         }
 
     }
@@ -110,7 +110,7 @@ public class InstallmentServiceImp implements InstallmentService {
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "Installment not found: " + installmentId);});
         installment.setStatus(status);
         installmentRepository.save(installment);
-        eventPublisher.publishEvent(InstallmentCreatedEvent.from(installment));
+        eventPublisher.publishEvent(InstallmentEvent.from(installment, EventTypes.UPDATE));
         log.info("Installments successfully updated - installmentId: {}", installmentId);
 
         return installment;
@@ -133,7 +133,7 @@ public class InstallmentServiceImp implements InstallmentService {
 
         installmentRepository.saveAll(installments);
         for (Installment installment: installments) {
-            eventPublisher.publishEvent(InstallmentDeletedEvent.from(installment));
+            eventPublisher.publishEvent(InstallmentEvent.from(installment, EventTypes.DELETE));
         }
         log.info("Installments successfully deleted - policyId: {}", policyId);
     }

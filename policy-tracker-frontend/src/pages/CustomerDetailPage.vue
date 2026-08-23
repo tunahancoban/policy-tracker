@@ -80,8 +80,6 @@ import { Notify } from 'quasar';
 import { useCustomerDetail } from '@/composables/useCustomerDetail';
 import { usePolicyList } from '@/composables/usePolicyList';
 import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/policy.types';
-import { formatPolicyPayload } from '@/utils/policyHelper';
-
 import CustomerModal from '@/components/CustomerModal.vue';
 import EditPolicyModal from '@/components/EditPolicyModal.vue';
 import CustomerProfileCard from '@/components/CustomerProfileCard.vue';
@@ -102,7 +100,7 @@ const {
     loadAllData,
     fetchPoliciesOnly,
     currentPage,
-    pageSize
+    pageSize,
 } = useCustomerDetail(customerId);
 
 const {
@@ -150,7 +148,7 @@ const onPolicyTableRequest = async (requestProp: {
         rowsPerPage: number;
         sortBy: string | null;
         descending: boolean;
-    }
+    };
 }) => {
     const { page, rowsPerPage, sortBy, descending } = requestProp.pagination;
 
@@ -168,12 +166,21 @@ const onPolicyTableRequest = async (requestProp: {
 
 const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
     try {
-        const payload = formatPolicyPayload(event.data);
-        await updatePolicyGlobal(event.id, payload);
-        Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+        await updatePolicyGlobal(event.id, event.data);
+
+        Notify.create({
+            message: 'Poliçe başarıyla güncellendi.',
+            color: 'positive',
+            icon: 'check_circle',
+            position: 'top-right',
+            timeout: 4000,
+        });
+
+        isEditModalOpen.value = false;
+        selectedPolicy.value = null;
         await fetchPoliciesOnly(sortByColumn.value, sortDescending.value);
     } catch (err) {
-        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Update Error:', err);
     }
 };
@@ -181,11 +188,19 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
 const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
     try {
         await createPolicy(newPolicyPayload);
-        Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+
+        Notify.create({
+            message: 'Poliçe başarıyla oluşturuldu.',
+            color: 'positive',
+            icon: 'check_circle',
+            position: 'top-right',
+            timeout: 4000,
+        });
+
         isCreateModalOpen.value = false;
         await loadAllData();
     } catch (err) {
-        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Create Error:', err);
     }
 };
@@ -193,11 +208,19 @@ const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
 const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
     try {
         await renewPolicy(renewPayload);
-        Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
+
+        Notify.create({
+            message: 'Poliçe başarıyla yenilendi.',
+            color: 'positive',
+            icon: 'check_circle',
+            position: 'top-right',
+            timeout: 4000,
+        });
+
         isCreateModalOpen.value = false;
         await loadAllData();
     } catch (err) {
-        Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
+        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Renew Error:', err);
     }
 };

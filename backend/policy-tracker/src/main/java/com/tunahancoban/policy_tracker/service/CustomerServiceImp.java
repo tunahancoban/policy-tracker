@@ -1,11 +1,10 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
+import com.tunahancoban.policy_tracker.model.DTO.events.CustomerEvent;
+import com.tunahancoban.policy_tracker.model.enums.EventTypes;
+import com.tunahancoban.policy_tracker.model.exceptions.BusinessValidationException;
 import com.tunahancoban.policy_tracker.mapper.CustomerMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.CustomerCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.CustomerDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.CustomerUpdatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserCreatedEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
@@ -82,8 +81,11 @@ public class CustomerServiceImp implements CustomerService {
 
         if (customerRepository.existsByIdentityNumber(request.getIdentityNumber())) {
             log.warn("Customer creation failed - identity number already registered: {}", request.getIdentityNumber());
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "A customer with this identity number already exists: " + request.getIdentityNumber());
+            throw new BusinessValidationException(
+                    "identityNumber",
+                    "Bu T.C. Kimlik Numarası ile kayıtlı bir müşteri zaten var" ,
+                    HttpStatus.CONFLICT
+            );
         }
 
 
@@ -94,7 +96,7 @@ public class CustomerServiceImp implements CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
 
         customerRepository.save(customer);
-        eventPublisher.publishEvent(CustomerCreatedEvent.from(customer));
+        eventPublisher.publishEvent(CustomerEvent.from(customer, EventTypes.CREATE));
         log.info("Customer successfully created - customerId: {}", customer.getCustomerId());
 
         return customer;
@@ -111,11 +113,18 @@ public class CustomerServiceImp implements CustomerService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
                 });
 
+        if(customerRepository.existsByIdentityNumber(customer.getIdentityNumber())){
+            throw new BusinessValidationException(
+                    "identityNumber",
+                    "Bu T.C. Kimlik Numarası ile kayıtlı bir müşteri zaten var" ,
+                    HttpStatus.CONFLICT
+            );
+        }
 
         customerMapper.updateEntityFromRequest(updates, customer);
         customer.setUpdatedAt(LocalDateTime.now());
         Customer savedCustomer = customerRepository.save(customer);
-        eventPublisher.publishEvent(CustomerUpdatedEvent.from(savedCustomer));
+        eventPublisher.publishEvent(CustomerEvent.from(savedCustomer, EventTypes.UPDATE));
 
         log.info("Customer successfully updated - customerId: {}", id);
 
@@ -134,8 +143,9 @@ public class CustomerServiceImp implements CustomerService {
                 });
 
         customer.setIsActive(false);
+        customer.setDeletedAt(LocalDateTime.now());
         customerRepository.save(customer);
-        eventPublisher.publishEvent(CustomerDeletedEvent.from(customer));
+        eventPublisher.publishEvent(CustomerEvent.from(customer, EventTypes.DELETE));
         log.info("Customer successfully deleted - customerId: {}", id);
     }
 

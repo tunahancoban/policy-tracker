@@ -51,6 +51,8 @@ public class Customer {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
     @Builder.Default
+    private LocalDateTime deletedAt = LocalDateTime.now();
+    @Builder.Default
     private Boolean isActive = true;
 
 }

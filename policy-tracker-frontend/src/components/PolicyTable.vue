@@ -51,11 +51,11 @@
                     </q-td>
                 </template>
 
-                <template v-slot:body-cell-active="props">
+                <template v-slot:body-cell-isActive="props">
                     <q-td :props="props" class="text-center">
-                        <q-chip :color="props.row.active === 'ACTIVE' ? 'positive' : 'negative'" text-color="white"
+                        <q-chip :color="props.row.isActive === 'ACTIVE' ? 'positive' : 'negative'" text-color="white"
                             dense class="text-weight-bold compact-chip">
-                            {{ getActiveLabel(props.row.active) }}
+                            {{ getActiveLabel(props.row.isActive) }}
                         </q-chip>
                     </q-td>
                 </template>
@@ -149,7 +149,7 @@ watch(
                 let customerFullName = policy.customerId;
 
                 if (policy.customerId) {
-                    const customer = await customerStore.getCustomerById(policy.customerId);
+                    const customer = await customerStore.fetchCustomerById(policy.customerId);
                     if (customer) {
                         customerFullName =
                             `${customer.firstName || ''} ${customer.lastName || ''}`.trim() ||

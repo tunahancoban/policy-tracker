@@ -10,21 +10,21 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCustomerRequest {
-    @NotBlank(message = "Name cannot be null")
+    @NotBlank(message = "İsim boş olamaz.")
     private String firstName;
 
-    @NotBlank(message = "Lastname cannot be null")
+    @NotBlank(message = "Soyisim boş olamaz.")
     private String lastName;
 
-    @NotBlank(message = "T.C. No cannot be null")
-    @Size(min = 11, max = 11, message = "T.C. No must be 11 digit")
+    @NotBlank(message = "TC No boş olamaz")
+    @Size(min = 11, max = 11, message = "TC No 11 haneli olmalı")
     private String identityNumber;
 
-    @NotBlank(message = "Email cannot be null")
-    @Email(message = "Enter a valid email")
+    @NotBlank(message = "Email boş olamaz")
+    @Email(message = "Geçerli bir email giriniz")
     private String email;
 
-    @NotBlank(message = "Phone number cannot be null")
+    @NotBlank(message = "Telefon numarası boş olamaz")
     private String phoneNumber;
 
     private String city;

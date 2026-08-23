@@ -1,14 +1,13 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.mapper.UserMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.UserUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.UserEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
+import com.tunahancoban.policy_tracker.model.enums.EventTypes;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;
+import com.tunahancoban.policy_tracker.model.exceptions.BusinessValidationException;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -71,7 +70,11 @@ public class UserServiceImp implements UserService {
         //Checks user does exist
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             log.warn("User creation failed - email already in use: {}", registerRequest.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This email already used by someone");
+            throw new BusinessValidationException(
+                    "email",
+                    "Bu email kullanımda." ,
+                    HttpStatus.CONFLICT
+            );
         }
 
         //It is hashing password
@@ -83,7 +86,7 @@ public class UserServiceImp implements UserService {
         User user = userMapper.toEntity(registerRequest);
         user.setPassword(hashedPassword);
         User savedUser = userRepository.save(user);
-        eventPublisher.publishEvent(UserCreatedEvent.from(savedUser));
+        eventPublisher.publishEvent(UserEvent.from(savedUser, EventTypes.CREATE));
         log.info("User successfully created - id: {}, email: {}", savedUser.getId(), savedUser.getEmail());
         return savedUser;
     }
@@ -99,9 +102,9 @@ public class UserServiceImp implements UserService {
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "This id does not exist. ID: " + id);
         });
         user.setDeletedAt(LocalDateTime.now());
-        user.setActive(false);
+        user.setIsActive(false);
         userRepository.save(user);
-        eventPublisher.publishEvent(UserDeletedEvent.from(user));
+        eventPublisher.publishEvent(UserEvent.from(user, EventTypes.DELETE));
         log.info("User successfully deleted - id: {}", id);
     }
 
@@ -126,7 +129,11 @@ public class UserServiceImp implements UserService {
 
             if (userRepository.existsByEmailAndIdNot(newEmail, id)) {
                 log.warn("User update failed - email already taken: {}", newEmail);
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "This email is taken");
+                throw new BusinessValidationException(
+                        "email",
+                        "Bu email kullanımda." ,
+                        HttpStatus.CONFLICT
+                );
             }
         }
 
@@ -147,7 +154,7 @@ public class UserServiceImp implements UserService {
         }
 
         User updatedUser = userRepository.save(user);
-        eventPublisher.publishEvent(UserUpdatedEvent.from(updatedUser));
+        eventPublisher.publishEvent(UserEvent.from(updatedUser, EventTypes.UPDATE));
         log.info("User successfully updated - id: {}", id);
 
         return updatedUser;

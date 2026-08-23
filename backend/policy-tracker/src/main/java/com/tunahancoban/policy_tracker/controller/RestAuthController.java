@@ -6,8 +6,12 @@ import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/rest/api/auth") //Root address of all paths.
@@ -19,31 +23,31 @@ public class RestAuthController {
     @PostMapping(path = "/login-request")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response){
 
-            LoginResponse loginResponse = authService.authenticate(request);
-            Cookie cookie = new Cookie("jwt_token", loginResponse.getToken());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setPath("/");
-            cookie.setMaxAge(24*60*60*7); //Token lifecycle 7 days
 
-            response.addCookie(cookie);
+        LoginResponse loginResponse = authService.authenticate(request);
 
-            LoginResponse newLoginResponse = new LoginResponse(loginResponse.getRole(), loginResponse.getId(),loginResponse.getUserEmail());
-            return ResponseEntity.ok(newLoginResponse);
+        ResponseCookie cookie = ResponseCookie.from( "jwt_token", loginResponse.getJwt_token())
+                        .httpOnly(true).secure(true).path("/").maxAge(Duration.ofDays(7)).sameSite("Strict").build();
+
+
+        loginResponse.setJwt_token(null);
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(loginResponse);
     }
 
     @PostMapping(path = "/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response){
-        Cookie cookie = new Cookie("jwt_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); //Token lifecycle
+    public ResponseEntity<Void> logout() {
+        ResponseCookie deleteCookie = ResponseCookie.from("jwt_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
 
-        response.addCookie(cookie);
-
-        return ResponseEntity.noContent().build();
-
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
     }
 
 }

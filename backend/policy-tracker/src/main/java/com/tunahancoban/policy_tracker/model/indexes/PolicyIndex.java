@@ -36,7 +36,7 @@ public class PolicyIndex {
     private InstallmentOptions installment;
 
     @Field(type = FieldType.Keyword)
-    private PolicyStatus active;
+    private PolicyStatus isActive;
 
     @Field(type = FieldType.Keyword)
     private PolicyType type;

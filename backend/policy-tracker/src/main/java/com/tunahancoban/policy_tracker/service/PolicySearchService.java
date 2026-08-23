@@ -64,8 +64,8 @@ public class PolicySearchService {
         if (request.getResponsibleUserId() != null) {
             criteria = criteria.and(new Criteria("responsibleUserId").is(request.getResponsibleUserId()));
         }
-        if (request.getStatus() != null) {
-            criteria = criteria.and(new Criteria("active").is(request.getStatus()));
+        if (request.getIsActive() != null) {
+            criteria = criteria.and(new Criteria("isActive").is(request.getIsActive()));
         }
         if (request.getType() != null) {
             criteria = criteria.and(new Criteria("type").is(request.getType()));

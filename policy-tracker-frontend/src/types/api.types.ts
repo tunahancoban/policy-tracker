@@ -38,5 +38,26 @@ export interface Page<T> {
 export interface LoginResponse {
   role: UserRole;
   id: string;
+  jwt_token: string;
   userEmail: string;
 }
+
+export interface SpringDefaultError {
+  timestamp?: string;
+  status?: number;
+  error?: string;
+  message?: string;
+  path?: string;
+}
+
+export interface ProblemDetail {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
+  errors?: Record<string, string>;
+}
+
+// Backend'den dönebilecek tüm hata modelleri
+export type ApiErrorResponse = SpringDefaultError & ProblemDetail;

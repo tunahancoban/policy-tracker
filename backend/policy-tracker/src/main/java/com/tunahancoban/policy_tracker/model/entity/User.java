@@ -45,7 +45,7 @@ public class User implements UserDetails {
     private String email; //Unique
 
     @Builder.Default
-    private boolean isActive = true;
+    private Boolean isActive = true;
 
     private LocalDateTime deletedAt;
 

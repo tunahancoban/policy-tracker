@@ -53,19 +53,28 @@
                 <q-form @submit="saveUser">
                     <q-card-section class="q-gutter-sm q-pt-md">
                         <q-input v-model="form.firstName" label="Ad *" outlined dense
+                            :error="!!fieldErrors.firstName" :error-message="fieldErrors.firstName"
+                            @update:model-value="clearFieldError('firstName')"
                             :rules="[val => !!val || 'Ad alanı zorunludur']" />
                         <q-input v-model="form.lastName" label="Soyad *" outlined dense
+                            :error="!!fieldErrors.lastName" :error-message="fieldErrors.lastName"
+                            @update:model-value="clearFieldError('lastName')"
                             :rules="[val => !!val || 'Soyad alanı zorunludur']" />
-                        <q-input v-model="form.email" label="E-posta *" outlined dense type="email" :rules="[
+                        <q-input v-model="form.email" label="E-posta *" outlined dense type="email"
+                            :error="!!fieldErrors.email" :error-message="fieldErrors.email"
+                            @update:model-value="clearFieldError('email')" :rules="[
                             val => !!val || 'E-posta alanı zorunludur',
                             val => /^[a-zA-Z0-9_+&*-]+(?:\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$/.test(val) || 'Geçerli bir e-posta girin'
                         ]" />
 
                         <template v-if="!isEditMode">
                             <q-input v-model="newPassword" label="Şifre *" outlined dense type="password"
+                                :error="!!fieldErrors.password" :error-message="fieldErrors.password"
+                                @update:model-value="clearFieldError('password')"
                                 :rules="[val => !!val || 'Şifre alanı zorunludur']" />
 
                             <q-input v-model="form.password" label="Şifre (Yeniden) *" outlined dense type="password"
+                                @update:model-value="clearFieldError('password')"
                                 :rules="[
                                     val => !!val || 'Şifre tekrarı zorunludur',
                                     val => newPassword === val || 'Şifreler birbiriyle uyuşmuyor'
@@ -77,10 +86,14 @@
 
                             <template v-if="wantsPasswordChange">
                                 <q-input v-model="newPassword" label="Yeni Şifre *" outlined dense type="password"
+                                    :error="!!fieldErrors.password" :error-message="fieldErrors.password"
+                                    @update:model-value="clearFieldError('password')"
                                     :rules="[val => !!val || 'Yeni şifre alanı zorunludur']" />
 
                                 <q-input v-model="form.password" label="Yeni Şifre (Yeniden) *" outlined dense
-                                    type="password" :rules="[
+                                    type="password"
+                                    @update:model-value="clearFieldError('password')"
+                                    :rules="[
                                         val => !!val || 'Şifre tekrarı zorunludur',
                                         val => newPassword === val || 'Şifreler birbiriyle uyuşmuyor'
                                     ]" />
@@ -88,6 +101,8 @@
                         </template>
 
                         <q-select v-model="form.role" outlined dense :options="userRoleOptions" label="Kullanıcı Rolü *"
+                            :error="!!fieldErrors.role" :error-message="fieldErrors.role"
+                            @update:model-value="clearFieldError('role')"
                             :rules="[val => !!val || 'Rol seçimi zorunludur']" />
                     </q-card-section>
 
@@ -104,12 +119,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useUserList } from '@/composables/useUserList';
-import { useNotify } from '@/composables/useNotify';
-import { useUserForm } from '@/composables/useUserForm';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { userColumns, userRoleOptions } from '@/types/user.types';
-import type { User } from '@/types/user.types';
+import { useUserList } from '../composables/useUserList';
+import { useNotify } from '../composables/useNotify';
+import { useUserForm } from '../composables/useUserForm';
+import { useConfirmDialog } from '../composables/useConfirmDialog';
+import { userColumns, userRoleOptions, type User } from '../types/user.types';
+import { ValidationError } from '../error/errors';
 
 const { users, isLoading, loadUsers, addUser, updateUser, deleteUser } = useUserList();
 const { notifySuccess, notifyError } = useNotify();
@@ -128,12 +143,23 @@ const {
 
 const showDialog = ref(false);
 
+// Backend'den dönen alan bazlı hatalar
+const fieldErrors = ref<Record<string, string>>({});
+
+const clearFieldError = (field: string) => {
+    if (fieldErrors.value[field]) {
+        delete fieldErrors.value[field];
+    }
+};
+
 const openCreateDialog = () => {
+    fieldErrors.value = {}; // Hataları temizle
     resetForCreate();
     showDialog.value = true;
 };
 
 const openEditDialog = (user: User) => {
+    fieldErrors.value = {}; // Hataları temizle
     resetForEdit(user);
     showDialog.value = true;
 };
@@ -146,7 +172,6 @@ const handleCreateUser = async () => {
 const handleUpdateUser = async () => {
     const patchData = buildUpdatePayload();
 
-    // Hiçbir şey değişmemişse gereksiz istek atma
     if (!patchData) {
         showDialog.value = false;
         return;
@@ -157,6 +182,8 @@ const handleUpdateUser = async () => {
 };
 
 const saveUser = async () => {
+    fieldErrors.value = {}; // Önceki hataları sıfırla
+
     try {
         if (isEditMode.value) {
             await handleUpdateUser();
@@ -165,6 +192,11 @@ const saveUser = async () => {
         }
         showDialog.value = false;
     } catch (error) {
+        if (error instanceof ValidationError && error.errors) {
+            fieldErrors.value = error.errors;
+            return; // Modal açık kalsın, kullanıcı düzeltsin
+        }
+
         console.error('Kullanıcı işlemi başarısız:', error);
         notifyError('İşlem sırasında bir hata oluştu.');
     }

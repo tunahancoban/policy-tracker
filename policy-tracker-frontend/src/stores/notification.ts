@@ -1,95 +1,106 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 import type { Notification } from '@/types/notification.types';
 import { notificationService } from '@/restservices/notificationService';
 
-interface NotificationState {
-  notifications: Notification[];
-  currentPage: number;
-  totalPages: number;
-  isLastPage: boolean;
-  unreadCount: number;
-  isLoading: boolean;
-}
+export const useNotificationStore = defineStore('notifications', () => {
+  const notifications = ref<Notification[]>([]);
+  const currentPage = ref(0);
+  const totalPages = ref(0);
+  const isLastPage = ref(false);
+  const unreadCount = ref(0);
+  const isLoading = ref(false);
 
-export const useNotificationStore = defineStore('notifications', {
-  state: (): NotificationState => ({
-    notifications: [],
-    currentPage: 0,
-    totalPages: 0,
-    isLastPage: false,
-    unreadCount: 0,
-    isLoading: false,
-  }),
+  async function fetchNotifications(page = 0, size = 20) {
+    if (isLoading.value) return;
 
-  actions: {
-    async fetchNotifications(page = 0, size = 20) {
-      if (this.isLoading) return;
+    isLoading.value = true;
+    try {
+      const data = await notificationService.fetchNotifications({ page, size });
 
-      this.isLoading = true;
-      try {
-        const data = await notificationService.fetchNotifications({ page, size });
-
-        if (page === 0) {
-          this.notifications = data.content;
-        } else {
-          const existingIds = new Set(this.notifications.map((n) => n.id));
-          const newItems = data.content.filter((n: Notification) => !existingIds.has(n.id));
-          this.notifications.push(...newItems);
-        }
-
-        this.currentPage = data.number;
-        this.totalPages = data.totalPages;
-        this.isLastPage = data.last;
-      } catch (error) {
-        console.error('Bildirimler yüklenirken hata oluştu:', error);
-      } finally {
-        this.isLoading = false;
+      if (page === 0) {
+        notifications.value = data.content;
+      } else {
+        const existingIds = new Set(notifications.value.map((n) => n.id));
+        const newItems = data.content.filter((n: Notification) => !existingIds.has(n.id));
+        notifications.value.push(...newItems);
       }
-    },
 
-    async loadMore() {
-      if (this.isLastPage || this.isLoading) return;
-      await this.fetchNotifications(this.currentPage + 1);
-    },
-
-    async fetchUnreadCount() {
-      try {
-        const data = await notificationService.fetchUnreadCount();
-        this.unreadCount = data;
-      } catch (error) {
-        console.error('Okunmamış bildirim sayısı alınırken hata oluştu:', error);
+      currentPage.value = data.number;
+      totalPages.value = data.totalPages;
+      isLastPage.value = data.last;
+      return data;
+    } catch (err) {
+      if (page === 0) {
+        notifications.value = [];
       }
-    },
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-    addFromSocket(notification: Notification) {
-      const exists = this.notifications.some((n) => n.id === notification.id);
-      if (!exists) {
-        this.notifications.unshift(notification);
-        if (!notification.read) {
-          this.unreadCount++;
-        }
+  async function loadMore() {
+    if (isLastPage.value || isLoading.value) return;
+    return fetchNotifications(currentPage.value + 1);
+  }
+
+  async function fetchUnreadCount() {
+    try {
+      const data = await notificationService.fetchUnreadCount();
+      unreadCount.value = data;
+    } catch (err) {
+      console.warn('Okunmamış bildirim sayısı alınamadı:', err);
+    }
+  }
+
+  function addFromSocket(notification: Notification) {
+    const exists = notifications.value.some((n) => n.id === notification.id);
+    if (!exists) {
+      notifications.value.unshift(notification);
+      if (!notification.read) {
+        unreadCount.value++;
       }
-    },
+    }
+  }
 
-    async markAsRead(id: string) {
-      const target = this.notifications.find((n) => n.id === id);
-      if (!target || target.read) return;
+  async function markAsRead(id: string) {
+    const target = notifications.value.find((n) => n.id === id);
+    if (!target || target.read) return;
 
-      try {
-        await notificationService.markAsRead(id);
-        target.read = true;
-        this.unreadCount = Math.max(0, this.unreadCount - 1);
-      } catch (error) {
-        console.error('Bildirim okundu işaretlenirken hata oluştu:', error);
-      }
-    },
+    target.read = true;
+    unreadCount.value = Math.max(0, unreadCount.value - 1);
 
-    reset() {
-      this.notifications = [];
-      this.currentPage = 0;
-      this.totalPages = 0;
-      this.isLastPage = false;
-      this.unreadCount = 0;
-    },
-  },
+    try {
+      await notificationService.markAsRead(id);
+    } catch (err) {
+      target.read = false;
+      unreadCount.value++;
+      throw err;
+    }
+  }
+
+  // 6. Sıfırlama
+  function reset() {
+    notifications.value = [];
+    currentPage.value = 0;
+    totalPages.value = 0;
+    isLastPage.value = false;
+    unreadCount.value = 0;
+  }
+
+  return {
+    notifications,
+    currentPage,
+    totalPages,
+    isLastPage,
+    unreadCount,
+    isLoading,
+    fetchNotifications,
+    loadMore,
+    fetchUnreadCount,
+    addFromSocket,
+    markAsRead,
+    reset,
+  };
 });

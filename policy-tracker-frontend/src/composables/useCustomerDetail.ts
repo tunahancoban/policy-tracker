@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCustomerStore } from '@/stores/customer';
 import { usePolicyStore } from '@/stores/policy';
-import { SORT_FIELD_MAP, type Policy } from '@/types/policy.types';
+import { SORT_FIELD_MAP } from '@/types/policy.types';
 
 export function useCustomerDetail(customerId: string) {
   const customerStore = useCustomerStore();
@@ -36,13 +36,11 @@ export function useCustomerDetail(customerId: string) {
   const loadAllData = async () => {
     try {
       await Promise.all([customerStore.fetchCustomerById(customerId), fetchPoliciesOnly()]);
-    } catch (error) {
-      console.error('Müşteri detay verileri yüklenirken hata oluştu:', error);
-      throw error;
+    } catch (err) {
+      console.error('Veriler yuklenirken bir hata oluştu: ', err);
     }
   };
 
-  // Sadece tablo sayfa/boyut değiştirdiğinde poliçeleri çeker
   const fetchPoliciesOnly = async (sortBy?: string | null, descending?: boolean) => {
     try {
       let sortParam: string | undefined;
@@ -57,15 +55,9 @@ export function useCustomerDetail(customerId: string) {
         pageSize.value.toString(),
         sortParam,
       );
-    } catch (error) {
-      console.error('Poliçeler yüklenirken hata oluştu:', error);
-      throw error;
+    } catch (err) {
+      console.error('Poliçeler yüklenirken hata oluştu: ', err);
     }
-  };
-
-  const updatePolicy = async (policyId: string, patchData: Partial<Policy>) => {
-    await policyStore.updatePolicy(policyId, patchData);
-    await fetchPoliciesOnly();
   };
 
   return {
@@ -79,6 +71,5 @@ export function useCustomerDetail(customerId: string) {
     pageSize,
     loadAllData,
     fetchPoliciesOnly,
-    updatePolicy,
   };
 }

@@ -66,7 +66,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Başlangıç Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.startDate)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -75,7 +75,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Bitiş Tarihi</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatDateOnly(policy.endDate)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
                                 <q-item class="q-py-sm">
@@ -84,7 +84,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Acenta Sorumlusu</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ selectedUser?.email
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -94,7 +94,7 @@
                                     <q-item-section>
                                         <q-item-label caption>Prim Tutarı</q-item-label>
                                         <q-item-label class="text-weight-medium">{{ formatCurrency(policy.premium)
-                                            }}</q-item-label>
+                                        }}</q-item-label>
                                     </q-item-section>
                                 </q-item>
 
@@ -309,13 +309,12 @@ const handlePayInstallment = async (installment: Installment) => {
 const onInstallmentsRequest = async (requestProp: { pagination: { page: number; rowsPerPage: number } }) => {
     const { page, rowsPerPage } = requestProp.pagination;
 
+    await fetchInstallmentsOnly(page, rowsPerPage);
+
     pagination.value.page = page;
     pagination.value.rowsPerPage = rowsPerPage;
     pagination.value.rowsNumber = installmentsTotal.value;
-
-    await fetchInstallmentsOnly();
 };
-
 onMounted(async () => {
     await loadAllData();
 

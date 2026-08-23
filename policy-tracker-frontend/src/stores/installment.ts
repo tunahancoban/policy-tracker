@@ -11,18 +11,19 @@ export const useInstallmentStore = defineStore('installment', () => {
   const currentPage = ref(0);
   const pageSize = ref(5);
 
-  const fetchInstallments = async (params: Record<string, string> = {}) => {
+  const fetchInstallments = async (params: Record<string, string | number> = {}) => {
     isLoading.value = true;
     try {
       const result = await installmentService.getInstallment(params);
       installments.value = result.content;
       totalElements.value = result.totalElements;
       totalPages.value = result.totalPages;
-    } catch (error) {
-      console.error('Poliçeler yüklenirken hata oluştu:', error);
+      return result;
+    } catch (err) {
       installments.value = [];
       totalElements.value = 0;
       totalPages.value = 0;
+      throw err;
     } finally {
       isLoading.value = false;
     }
@@ -33,14 +34,15 @@ export const useInstallmentStore = defineStore('installment', () => {
     try {
       const updatedInstallment = await installmentService.updateInstallment(
         installmentId.toString(),
-        { status: status },
+        { status },
       );
+
       const index = installments.value.findIndex((i) => i.installmentNo === installmentNo);
       if (index !== -1) {
         installments.value[index] = updatedInstallment;
       }
-    } catch (error) {
-      console.error('Taksit güncellenirken hata oluştu:', error);
+
+      return updatedInstallment;
     } finally {
       isLoading.value = false;
     }

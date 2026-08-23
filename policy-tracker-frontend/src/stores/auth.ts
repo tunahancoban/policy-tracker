@@ -22,41 +22,29 @@ export const useAuthStore = defineStore('auth', () => {
   const clearAuthData = () => {
     userRole.value = null;
     userEmail.value = null;
+    id.value = null;
   };
 
   const login = async (email: string, password: string) => {
-    try {
-      const restResponse = await authService.login(email, password);
-
-      if (restResponse) {
-        const { role, id, userEmail } = restResponse;
-        saveLoginData({ role, id, userEmail });
-        isInitialized.value = true;
-      }
-    } catch (error) {
-      console.error('Giriş yapılırken hata oluştu:', error);
-      clearAuthData();
-      throw error;
+    const restResponse = await authService.login(email, password);
+    if (restResponse) {
+      saveLoginData(restResponse);
+      isInitialized.value = true;
     }
   };
 
-  const checkAuth = async () => {
+  const checkAuth = async (): Promise<boolean> => {
     try {
       const userData = await authService.checkAuth();
-
-      if (userData && userData.userEmail) {
-        saveLoginData({
-          role: userData.role,
-          id: userData.id,
-          userEmail: userData.userEmail,
-        });
-      } else {
-        clearAuthData();
+      if (userData?.userEmail) {
+        saveLoginData(userData);
+        return true;
       }
-    } catch (error) {
-      console.error('checkAuth başarısız oldu:', error);
       clearAuthData();
-      throw error;
+      return false;
+    } catch {
+      clearAuthData();
+      return false;
     } finally {
       isInitialized.value = true;
     }
@@ -65,9 +53,8 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       await authService.logout();
-    } catch (error) {
-      console.error('Logout isteği sırasında hata oluştu:', error);
-      throw error;
+    } catch (err) {
+      console.error('Logout isteği sırasında hata oluştu:', err);
     } finally {
       clearAuthData();
       isInitialized.value = false;
@@ -82,6 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
     saveLoginData,
+    clearAuthData,
     checkAuth,
     logout,
     login,

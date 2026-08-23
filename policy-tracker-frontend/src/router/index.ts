@@ -28,7 +28,9 @@ export default defineRouter(({ store }) => {
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore(store);
 
-    if (!authStore.isInitialized) {
+    const isProtected = Boolean(to.meta.requiresAuth || to.meta.requiresAdmin);
+
+    if (isProtected && !authStore.isInitialized) {
       try {
         await authStore.checkAuth();
       } catch (error) {
@@ -40,7 +42,7 @@ export default defineRouter(({ store }) => {
       return next({ name: 'dashboard' });
     }
 
-    if ((to.meta.requiresAuth || to.meta.requiresAdmin) && !authStore.isAuthenticated) {
+    if (isProtected && !authStore.isAuthenticated) {
       return next({ name: 'login' });
     }
 

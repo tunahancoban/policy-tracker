@@ -27,14 +27,6 @@ public class RestPolicyController {
     private final PolicyService policyService;
     private final PolicySearchService policySearchService;
 
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "endDate",
-            "startDate",
-            "premium",
-            "installment",
-            "policyId"
-    );
-
     @GetMapping(path = "/with-params")
     public Page<Policy> getPolicyWithParams(PolicySearchRequest request) {
         return policySearchService.search(request);

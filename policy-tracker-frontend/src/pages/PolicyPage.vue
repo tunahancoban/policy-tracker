@@ -136,7 +136,7 @@ const buildParams = (
     const extra: Record<string, string> = {};
     if (!authStore.isAdmin && authStore.id) extra.responsibleUserId = authStore.id;
     if (selectedType.value) extra.type = selectedType.value;
-    if (selectedActive.value) extra.active = selectedActive.value;
+    if (selectedActive.value) extra.isActive = selectedActive.value;
 
     return buildQueryParams(
         {
@@ -231,9 +231,9 @@ const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
         Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
         void loadPolicies(buildParams());
-    } catch (err) {
+    } catch (error) {
         Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
-        console.error('Policy Renew Error:', err);
+        console.error('Policy Renew Error:', error);
     }
 };
 
@@ -266,9 +266,9 @@ const handlePolicyDelete = async (policy: Policy) => {
         await deletePolicy(policy.policyId);
         Notify.create({ message: 'Poliçe başarıyla silindi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         void loadPolicies(buildParams());
-    } catch (err) {
+    } catch (error) {
         Notify.create({ message: 'Poliçe silinirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
-        console.error('Policy Delete Error:', err);
+        console.error('Policy Delete Error:', error);
     }
 };
 

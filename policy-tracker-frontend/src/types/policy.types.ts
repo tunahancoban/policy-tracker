@@ -1,10 +1,12 @@
+import { formatDate } from '@/utils/dateHelper';
+
 export interface CreatePolicyRequest {
   type: string;
   startDate: string;
   endDate: string;
   premium: number;
   customerId: string;
-  active: string;
+  isActive: string;
   responsibleUserId: string;
   note: string;
   installment: number;
@@ -30,7 +32,7 @@ export interface Policy {
   startDate: string;
   endDate: string;
   premium: number;
-  active: string;
+  isActive: string;
   previousPolicyId: string;
   rootPolicyId: string;
   renewalSequence: number;
@@ -50,7 +52,7 @@ export interface PolicyForm {
   startDate: string;
   endDate: string;
   responsibleUserId: string;
-  active: string;
+  isActive: string;
 }
 
 export const SORT_FIELD_MAP: Record<string, string> = {
@@ -81,14 +83,16 @@ export const policyColumns = [
   {
     name: 'startDate',
     label: 'Başlangıç Tarihi',
-    field: 'startDate',
+    field: (row: Policy) =>
+      activeOptions.find((opt) => opt.value === row.startDate)?.label || formatDate(row.startDate),
     align: 'left' as const,
     sortable: true,
   },
   {
     name: 'endDate',
     label: 'Bitiş Tarihi ',
-    field: 'endDate',
+    field: (row: Policy) =>
+      activeOptions.find((opt) => opt.value === row.endDate)?.label || formatDate(row.endDate),
     align: 'left' as const,
     sortable: true,
   },
@@ -100,10 +104,10 @@ export const policyColumns = [
     sortable: true,
   },
   {
-    name: 'active',
+    name: 'isActive',
     label: 'Aktif/Pasif',
     field: (row: Policy) =>
-      activeOptions.find((opt) => opt.value === row.active)?.label || row.active,
+      activeOptions.find((opt) => opt.value === row.isActive)?.label || row.isActive,
     align: 'center' as const,
   },
 

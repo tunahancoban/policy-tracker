@@ -17,15 +17,19 @@
             <q-form @submit="onSubmit">
                 <q-card-section class="q-gutter-md">
 
-                    <!-- Müşteri Seçimi  -->
                     <q-select v-model="form.customerId" :options="filteredCustomerOptions" option-value="customerId"
-                        option-label="fullName" emit-value map-options label="Müşteri *" outlined dense disable />
+                        option-label="fullName" emit-value map-options label="Müşteri *" outlined dense disable
+                        :error="!!fieldErrors.customerId" :error-message="fieldErrors.customerId"
+                        :rules="[val => !!val || 'Müşteri seçimi zorunludur']" />
 
-                    <!-- Sorumlu User-->
+                    <!-- Sorumlu User -->
                     <q-select v-model="form.responsibleUserId" :options="filteredUserOptions" option-value="userId"
                         option-label="fullName" emit-value map-options use-input fill-input hide-selected
                         input-debounce="300" @filter="filterUserFn" label="Sorumlu Acente Personeli Seçin *" outlined
-                        dense :rules="[val => !!val || 'Sorumlu personel seçimi zorunludur']">
+                        dense lazy-rules :error="!!fieldErrors.responsibleUserId"
+                        :error-message="fieldErrors.responsibleUserId"
+                        @update:model-value="clearFieldError('responsibleUserId')"
+                        :rules="[val => !!val || 'Sorumlu personel seçimi zorunludur']">
                         <template v-slot:no-option>
                             <q-item>
                                 <q-item-section class="text-grey">
@@ -37,50 +41,66 @@
 
                     <!-- Poliçe Türü -->
                     <q-select v-model="form.type" :options="policyTypeOptions" option-value="value" option-label="label"
-                        emit-value map-options label="Poliçe Türü *" outlined dense disable />
+                        emit-value map-options label="Poliçe Türü *" outlined dense disable
+                        :error="!!fieldErrors.type" :error-message="fieldErrors.type"
+                        :rules="[val => !!val || 'Poliçe türü zorunludur']" />
 
-                    <!-- Aktiflik Durumu -->
-                    <q-select v-model="form.active" :options="activeOptions" option-value="value" option-label="label"
-                        emit-value map-options label="Aktiflik Durumu *" outlined dense
-                        :rules="[val => !!val || 'Aktiflik durumu zorunludur']" />
+                    <!-- Aktiflik Durumu (Boolean değerler için val !== null kontrolü) -->
+                    <q-select v-model="form.isActive" :options="activeOptions" option-value="value" option-label="label"
+                        emit-value map-options label="Aktiflik Durumu *" outlined dense lazy-rules
+                        :error="!!fieldErrors.isActive" :error-message="fieldErrors.isActive"
+                        @update:model-value="clearFieldError('isActive')"
+                        :rules="[val => val !== null && val !== undefined || 'Aktiflik durumu zorunludur']" />
 
                     <!-- Prim Tutarı -->
                     <q-input v-model.number="form.premium" type="number" label="Prim Tutarı (TL) *" outlined dense
-                        prefix="₺" :rules="[
-                            val => val !== null && val !== undefined || 'Prim tutarı zorunludur',
-                            val => val > 0 || 'Prim tutarı 0\'dan büyük olmalıdır'
+                        prefix="₺" lazy-rules
+                        :error="!!fieldErrors.premium" :error-message="fieldErrors.premium"
+                        @update:model-value="clearFieldError('premium')" :rules="[
+                            val => (val !== null && val !== undefined && val !== '') || 'Prim tutarı zorunludur',
+                            val => Number(val) > 0 || 'Prim tutarı 0\'dan büyük olmalıdır'
                         ]" />
-
-                    <!-- Tarih Alanları -->
-                    <q-input v-model="form.startDate" label="Başlangıç Tarihi *" outlined dense stack-label
-                        mask="####/##/##">
+                    <!-- Start Date -->
+                    <q-input :model-value="formatDate(form.startDate)" label="Başlangıç Tarihi *" outlined dense
+                        stack-label readonly lazy-rules
+                        :error="!!fieldErrors.startDate" :error-message="fieldErrors.startDate" :rules="[
+                            () => !!form.startDate || 'Başlangıç tarihi zorunludur'
+                        ]">
                         <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer">
-                                <q-popup-proxy cover transition-show="scale" transition-hide="scale" no-parent-close>
-                                    <q-date v-model="form.startDate" mask="YYYY/MM/DD" v-close-popup />
+                                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                                    <q-date v-model="form.startDate" mask="YYYY-MM-DD" v-close-popup
+                                        @update:model-value="clearFieldError('startDate')" />
                                 </q-popup-proxy>
                             </q-icon>
                         </template>
                     </q-input>
 
-                    <!-- Bitiş Tarihi -->
-                    <q-input v-model="form.endDate" label="Bitiş Tarihi *" outlined dense stack-label mask="####/##/##">
+                    <!-- End Date -->
+                    <q-input :model-value="formatDate(form.endDate)" label="Bitiş Tarihi *" outlined dense stack-label
+                        readonly lazy-rules
+                        :error="!!fieldErrors.endDate" :error-message="fieldErrors.endDate" :rules="[
+                            () => !!form.endDate || 'Bitiş tarihi zorunludur',
+                            () => !form.startDate || !form.endDate || form.endDate >= form.startDate || 'Bitiş tarihi başlangıç tarihinden önce olamaz'
+                        ]">
                         <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer">
-                                <q-popup-proxy cover transition-show="scale" transition-hide="scale" no-parent-close>
-                                    <q-date v-model="form.endDate" mask="YYYY/MM/DD" v-close-popup />
+                                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                                    <q-date v-model="form.endDate" mask="YYYY-MM-DD"
+                                        :options="date => !form.startDate || date >= form.startDate.replace(/-/g, '/')"
+                                        v-close-popup
+                                        @update:model-value="clearFieldError('endDate')" />
                                 </q-popup-proxy>
                             </q-icon>
                         </template>
                     </q-input>
 
-                    <q-input v-model="form.note" label="Not giriniz" outlined dense />
+
 
                 </q-card-section>
 
                 <q-separator />
 
-                <!-- Aksiyon Butonları -->
                 <q-card-actions align="right" class="q-pa-md">
                     <q-btn flat label="İptal" color="grey-7" v-close-popup :disable="loading" />
                     <q-btn type="submit" label="Güncelle" color="primary" :loading="loading" :disable="!hasChanges" />
@@ -97,6 +117,8 @@ import { useUserStore } from '../stores/user';
 import { useCustomerStore } from '../stores/customer';
 import type { CustomerOption } from '../composables/usePolicyForm';
 import { type Policy, type PolicyForm, policyTypeOptions } from '../types/policy.types';
+import { formatDate } from '../utils/dateHelper';
+import { ValidationError } from '../error/errors';
 
 const userStore = useUserStore();
 const customerStore = useCustomerStore();
@@ -122,8 +144,7 @@ const isOpen = computed({
     set: (value) => emit('update:modelValue', value)
 });
 
-// Yalnızca form state, loading ve submit yönetimi için composable kullanılıyor.
-// "create" moduna özel onModalShow override'ı yapılmıyor.
+
 const {
     form,
     loading,
@@ -132,14 +153,23 @@ const {
     submitWithLoading,
 } = usePolicyForm({ isRenewal: false, policyData: null });
 
-// EditPolicyModal'ın kendi customer seçenek listesi (sadece mevcut müşteri)
 const filteredCustomerOptions = ref<CustomerOption[]>([]);
 
 const originalForm = ref<PolicyForm>({ ...form.value });
 
+// Backend'den dönen alan bazlı hatalar
+const fieldErrors = ref<Record<string, string>>({});
+
+const clearFieldError = (field: string) => {
+    if (fieldErrors.value[field]) {
+        delete fieldErrors.value[field];
+    }
+};
+
 const trackedFields: (keyof PolicyForm)[] = [
-    'customerId', 'type', 'premium', 'note', 'responsibleUserId', 'startDate', 'endDate', 'active'
+    'customerId', 'type', 'premium', 'note', 'responsibleUserId', 'startDate', 'endDate', 'isActive'
 ];
+
 
 function assignIfChanged<K extends keyof PolicyForm>(
     target: Partial<PolicyForm>,
@@ -162,13 +192,12 @@ const getChangedFields = (): Partial<PolicyForm> => {
 
 const hasChanges = computed(() => Object.keys(getChangedFields()).length > 0);
 
-// ── Modal açılışında formu mevcut poliçe verisiyle doldur ─────────────────────
-// baseOnModalShow yerine doğrudan customer/user store kullanılıyor.
+
 const onModalShow = async () => {
-    // Müşteri listesi henüz yüklenmediyse çek (edit'te filtreleme için gerekli)
+    fieldErrors.value = {}; // Hataları temizle
+
     if (!customerStore.customerData?.length) await customerStore.fetchCustomerData();
 
-    // Sorumlu kullanıcıyı ID ile getir
     const responsibleUser = await userStore.fetchUserById(props.policyData.responsibleUserId);
 
     form.value = {
@@ -179,17 +208,16 @@ const onModalShow = async () => {
         responsibleUserId: props.policyData.responsibleUserId || '',
         note: props.policyData.note || '',
         startDate: props.policyData.startDate
-            ? props.policyData.startDate.slice(0, 10).replace(/-/g, '/')
+            ? props.policyData.startDate
             : '',
         endDate: props.policyData.endDate
-            ? props.policyData.endDate.slice(0, 10).replace(/-/g, '/')
+            ? props.policyData.endDate
             : '',
-        active: props.policyData.active || ''
+        isActive: props.policyData.isActive || ''
     };
 
     originalForm.value = { ...form.value };
 
-    // Sadece bu müşteri seçenek olarak gösterilsin (değiştirilemiyor)
     const matchedCustomer = customerStore.customerData.find(
         (c) => c.customerId === form.value.customerId
     );
@@ -201,7 +229,6 @@ const onModalShow = async () => {
         }]
         : [];
 
-    // Sorumlu kullanıcı drop-down'ı
     filteredUserOptions.value = responsibleUser
         ? [{
             userId: responsibleUser.id,
@@ -220,12 +247,23 @@ const onSubmit = async () => {
         return;
     }
 
-    await submitWithLoading(async () => {
-        await emit('updated', {
-            id: props.policyData.policyId,
-            data: patchData
+    fieldErrors.value = {}; 
+
+    try {
+        await submitWithLoading(async () => {
+            await emit('updated', {
+                id: props.policyData.policyId,
+                data: patchData
+            });
+            isOpen.value = false;
         });
-        isOpen.value = false;
-    });
+    } catch (error: unknown) {
+        if (error instanceof ValidationError && error.errors) {
+            fieldErrors.value = error.errors;
+            return; 
+        }
+
+        console.error('Poliçe güncelleme hatası:', error);
+    }
 };
 </script>

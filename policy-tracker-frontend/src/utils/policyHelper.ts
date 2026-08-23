@@ -1,24 +1,4 @@
-import type { Policy } from '@/types/policy.types';
 import type { paymentStatus } from '@/types/installment.types';
-
-export const formatPolicyPayload = (eventData: Partial<Policy>) => {
-  const payload: Partial<Policy> = {};
-
-  if (eventData.customerId) payload.customerId = eventData.customerId;
-  if (eventData.premium !== undefined) payload.premium = eventData.premium;
-
-  if (eventData.startDate) {
-    payload.startDate = `${eventData.startDate.replace(/\//g, '-')}`;
-  }
-  if (eventData.endDate) {
-    payload.endDate = `${eventData.endDate.replace(/\//g, '-')}`;
-  }
-  if (eventData.type) {
-    payload.type = eventData.type;
-  }
-
-  return payload;
-};
 
 // ── Policy type renk haritası ────────────────────────────────────────────────
 const policyTypeColor: Record<string, string> = {
@@ -47,7 +27,9 @@ export const formatDateOnly = (dateStr: string | null | undefined): string => {
 /** Sayıyı Türkçe para formatında gösterir. Örn: "1.500,00 TL" */
 export const formatCurrency = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return '—';
-  return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+  return (
+    value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL'
+  );
 };
 
 // ── Taksit ödeme durumu yardımcıları ────────────────────────────────────────

@@ -47,7 +47,8 @@
                     @row-click="goToCustomerDetail" @request="onTableRequest" class="clickable-table">
                     <template v-slot:body-cell-isActive="props">
                         <q-td :props="props" class="text-center">
-                            <q-chip :color="props.row.isActive ? 'positive' : 'negative'" dense class="status-chip">
+                            <q-chip :color="props.row.isActive ? 'positive' : 'negative'" text-color="white" dense
+                                class="text-weight-bold compact-chip">
                                 {{ props.row.isActive ? 'Aktif' : 'Pasif' }}
                             </q-chip>
                         </q-td>

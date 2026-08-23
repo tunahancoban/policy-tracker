@@ -38,12 +38,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
         dashboardService.getRecentActivities(listNumber),
         dashboardService.getCharts(year),
       ]);
+
       summary.value = summaryResult;
       activities.value = activitiesResult;
       chartDataFromApi.value = chartsResult;
-    } catch (error) {
-      console.error('Dashboard verileri yüklenirken hata:', error);
-      throw error;
+    } catch (err) {
+      activities.value = [];
+      throw err;
     } finally {
       isDashboardLoading.value = false;
     }
@@ -65,14 +66,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
       }
 
       const pageData = await policyService.getPolicy(params);
-
       renewalPolicies.value = pageData.content || [];
       renewalTotalRows.value = pageData.totalElements || 0;
-    } catch (error) {
-      console.error('Yenileme poliçeleri yüklenirken hata:', error);
+    } catch (err) {
       renewalPolicies.value = [];
       renewalTotalRows.value = 0;
-      throw error;
+      throw err;
     } finally {
       renewalLoading.value = false;
     }

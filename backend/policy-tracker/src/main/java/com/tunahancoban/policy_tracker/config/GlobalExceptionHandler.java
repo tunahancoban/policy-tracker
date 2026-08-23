@@ -1,5 +1,6 @@
-package com.tunahancoban.policy_tracker.exception;
+package com.tunahancoban.policy_tracker.config;
 
+import com.tunahancoban.policy_tracker.model.exceptions.BusinessValidationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,20 +28,38 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
-        String cleanErrorMessage = exception.getBindingResult()
+        Map<String, String> fieldErrors = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Geçersiz değer",
+                        (existing, replacement) -> existing // aynı field'da 2 hata varsa ilkini tut
+                ));
 
-        if (cleanErrorMessage.isBlank()) {
-            cleanErrorMessage = "Validation error occurred";
-        }
+        log.warn("Validation Error: {}", fieldErrors);
 
-        log.warn("Validation Error: {}", cleanErrorMessage);
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, cleanErrorMessage);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Doğrulama hatası");
         problemDetail.setTitle("Validasyon Hatası");
+        problemDetail.setProperty("errors", fieldErrors);
+        return problemDetail;
+    }
+
+    // ----------------------------------------------------------------
+    // 409 / 400 - Alan Bazlı İş Kuralı ve Çakışma Hataları
+    // ----------------------------------------------------------------
+    @ExceptionHandler(BusinessValidationException.class)
+    public ProblemDetail handleBusinessValidationException(BusinessValidationException exception) {
+        log.warn("Business Validation Error on field '{}': {}", exception.getFieldName(), exception.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                exception.getStatus(),
+                exception.getMessage()
+        );
+        problemDetail.setTitle("İş Kuralı Doğrulama Hatası");
+
+        problemDetail.setProperty("errors", Map.of(exception.getFieldName(), exception.getMessage()));
+
         return problemDetail;
     }
 

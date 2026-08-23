@@ -1,23 +1,35 @@
 package com.tunahancoban.policy_tracker.model.DTO.events;
 
 import com.tunahancoban.policy_tracker.model.entity.Customer;
+import com.tunahancoban.policy_tracker.model.enums.EventTypes;
+
 import java.time.LocalDateTime;
 
-public record CustomerUpdatedEvent(
+public record CustomerEvent(
+        EventTypes eventType,
         String customerId,
         String firstName,
         String lastName,
+        String identityNumber,
         String email,
         String phoneNumber,
+        Boolean isActive,
+        LocalDateTime createdAt,
+        LocalDateTime deletedAt,
         LocalDateTime updatedAt
 ) {
-    public static CustomerUpdatedEvent from(Customer customer) {
-        return new CustomerUpdatedEvent(
+    public static CustomerEvent from(Customer customer, EventTypes eventType) {
+        return new CustomerEvent(
+                eventType,
                 customer.getCustomerId(),
                 customer.getFirstName(),
                 customer.getLastName(),
+                customer.getIdentityNumber(),
                 customer.getEmail(),
                 customer.getPhoneNumber(),
+                customer.getIsActive(),
+                customer.getCreatedAt(),
+                customer.getDeletedAt(),
                 customer.getUpdatedAt()
         );
     }

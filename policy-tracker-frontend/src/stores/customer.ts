@@ -26,12 +26,11 @@ export const useCustomerStore = defineStore('customer', () => {
       totalElements.value = result.totalElements;
       totalPages.value = result.totalPages;
       isInitialized.value = true;
-    } catch (error) {
-      console.error('Müşteri verisi çekilemedi:', error);
+    } catch (err) {
       customerData.value = [];
       totalElements.value = 0;
       totalPages.value = 0;
-      throw error;
+      throw err;
     } finally {
       isLoading.value = false;
     }
@@ -42,35 +41,22 @@ export const useCustomerStore = defineStore('customer', () => {
     try {
       const customer = await customerService.getCustomerById(customerId);
       selectedCustomer.value = customer;
-    } catch (error) {
-      console.error('Müşteri bilgisi çekilemedi', error);
+      return customer;
+    } catch (err) {
       selectedCustomer.value = null;
-      throw error;
+      throw err;
     } finally {
       isLoading.value = false;
     }
   };
 
-  const getCustomerById = async (customerId: string): Promise<Customer | null> => {
-    isLoading.value = true;
-    try {
-      const customer = await customerService.getCustomerById(customerId);
-      return customer;
-    } catch (error) {
-      console.error('Müşteri bilgisi çekilemedi', error);
-      throw error;
-    } finally {
-      isLoading.value = false;
-    }
-  };
   const addCustomer = async (newCustomer: Customer) => {
     isLoading.value = true;
     try {
       const addedCustomer = await customerService.addCustomer(newCustomer);
       customerData.value.push(addedCustomer);
-    } catch (error) {
-      console.error('Müşteri eklenemedi: ', error);
-      throw error;
+      totalElements.value += 1;
+      return addedCustomer;
     } finally {
       isLoading.value = false;
     }
@@ -84,46 +70,34 @@ export const useCustomerStore = defineStore('customer', () => {
       if (index !== -1) {
         customerData.value[index] = result;
       }
-    } catch (error) {
-      console.error('Müşteri güncellemesi başarısız oldu:', error);
-      throw error;
+      if (selectedCustomer.value?.customerId === result.customerId) {
+        selectedCustomer.value = result;
+      }
+      return result;
     } finally {
       isLoading.value = false;
     }
   };
 
   const deleteCustomer = async (customerId: string) => {
+    isLoading.value = true;
     try {
       await customerService.deleteCustomer(customerId);
       customerData.value = customerData.value.filter((c) => c.customerId !== customerId);
-    } catch (error) {
-      console.error('deleteCustomer başarısız oldu:', error);
-      throw error;
-    }
-  };
-
-  const searchCustomer = async (searchParams: Record<string, string>) => {
-    isLoading.value = true;
-    try {
-      const result = await customerService.getCustomer({
-        ...searchParams,
-        page: '0',
-        size: String(pageSize.value),
-      });
-      customerData.value = result.content;
-      totalElements.value = result.totalElements;
-      totalPages.value = result.totalPages;
-      currentPage.value = 0;
-    } catch (error) {
-      console.error('Müşteri arama hatası:', error);
-      customerData.value = [];
-      totalElements.value = 0;
-      totalPages.value = 0;
-      throw error;
+      totalElements.value = Math.max(0, totalElements.value - 1);
     } finally {
       isLoading.value = false;
     }
   };
+
+  const searchCustomer = async (searchParams: Record<string, string>) => {
+    currentPage.value = 0;
+    return fetchCustomerData({
+      ...searchParams,
+      page: '0',
+    });
+  };
+
   return {
     customerData,
     selectedCustomer,
@@ -135,7 +109,6 @@ export const useCustomerStore = defineStore('customer', () => {
     pageSize,
     fetchCustomerData,
     fetchCustomerById,
-    getCustomerById,
     addCustomer,
     searchCustomer,
     updateCustomer,

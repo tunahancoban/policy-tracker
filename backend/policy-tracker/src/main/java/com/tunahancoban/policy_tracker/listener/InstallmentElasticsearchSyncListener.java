@@ -1,9 +1,7 @@
 package com.tunahancoban.policy_tracker.listener;
 
 import com.tunahancoban.policy_tracker.mapper.InstallmentMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.InstallmentEvent;
 import com.tunahancoban.policy_tracker.repository.InstallmentElasticsearchRepository;
 import com.tunahancoban.policy_tracker.repository.InstallmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +19,8 @@ public class InstallmentElasticsearchSyncListener {
     private final InstallmentMapper installmentMapper;
 
     @EventListener
-    public void onInstallmentCreated(InstallmentCreatedEvent event) {
-        syncInstallment(event.id(), "CREATE");
-    }
-
-    @EventListener
-    public void onInstallmentUpdated(InstallmentUpdatedEvent event) {
-        syncInstallment(event.id(), "UPDATE");
-    }
-
-    @EventListener
-    public void onInstallmentDeleted(InstallmentDeletedEvent event) {
-        syncInstallment(event.id(), "DELETE");
+    public void onInstallmentEvent(InstallmentEvent event) {
+        syncInstallment(event.id(), event.eventType().toString());
     }
 
     private void syncInstallment(String installmentId, String operation) {

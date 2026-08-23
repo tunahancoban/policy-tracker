@@ -2,13 +2,12 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.annotation.LogActivity;
 import com.tunahancoban.policy_tracker.mapper.PolicyMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyEvent;
 import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
 import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.enums.EventTypes;
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
@@ -51,7 +50,7 @@ public class PolicyServiceImp implements PolicyService {
         Policy searchCriteria = Policy.builder()
                 .policyId(policyId)
                 .customerId(customerId)
-                .active(active)
+                .isActive(active)
                 .responsibleUserId(responsibleUserId)
                 .type(type).build();
 
@@ -102,7 +101,7 @@ public class PolicyServiceImp implements PolicyService {
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
 
-        eventPublisher.publishEvent(PolicyCreatedEvent.from(savedPolicy));
+        eventPublisher.publishEvent(PolicyEvent.from(savedPolicy, EventTypes.CREATE));
 
         log.info("Policy successfully created - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
         return savedPolicy;
@@ -120,13 +119,12 @@ public class PolicyServiceImp implements PolicyService {
         });
         //policyRepository.deleteByPolicyId(policyID);
 
-        policy.setActive(PolicyStatus.PASSIVE);
+        policy.setIsActive(PolicyStatus.PASSIVE);
         policy.setDeletedAt(LocalDateTime.now());
         installmentService.deleteInstallment(policyID);
 
         policyRepository.save(policy);
-
-        eventPublisher.publishEvent(PolicyDeletedEvent.from(policy));
+        eventPublisher.publishEvent(PolicyEvent.from(policy, EventTypes.DELETE));
 
         log.info("Policy successfully deleted - policyId: {}", policyID);
     }
@@ -146,9 +144,9 @@ public class PolicyServiceImp implements PolicyService {
         policy.setUpdatedAt(LocalDateTime.now());
 
         Policy updatedPolicy = policyRepository.save(policy);
-
+        eventPublisher.publishEvent(PolicyEvent.from(updatedPolicy, EventTypes.UPDATE));
         log.info("Policy successfully updated - policyId: {}", policyID);
-        eventPublisher.publishEvent(PolicyUpdatedEvent.from(updatedPolicy));
+
         return updatedPolicy;
     }
 
@@ -181,8 +179,7 @@ public class PolicyServiceImp implements PolicyService {
 
         installmentService.createInstallment(policy, request.getInstallment().getValue());
         Policy savedPolicy = policyRepository.save(policy);
-
-        eventPublisher.publishEvent(PolicyCreatedEvent.from(savedPolicy));
+        eventPublisher.publishEvent(PolicyEvent.from(savedPolicy, EventTypes.CREATE));
 
         log.info("Policy successfully renewed - policyId: {}, customerId: {}", savedPolicy.getPolicyId(), savedPolicy.getCustomerId());
         return savedPolicy;

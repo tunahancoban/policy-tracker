@@ -1,9 +1,7 @@
 package com.tunahancoban.policy_tracker.listener;
 
 import com.tunahancoban.policy_tracker.mapper.PolicyMapper;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyCreatedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyDeletedEvent;
-import com.tunahancoban.policy_tracker.model.DTO.events.PolicyUpdatedEvent;
+import com.tunahancoban.policy_tracker.model.DTO.events.PolicyEvent;
 import com.tunahancoban.policy_tracker.repository.PolicyElasticsearchRepository;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +19,8 @@ public class PolicyElasticsearchSyncListener {
     private final PolicyMapper policyMapper;
 
     @EventListener
-    public void onPolicyCreated(PolicyCreatedEvent event) {
-        syncPolicy(event.policyId(), "CREATE");
-    }
-
-    @EventListener
-    public void onPolicyUpdated(PolicyUpdatedEvent event) {
-        syncPolicy(event.policyId(), "UPDATE");
-    }
-
-    @EventListener
-    public void onPolicyDeleted(PolicyDeletedEvent event) {
-
-        syncPolicy(event.policyId(), "DELETE");
+    public void onPolicyEvent(PolicyEvent event) {
+        syncPolicy(event.policyId(), event.eventType().toString());
     }
 
     private void syncPolicy(String policyId, String operation) {

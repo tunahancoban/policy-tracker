@@ -14,7 +14,7 @@ public class PolicySearchRequest {
     private String customerId;
     private String policyId;
     private String responsibleUserId;
-    private PolicyStatus status;
+    private PolicyStatus isActive;
     private PolicyType type;
     private String keyword;
     private LocalDate endDateFrom;

@@ -127,12 +127,12 @@ const pieChartData = computed<ChartData<'doughnut'>>(() => {
 });
 
 const statusChartData = computed<ChartData<'doughnut'>>(() => ({
-    labels: ['Aktif Poliçe', 'Yakında Sona Erecek', 'Süresi Dolmuş'],
+    labels: ['30 Günden Fazla Süresi Olanlar', '30 Gün İçinde Sona Erecek', 'Süresi Dolmuş'],
     datasets: [{
         label: 'Poliçe Durumu',
         backgroundColor: ['#21BA45', '#F2C037', '#C10015'],
         data: [
-            summary.value.activePolicyNumber,
+            summary.value.activePolicyNumber - summary.value.expiringSoonPolicies,
             summary.value.expiringSoonPolicies,
             summary.value.expiredPolicies,
         ],

@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LoginResponse {
 
-    private String token;
+    private String jwt_token;
     private String role;
     private String id;
     private String userEmail;
