@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 public class CustomerSearchRequest {
     private String customerId;
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String identityNumber;
     private String email;
     private String phoneNumber;

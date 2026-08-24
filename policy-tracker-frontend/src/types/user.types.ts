@@ -1,8 +1,7 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   role: UserRole;
   createdAt?: string;
 }
@@ -17,7 +16,7 @@ export const userColumns = [
   {
     name: 'fullName',
     label: 'Ad Soyad',
-    field: (row: User) => `${row.firstName} ${row.lastName}`,
+    field: 'fullName',
     align: 'left' as const,
   },
   { name: 'email', label: 'E-posta', field: 'email', align: 'left' as const },
@@ -26,16 +25,14 @@ export const userColumns = [
 ];
 
 export interface RegisterRequest {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   password: string;
   role: UserRole;
 }
 
 export interface UpdateUserRequest {
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   email?: string;
   password?: string;
   role?: UserRole;
@@ -43,8 +40,7 @@ export interface UpdateUserRequest {
 
 export interface UserForm {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   password?: string;
   role: UserRole;

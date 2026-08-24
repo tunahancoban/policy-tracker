@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia';
-import { useDashboardStore } from '@/stores/dashboard';
+import { useDashboardStore } from '../stores/dashboard';
 
 export function useDashboardData() {
   const dashboardStore = useDashboardStore();

@@ -75,17 +75,13 @@ public class UserSearchService {
             criteria = criteria.and(new Criteria("role").is(request.getRole().name()));
         }
 
-        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
-            criteria = criteria.and(new Criteria("firstName").contains(request.getFirstName()));
-        }
-        if (request.getLastName() != null && !request.getLastName().isBlank()) {
-            criteria = criteria.and(new Criteria("lastName").contains(request.getLastName()));
+        if (request.getFullName() != null && !request.getFullName().isBlank()) {
+            criteria = criteria.and(new Criteria("fullName").contains(request.getFullName()));
         }
 
         if (request.getKeyword() != null && !request.getKeyword().isBlank()) {
             String keyword = request.getKeyword().trim();
-            Criteria keywordCriteria = new Criteria("firstName").contains(keyword)
-                    .or(new Criteria("lastName").contains(keyword))
+            Criteria keywordCriteria = new Criteria("fullName").contains(keyword)
                     .or(new Criteria("email").contains(keyword));
             criteria = criteria.and(keywordCriteria);
         }
@@ -95,11 +91,10 @@ public class UserSearchService {
 
     private String resolveSortField(String sortBy) {
         if (sortBy == null || sortBy.isBlank()) {
-            return "firstName.keyword";
+            return "fullName.keyword";
         }
         return switch (sortBy) {
-            case "firstName" -> "firstName.keyword";
-            case "lastName" -> "lastName.keyword";
+            case "fullName" -> "fullName.keyword";
             default -> sortBy;
         };
     }

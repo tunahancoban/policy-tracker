@@ -23,8 +23,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (userRepository.findByEmail("admin@policytracker.com").isEmpty()) {
             User admin = new User();
-            admin.setFirstName("Admin");
-            admin.setLastName("Admin");
+            admin.setFullName("Admin");
             admin.setEmail("admin@policytracker.com");
             admin.setPassword(passwordEncoder.encode("1234"));
             admin.setIsActive(true);

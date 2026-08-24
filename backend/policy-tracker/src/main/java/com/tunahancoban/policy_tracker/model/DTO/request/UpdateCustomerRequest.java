@@ -11,8 +11,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 @AllArgsConstructor
 public class UpdateCustomerRequest {
 
-    private JsonNullable<String> firstName = JsonNullable.undefined();
-    private JsonNullable<String> lastName = JsonNullable.undefined();
+    private JsonNullable<String> fullName = JsonNullable.undefined();
     private JsonNullable<String> identityNumber = JsonNullable.undefined();
     private JsonNullable<String> email = JsonNullable.undefined();
     private JsonNullable<String> phoneNumber = JsonNullable.undefined();

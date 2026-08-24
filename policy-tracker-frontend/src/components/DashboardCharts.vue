@@ -48,8 +48,8 @@
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
 import { Chart as ChartJS } from 'chart.js';
-import { createStaggeredChart } from '@/composables/useStaggeredChart';
-import type { ChartResponse, DashboardSummary } from '@/types/dashboard.types';
+import { createStaggeredChart } from '../composables/useStaggeredChart';
+import type { ChartResponse, DashboardSummary } from '../types/dashboard.types';
 import type { ChartData, Chart } from 'chart.js';
 
 const $q = useQuasar();

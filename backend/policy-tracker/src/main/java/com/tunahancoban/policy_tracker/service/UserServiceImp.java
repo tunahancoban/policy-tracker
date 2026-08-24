@@ -36,15 +36,14 @@ public class UserServiceImp implements UserService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable) {
-        log.debug("Searching users - id: {}, firstName: {}, lastName: {}, email: {}, role: {}",
-                id, firstName, lastName, email, role);
+    public Page<User> getUserWithParam(String id, String fullName, String email, Role role, Pageable pageable) {
+        log.debug("Searching users - id: {}, fullName: {}, email: {}, role: {}",
+                id, fullName, email, role);
 
         //Creates a searchCriteria
         User searchCriteria = User.builder()
                 .id(id)
-                .firstName(firstName)
-                .lastName(lastName)
+                .fullName(fullName)
                 .email(email)
                 .role(role)
                 .build();

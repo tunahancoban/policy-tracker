@@ -13,7 +13,7 @@ interface UserOption {
 /**
  * Queries the backend dynamically.
  * - If the query contains '@' → search by email
- * - Otherwise             → search by firstName (backend handles partial match)
+ * - Otherwise             → search by fullName (backend handles partial match)
  * The store's `searchUser` action writes the result back to `users` ref.
  */
 export function useUserBackendSearch(
@@ -36,12 +36,12 @@ export function useUserBackendSearch(
     // Split into first/last name if there's a space
     const parts = query.split(' ').filter(Boolean);
     if (parts.length >= 2) {
-      await userStore.searchUser({ firstName: parts[0]!, lastName: parts[1]! });
+      await userStore.searchUser({ fullName: parts[0]!, lastName: parts[1]! });
       return;
     }
 
-    // Single word: try firstName search
-    await userStore.searchUser({ firstName: query });
+    // Single word: try fullName search
+    await userStore.searchUser({ fullName: query });
   };
 
   return { onSearch };

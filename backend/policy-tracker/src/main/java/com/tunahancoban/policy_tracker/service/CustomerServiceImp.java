@@ -34,16 +34,15 @@ public class CustomerServiceImp implements CustomerService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
+    public Page<Customer> getCustomerByParam(String customerId, String fullName,
                                              String identityNumber, String email, String phoneNumber,
                                              Boolean active, Pageable pageable) {
-        log.debug("Customer search initiated - customerId: {}, firstName: {}, lastName: {}, active: {}, page: {}",
-                customerId, firstName, lastName, active, pageable);
+        log.debug("Customer search initiated - customerId: {}, firstName: {}, active: {}, page: {}",
+                customerId, fullName, active, pageable);
 
         Customer searchCriteria = Customer.builder()
                 .customerId(customerId)
-                .firstName(firstName)
-                .lastName(lastName)
+                .fullName(fullName)
                 .identityNumber(identityNumber)
                 .email(email)
                 .phoneNumber(phoneNumber)

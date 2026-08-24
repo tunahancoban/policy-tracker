@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomerService {
-    Page<Customer> getCustomerByParam(String customerId, String firstName, String lastName,
+    Page<Customer> getCustomerByParam(String customerId, String fullName,
                                       String identityNumber, String email, String phoneNumber,
                                       Boolean active, Pageable pageable);
     Customer getCustomerByCustomerId(String customerId);

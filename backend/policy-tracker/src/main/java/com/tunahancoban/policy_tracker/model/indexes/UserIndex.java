@@ -29,15 +29,7 @@ public class UserIndex {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword, ignoreAbove = 256)
             }
     )
-    private String firstName;
-
-    @MultiField(
-            mainField = @Field(type = FieldType.Text),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword, ignoreAbove = 256)
-            }
-    )
-    private String lastName;
+    private String fullName;
 
     @Field(type = FieldType.Keyword)
     private String email;

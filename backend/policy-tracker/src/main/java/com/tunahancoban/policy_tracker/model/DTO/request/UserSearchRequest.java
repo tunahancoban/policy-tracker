@@ -9,8 +9,7 @@ import lombok.Setter;
 public class UserSearchRequest {
 
     private String id;
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String email;
     private Role role;
     private Boolean isActive;
@@ -19,6 +18,6 @@ public class UserSearchRequest {
 
     private int page = 0;
     private int size = 20;
-    private String sortBy = "firstName";
+    private String sortBy = "fullName";
     private String sortDirection = "ASC";
 }

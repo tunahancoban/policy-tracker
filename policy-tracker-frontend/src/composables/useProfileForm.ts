@@ -1,11 +1,11 @@
 // composables/useProfileForm.ts
 import { ref } from 'vue';
-import type { User } from '@/types/user.types';
+import type { User } from '../types/user.types';
 
 export function useProfileForm() {
   const profileForm = ref({
     id: '',
-    firstName: '',
+    fullName: '',
     lastName: '',
     email: '',
   });
@@ -14,8 +14,8 @@ export function useProfileForm() {
 
   const populateFrom = (user: User) => {
     profileForm.value.id = user.id ?? '';
-    profileForm.value.firstName = user.firstName;
-    profileForm.value.lastName = user.lastName;
+    profileForm.value.fullName = user.fullName;
+
     profileForm.value.email = user.email;
   };
 
@@ -28,7 +28,7 @@ export function useProfileForm() {
 
   const buildUpdatePayload = (): Record<string, unknown> => {
     const payload: Record<string, unknown> = {
-      firstName: profileForm.value.firstName,
+      fullName: profileForm.value.fullName,
       lastName: profileForm.value.lastName,
       email: profileForm.value.email,
     };

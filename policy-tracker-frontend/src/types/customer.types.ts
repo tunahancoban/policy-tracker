@@ -1,7 +1,6 @@
 export interface Customer {
   customerId: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   identityNumber: string;
   email: string;
   phoneNumber: string;
@@ -14,7 +13,7 @@ export interface Customer {
 }
 
 export const CUSTOMER_SORT_FIELD_MAP: Record<string, string> = {
-  firstName: 'firstName',
+  fullName: 'fullName',
   email: 'email',
   phoneNumber: 'phoneNumber',
   customerId: 'customerId',
@@ -31,9 +30,9 @@ export const customerColumns = [
     sortable: true,
   },
   {
-    name: 'firstName',
+    name: 'fullName',
     label: 'Ad Soyad',
-    field: (row: Customer) => `${row.firstName} ${row.lastName}`,
+    field: 'fullName',
     align: 'left' as const,
     sortable: true,
   },
@@ -52,8 +51,7 @@ export const stateOptions = [
 
 export const initialForm = {
   customerId: '',
-  firstName: '',
-  lastName: '',
+  fullName: '',
   identityNumber: '',
   email: '',
   phoneNumber: '',

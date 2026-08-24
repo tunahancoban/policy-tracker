@@ -207,17 +207,14 @@ const onModalShow = async () => {
         installment: props.policyData.installment || 0,
         responsibleUserId: props.policyData.responsibleUserId || '',
         note: props.policyData.note || '',
-        startDate: props.policyData.startDate
-            ? props.policyData.startDate
-            : '',
-        endDate: props.policyData.endDate
-            ? props.policyData.endDate
-            : '',
+        startDate: props.policyData.startDate || '',
+        endDate: props.policyData.endDate || '',
         isActive: props.policyData.isActive || ''
     };
 
     originalForm.value = { ...form.value };
 
+    // Müşteri seçeneğini doldur
     const matchedCustomer = customerStore.customerData.find(
         (c) => c.customerId === form.value.customerId
     );
@@ -225,16 +222,16 @@ const onModalShow = async () => {
         ? [{
             customerId: matchedCustomer.customerId,
             identityNumber: matchedCustomer.identityNumber || '',
-            fullName: `${matchedCustomer.firstName || ''} ${matchedCustomer.lastName || ''}`.trim(),
+            fullName: `${matchedCustomer.fullName || ''}`.trim(),
         }]
         : [];
 
+    // Sorumlu kullanıcı seçeneğini doldur
     filteredUserOptions.value = responsibleUser
         ? [{
             userId: responsibleUser.id,
             email: responsibleUser.email || '',
-            fullName: `${responsibleUser.firstName || ''} ${responsibleUser.lastName || ''}`.trim()
-                + (responsibleUser.email ? ` (${responsibleUser.email})` : ''),
+            fullName: `${(responsibleUser.fullName || '').trim()}${responsibleUser.email ? ` (${responsibleUser.email})` : ''}`,
         }]
         : [];
 };

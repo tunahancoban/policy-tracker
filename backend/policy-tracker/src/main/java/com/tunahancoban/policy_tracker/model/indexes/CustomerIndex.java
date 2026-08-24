@@ -24,10 +24,7 @@ public class CustomerIndex {
     private String customerId;
 
     @Field(type = FieldType.Text)
-    private String firstName;
-
-    @Field(type = FieldType.Text)
-    private String lastName;
+    private String fullName;
 
     @Field(type = FieldType.Keyword)
     private String identityNumber;

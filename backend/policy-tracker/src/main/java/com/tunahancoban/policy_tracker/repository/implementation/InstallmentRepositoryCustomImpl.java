@@ -1,5 +1,6 @@
-package com.tunahancoban.policy_tracker.repository;
+package com.tunahancoban.policy_tracker.repository.implementation;
 
+import com.tunahancoban.policy_tracker.repository.InstallmentRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.domain.Sort;

@@ -70,7 +70,7 @@ export function usePolicyForm(
   const customerOptions = computed<CustomerOption[]>(() =>
     customerStore.customerData.map((c) => {
       const namePart =
-        `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email || 'İsimsiz Müşteri';
+        `${c.fullName || ''}`.trim() || c.email || 'İsimsiz Müşteri';
       const identityPart = c.identityNumber ? `(TC: ${c.identityNumber})` : `(ID: ${c.customerId})`;
       return {
         customerId: c.customerId,
@@ -83,7 +83,7 @@ export function usePolicyForm(
   const userOptions = computed<UserOption[]>(() => {
     const data = Array.isArray(userStore.users) ? userStore.users : [];
     return data.map((u) => {
-      const namePart = `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Acente Personeli';
+      const namePart = `${u.fullName || ''}`.trim() || 'Acente Personeli';
       const infoPart = u.email ? `(${u.email})` : `(ID: ${u.id})`;
       return {
         userId: u.id,
@@ -167,7 +167,7 @@ export function usePolicyForm(
       premium: policy.premium ?? 0,
       installment: policy.installment ?? 1,
       responsibleUserId:
-      userStore.users.find((u) => u.id === policy.responsibleUserId)?.firstName || '',
+      userStore.users.find((u) => u.id === policy.responsibleUserId)?.fullName || '',
       startDate: start,
       endDate: end,
       note: policy.note ? `${policy.note} (Yenileme)` : 'Poliçe Yenileme',

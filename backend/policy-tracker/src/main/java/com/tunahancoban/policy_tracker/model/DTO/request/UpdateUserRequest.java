@@ -16,9 +16,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateUserRequest {
 
-    private JsonNullable<String> firstName = JsonNullable.undefined();
-
-    private JsonNullable<String> lastName = JsonNullable.undefined();
+    private JsonNullable<String> fullName = JsonNullable.undefined();
 
     private JsonNullable<Boolean> isActive = JsonNullable.undefined();
 

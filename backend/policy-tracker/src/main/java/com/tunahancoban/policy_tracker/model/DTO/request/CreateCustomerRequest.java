@@ -11,10 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 public class CreateCustomerRequest {
     @NotBlank(message = "İsim boş olamaz.")
-    private String firstName;
-
-    @NotBlank(message = "Soyisim boş olamaz.")
-    private String lastName;
+    private String fullName;
 
     @NotBlank(message = "TC No boş olamaz")
     @Size(min = 11, max = 11, message = "TC No 11 haneli olmalı")

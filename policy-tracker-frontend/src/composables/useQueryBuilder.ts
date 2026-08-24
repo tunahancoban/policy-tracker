@@ -80,7 +80,7 @@ export function resolveCustomerSearchParam(query: string): Record<string, string
   if (query.includes('@')) return { email: query };
   if (/^0\d{10}$/.test(query) || /^5\d{9}$/.test(query)) return { phoneNumber: query };
   if (/^\d{11}$/.test(query)) return { identityNumber: query };
-  return { firstName: query };
+  return { fullName: query };
 }
 
 // ── Kısayol: policy sıralama haritasıyla tam params üret ────────────────────

@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 public record UserEvent(
         EventTypes eventType,
         String id,
-        String firstName,
-        String lastName,
+        String fullName,
         String email,
         Boolean isActive,
         LocalDateTime deletedAt,
@@ -22,8 +21,7 @@ public record UserEvent(
         return new UserEvent(
                 eventType,
                 user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
+                user.getFullName(),
                 user.getEmail(),
                 user.getIsActive(),
                 user.getDeletedAt(),

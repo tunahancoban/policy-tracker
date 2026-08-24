@@ -30,10 +30,7 @@ public class User implements UserDetails {
     private String id; //Unique
 
     @NotBlank(message = "Name cannot be null")
-    private String firstName;
-
-    @NotBlank(message = "Lastname cannot be null")
-    private String lastName;
+    private String fullName;
 
     @NotBlank(message = "Email cannot be null")
     @Pattern(
@@ -85,9 +82,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
-    }
-
-    public String toString() {
-        return "User(id=" + this.getId() + ", firstName=" + this.getFirstName() + ", lastName=" + this.getLastName() + ", email=" + this.getEmail()  + ", role=" + this.getRole() + ")";
     }
 }

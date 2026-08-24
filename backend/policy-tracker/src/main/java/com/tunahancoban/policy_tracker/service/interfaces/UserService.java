@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    Page<User> getUserWithParam(String id, String firstName, String lastName, String email, Role role, Pageable pageable);
+    Page<User> getUserWithParam(String id, String firstName, String email, Role role, Pageable pageable);
     User createUser(RegisterRequest registerRequest);
     void deleteUser(String id);
     User updateUser(String id, UpdateUserRequest request);

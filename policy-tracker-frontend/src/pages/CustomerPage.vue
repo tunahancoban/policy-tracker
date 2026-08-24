@@ -73,7 +73,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import CustomerModal from '../components/CustomerModal.vue';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog } from '../composables/useConfirmDialog';
 
 import type { Customer } from '../types/customer.types';
 import { customerColumns, CUSTOMER_SORT_FIELD_MAP } from '../types/customer.types';
@@ -139,7 +139,7 @@ const buildQueryParams = (
         } else if (/^\d{11}$/.test(query)) {
             params.identityNumber = query;
         } else {
-            params.firstName = query;
+            params.fullName = query;
         }
     }
 
@@ -213,7 +213,7 @@ const handleDelete = async (customer: Customer) => {
 
     const isConfirmed = await confirm({
         title: 'Müşteri Silme Onayı',
-        message: `${customer.firstName} ${customer.lastName} isimli müşteriyi silmek istediğinize emin misiniz? Bu müşteriye tanımlı poliçeler de etkilenecektir. Bu işlem geri alınamaz.`,
+        message: `${customer.fullName} isimli müşteriyi silmek istediğinize emin misiniz? Bu müşteriye tanımlı poliçeler de etkilenecektir. Bu işlem geri alınamaz.`,
         okLabel: 'Evet, Sil',
         cancelLabel: 'Vazgeç',
         color: 'negative',

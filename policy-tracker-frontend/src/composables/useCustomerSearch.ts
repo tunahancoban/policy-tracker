@@ -28,7 +28,7 @@ export function useCustomerSearch(
       return;
     }
 
-    await customerStore.searchCustomer({ firstName: query });
+    await customerStore.searchCustomer({ fullName: query });
   };
 
   return { onSearch };

@@ -16,14 +16,11 @@
                 </div>
 
                 <q-form @submit="handleUpdateProfile" class="q-gutter-md">
-                    <q-input v-model="profileForm.firstName" label="Ad *" outlined dense
-                        :error="!!fieldErrors.firstName" :error-message="fieldErrors.firstName"
-                        @update:model-value="clearFieldError('firstName')"
+                    <q-input v-model="profileForm.fullName" label="Ad *" outlined dense
+                        :error="!!fieldErrors.fullName" :error-message="fieldErrors.fullName"
+                        @update:model-value="clearFieldError('fullName')"
                         :rules="[val => !!val || 'Ad alanı zorunludur']" />
-                    <q-input v-model="profileForm.lastName" label="Soyad *" outlined dense
-                        :error="!!fieldErrors.lastName" :error-message="fieldErrors.lastName"
-                        @update:model-value="clearFieldError('lastName')"
-                        :rules="[val => !!val || 'Soyad alanı zorunludur']" />
+                 
                     <q-input v-model="profileForm.email" label="E-posta *" outlined dense type="email"
                         :error="!!fieldErrors.email" :error-message="fieldErrors.email"
                         @update:model-value="clearFieldError('email')"

@@ -10,18 +10,11 @@
             <q-form @submit.prevent="saveCustomer">
                 <q-card-section class="q-gutter-sm">
                     <!-- Ad -->
-                    <q-input v-model="form.firstName" label="Ad *" outlined dense :error="!!fieldErrors.firstName"
-                        :error-message="fieldErrors.firstName" @update:model-value="clearFieldError('firstName')"
+                    <q-input v-model="form.fullName" label="Ad Soyad*" outlined dense :error="!!fieldErrors.fullName"
+                        :error-message="fieldErrors.fullName" @update:model-value="clearFieldError('fullName')"
                         :rules="[
                             (val) => !!val?.trim() || 'Ad zorunludur',
                             (val) => val?.trim().length >= 2 || 'Ad en az 2 karakter olmalıdır',
-                        ]" />
-
-                    <!-- Soyad -->
-                    <q-input v-model="form.lastName" label="Soyad *" outlined dense :error="!!fieldErrors.lastName"
-                        :error-message="fieldErrors.lastName" @update:model-value="clearFieldError('lastName')" :rules="[
-                            (val) => !!val?.trim() || 'Soyad zorunludur',
-                            (val) => val?.trim().length >= 2 || 'Soyad en az 2 karakter olmalıdır',
                         ]" />
 
                     <!-- T.C. Kimlik No -->
@@ -101,7 +94,7 @@ const clearFieldError = (field: string) => {
 watch(
     () => props.modelValue,
     (newVal) => {
-        fieldErrors.value = {}; // Hataları temizle
+        fieldErrors.value = {}; 
         if (newVal) {
             if (props.customerData && props.customerData.customerId) {
                 isEditMode.value = true;

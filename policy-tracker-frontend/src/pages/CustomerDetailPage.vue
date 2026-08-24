@@ -26,7 +26,7 @@
                 <span class="separator">›</span>
                 <router-link to="/customers">Müşteriler</router-link>
                 <span class="separator">›</span>
-                <span class="current">{{ customer.firstName }} {{ customer.lastName }}</span>
+                <span class="current">{{ customer.fullName }}</span>
             </div>
 
             <div class="row items-center justify-end q-py-sm q-mb-md">
@@ -77,14 +77,14 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Notify } from 'quasar';
 
-import { useCustomerDetail } from '@/composables/useCustomerDetail';
-import { usePolicyList } from '@/composables/usePolicyList';
-import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/policy.types';
-import CustomerModal from '@/components/CustomerModal.vue';
-import EditPolicyModal from '@/components/EditPolicyModal.vue';
-import CustomerProfileCard from '@/components/CustomerProfileCard.vue';
-import PolicySummaryCards from '@/components/PolicySummaryCard.vue';
-import PolicyTable from '@/components/PolicyTable.vue';
+import { useCustomerDetail } from '../composables/useCustomerDetail';
+import { usePolicyList } from '../composables/usePolicyList';
+import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '../types/policy.types';
+import CustomerModal from '../components/CustomerModal.vue';
+import EditPolicyModal from '../components/EditPolicyModal.vue';
+import CustomerProfileCard from '../components/CustomerProfileCard.vue';
+import PolicySummaryCards from '../components/PolicySummaryCard.vue';
+import PolicyTable from '../components/PolicyTable.vue';
 import NewPolicyModal from '../components/NewPolicyModal.vue';
 
 const route = useRoute();

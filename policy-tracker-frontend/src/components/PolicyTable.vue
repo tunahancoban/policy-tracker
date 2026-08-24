@@ -80,9 +80,9 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { policyColumns, activeOptions, type Policy } from '@/types/policy.types';
-import { calculateRemainingDays, getRemainingDaysColor } from '@/utils/dateHelper';
-import { useCustomerStore } from '@/stores/customer';
+import { policyColumns, activeOptions, type Policy } from '../types/policy.types';
+import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper';
+import { useCustomerStore } from '../stores/customer';
 
 // Müşteri tam adı alanını satıra ekleyen genişletilmiş tip
 export type EnrichedPolicy = Policy & { customerFullName: string };
@@ -152,7 +152,7 @@ watch(
                     const customer = await customerStore.fetchCustomerById(policy.customerId);
                     if (customer) {
                         customerFullName =
-                            `${customer.firstName || ''} ${customer.lastName || ''}`.trim() ||
+                            `${customer.fullName || ''}`.trim() ||
                             customer.email ||
                             'İsimsiz Müşteri';
                     }

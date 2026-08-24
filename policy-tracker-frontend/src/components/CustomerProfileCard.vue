@@ -6,7 +6,7 @@
             <div class="q-ml-md">
 
                 <div class="text-h5 text-weight-bold">
-                    {{ customer.firstName }} {{ customer.lastName }}
+                    {{ customer.fullName }} 
                 </div>
 
                 <div class="text-caption text-blue-2">Müşteri Detay Profili</div>
@@ -103,6 +103,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Customer } from '@/types/customer.types';
+import type { Customer } from '../types/customer.types';
 defineProps<{ customer: Customer }>();
 </script>

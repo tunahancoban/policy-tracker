@@ -52,14 +52,10 @@
 
                 <q-form @submit="saveUser">
                     <q-card-section class="q-gutter-sm q-pt-md">
-                        <q-input v-model="form.firstName" label="Ad *" outlined dense
-                            :error="!!fieldErrors.firstName" :error-message="fieldErrors.firstName"
-                            @update:model-value="clearFieldError('firstName')"
+                        <q-input v-model="form.fullName" label="Ad Soyad*" outlined dense
+                            :error="!!fieldErrors.fullName" :error-message="fieldErrors.fullName"
+                            @update:model-value="clearFieldError('fullName')"
                             :rules="[val => !!val || 'Ad alanı zorunludur']" />
-                        <q-input v-model="form.lastName" label="Soyad *" outlined dense
-                            :error="!!fieldErrors.lastName" :error-message="fieldErrors.lastName"
-                            @update:model-value="clearFieldError('lastName')"
-                            :rules="[val => !!val || 'Soyad alanı zorunludur']" />
                         <q-input v-model="form.email" label="E-posta *" outlined dense type="email"
                             :error="!!fieldErrors.email" :error-message="fieldErrors.email"
                             @update:model-value="clearFieldError('email')" :rules="[
@@ -194,7 +190,7 @@ const saveUser = async () => {
     } catch (error) {
         if (error instanceof ValidationError && error.errors) {
             fieldErrors.value = error.errors;
-            return; // Modal açık kalsın, kullanıcı düzeltsin
+            return;
         }
 
         console.error('Kullanıcı işlemi başarısız:', error);
@@ -205,7 +201,7 @@ const saveUser = async () => {
 const confirmDelete = async (user: User) => {
     const isConfirmed = await confirm({
         title: 'Kullanıcıyı Sil',
-        message: `${user.firstName} ${user.lastName} adlı kullanıcıyı sistemden silmek istediğinize emin misiniz?`,
+        message: `${user.fullName} adlı kullanıcıyı sistemden silmek istediğinize emin misiniz?`,
         okLabel: 'Sil',
         cancelLabel: 'Vazgeç',
         color: 'negative',

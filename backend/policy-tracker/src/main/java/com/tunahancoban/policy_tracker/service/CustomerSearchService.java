@@ -81,17 +81,12 @@ public class CustomerSearchService {
         }
 
         // Containing / Text matches
-        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
-            criteria = criteria.and(new Criteria("firstName").contains(request.getFirstName()));
+        if (request.getFullName() != null && !request.getFullName().isBlank()) {
+            criteria = criteria.and(new Criteria("fullName").contains(request.getFullName()));
         }
-        if (request.getLastName() != null && !request.getLastName().isBlank()) {
-            criteria = criteria.and(new Criteria("lastName").contains(request.getLastName()));
-        }
-
         // Global Keyword search across name & email
         if (request.getKeyword() != null && !request.getKeyword().isBlank()) {
-            Criteria keywordCriteria = new Criteria("firstName").contains(request.getKeyword())
-                    .or(new Criteria("lastName").contains(request.getKeyword()))
+            Criteria keywordCriteria = new Criteria("fullName").contains(request.getKeyword())
                     .or(new Criteria("email").contains(request.getKeyword()));
             criteria = criteria.and(keywordCriteria);
         }

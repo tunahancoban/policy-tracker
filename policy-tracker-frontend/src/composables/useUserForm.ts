@@ -1,18 +1,17 @@
 // src/composables/useUserForm.ts
 import { ref } from 'vue';
-import type { User, UserForm, RegisterRequest, UpdateUserRequest } from '@/types/user.types';
-import { diffObjects } from '@/utils/diffObjects';
+import type { User, UserForm, RegisterRequest, UpdateUserRequest } from '../types/user.types';
+import { diffObjects } from '../utils/diffObjects';
 
 const INITIAL_FORM: UserForm = {
   id: '',
-  firstName: '',
-  lastName: '',
+  fullName: '',
   email: '',
   password: '',
   role: 'ROLE_USER',
 };
 
-const PATCHABLE_KEYS: (keyof User)[] = ['firstName', 'lastName', 'email', 'role'];
+const PATCHABLE_KEYS: (keyof User)[] = ['fullName', 'email', 'role'];
 
 export function useUserForm() {
   const form = ref<UserForm>({ ...INITIAL_FORM });
@@ -34,8 +33,7 @@ export function useUserForm() {
     originalUser.value = user;
     form.value = {
       id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
     };
@@ -44,8 +42,7 @@ export function useUserForm() {
   };
 
   const buildCreatePayload = (): RegisterRequest => ({
-    firstName: form.value.firstName,
-    lastName: form.value.lastName,
+    fullName: form.value.fullName,
     email: form.value.email,
     password: form.value.password!,
     role: form.value.role,

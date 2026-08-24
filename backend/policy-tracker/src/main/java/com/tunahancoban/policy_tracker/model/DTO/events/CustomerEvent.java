@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 public record CustomerEvent(
         EventTypes eventType,
         String customerId,
-        String firstName,
-        String lastName,
+        String fullName,
         String identityNumber,
         String email,
         String phoneNumber,
@@ -22,8 +21,7 @@ public record CustomerEvent(
         return new CustomerEvent(
                 eventType,
                 customer.getCustomerId(),
-                customer.getFirstName(),
-                customer.getLastName(),
+                customer.getFullName(),
                 customer.getIdentityNumber(),
                 customer.getEmail(),
                 customer.getPhoneNumber(),

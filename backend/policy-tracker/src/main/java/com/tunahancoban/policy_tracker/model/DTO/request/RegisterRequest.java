@@ -11,23 +11,20 @@ import lombok.Setter;
 @Setter
 public class RegisterRequest {
 
-    @NotBlank(message = "Name cannot be null")
-    private String firstName;
+    @NotBlank(message = "İsim boş olamaz.")
+    private String fullName;
 
-    @NotBlank(message = "Lastname cannot be null")
-    private String lastName;
-
-    @NotBlank(message = "Email cannot be null")
+    @NotBlank(message = "Email boş olamaz.")
     @Pattern(
             regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Please enter a valid email"
+            message = "Geçerli bir email girin."
     )
     private String email;
 
-    @NotBlank(message = "Password cannot be null")
+    @NotBlank(message = "Şifre boş olamaz.")
     private String password;
 
-    @NotNull(message = "Role cannot be null")
+    @NotNull(message = "Rol seçiniz.")
     private Role role;
 
 }

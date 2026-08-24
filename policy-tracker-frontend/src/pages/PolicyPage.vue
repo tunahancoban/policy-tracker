@@ -77,21 +77,21 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '@/types/policy.types';
-import { policyTypeOptions } from '@/types/policy.types';
-import { usePolicyList } from '@/composables/usePolicyList';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useAuthStore } from '@/stores/auth';
+import type { Policy, CreatePolicyRequest, RenewPolicyRequest } from '../types/policy.types';
+import { policyTypeOptions } from '../types/policy.types';
+import { usePolicyList } from '../composables/usePolicyList';
+import { useConfirmDialog } from '../composables/useConfirmDialog';
+import { useAuthStore } from '../stores/auth';
 import { Notify } from 'quasar';
-import PolicyTable from '@/components/PolicyTable.vue';
+import PolicyTable from '../components/PolicyTable.vue';
 import { useRouter } from 'vue-router';
-import NewPolicyModal from '@/components/NewPolicyModal.vue';
-import EditPolicyModal from '@/components/EditPolicyModal.vue';
+import NewPolicyModal from '../components/NewPolicyModal.vue';
+import EditPolicyModal from '../components/EditPolicyModal.vue';
 import {
     buildQueryParams,
     resolvePolicySearchParam,
     POLICY_SORT_FIELD_MAP,
-} from '@/composables/useQueryBuilder';
+} from '../composables/useQueryBuilder';
 
 const authStore = useAuthStore();
 const activeOptions = [

@@ -155,13 +155,17 @@
                                         </q-chip>
                                     </q-td>
                                 </template>
-                                <template v-slot:body-cell-operations="props">
-                                    <q-td :props="props" class="text-center">
-                                        <q-btn v-if="props.row.status !== 'PAID'" flat color="primary" icon="payment"
-                                            label="Ödeme Yap" :loading="paymentLoadingNo === props.row.installmentNo"
-                                            @click="handlePayInstallment(props.row)" />
-                                    </q-td>
-                                </template>
+                               <template v-slot:body-cell-operations="props">
+    <q-td :props="props" class="text-center">
+        <q-btn v-if="props.row.status !== 'PAID'" flat color="primary" icon="payment"
+            label="Ödeme Yap" :loading="paymentLoadingNo === props.row.installmentNo"
+            @click="handlePayInstallment(props.row)" />
+
+        <q-btn v-else flat color="negative" icon="undo"
+            label="Geri Al" :loading="paymentLoadingNo === props.row.installmentNo"
+            @click="handleRevertInstallment(props.row)" />
+    </q-td>
+</template>
                             </q-table>
                         </q-card-section>
                     </q-card>
@@ -186,15 +190,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { usePolicyDetail } from '@/composables/usePolicyDetail';
-import { usePolicyList } from '@/composables/usePolicyList';
-import { useInstallmentStore } from '@/stores/installment';
-import type { Installment } from '@/types/installment.types';
-import type { Policy } from '@/types/policy.types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { usePolicyDetail } from '../composables/usePolicyDetail';
+import { usePolicyList } from '../composables/usePolicyList';
+import { useInstallmentStore } from '../stores/installment';
+import type { Installment } from '../types/installment.types';
+import type { Policy } from '../types/policy.types';
+import { useConfirmDialog } from '../composables/useConfirmDialog';
 import { Notify } from 'quasar';
-import EditPolicyModal from '@/components/EditPolicyModal.vue';
-import { formatDateOnly, formatCurrency, getStatusColor, getStatusLabel } from '@/utils/policyHelper';
+import EditPolicyModal from '../components/EditPolicyModal.vue';
+import { formatDateOnly, formatCurrency, getStatusColor, getStatusLabel } from '../utils/policyHelper';
 
 const route = useRoute();
 const policyId = route.params.id as string;
@@ -269,6 +273,42 @@ const pagination = ref({
     rowsPerPage: 5,
     rowsNumber: 0,
 });
+
+const handleRevertInstallment = async (installment: Installment) => {
+    const isConfirmed = await confirm({
+        title: 'Ödemeyi Geri Al',
+        message: `${installment.installmentNo}. taksit için yapılan ödemeyi geri almak istediğinize emin misiniz?`,
+        okLabel: 'Geri Al',
+        cancelLabel: 'Vazgeç',
+        color: 'negative'
+    });
+
+    if (!isConfirmed) return;
+
+    paymentLoadingNo.value = installment.installmentNo;
+    try {
+        await setPaymentStatus(installment.id, installment.installmentNo, 'UNPAID');
+        Notify.create({
+            message: `${installment.installmentNo}. taksit ödemesi geri alındı.`,
+            color: 'warning',
+            icon: 'undo',
+            position: 'top-right',
+            timeout: 4000
+        });
+        await fetchInstallmentsOnly();
+    } catch (error) {
+        Notify.create({
+            message: 'Ödeme geri alınırken bir hata oluştu.',
+            color: 'negative',
+            icon: 'error',
+            position: 'top-right',
+            timeout: 5000
+        });
+        console.error('Taksit geri alma hatası:', error);
+    } finally {
+        paymentLoadingNo.value = null;
+    }
+};
 
 const handlePayInstallment = async (installment: Installment) => {
     const isConfirmed = await confirm({

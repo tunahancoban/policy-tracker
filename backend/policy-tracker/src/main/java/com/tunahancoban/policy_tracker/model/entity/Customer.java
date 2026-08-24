@@ -25,10 +25,7 @@ public class Customer {
     private String customerId;
 
     @NotBlank(message = "Name cannot be null")
-    private String firstName;
-
-    @NotBlank(message = "Lastname cannot be null")
-    private String lastName;
+    private String fullName;
 
     @NotBlank(message = "T.C. No cannot be null")
     @Size(min =11, max=11, message = "T.C. No must be 11 digit")
