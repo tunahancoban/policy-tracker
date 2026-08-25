@@ -1,10 +1,10 @@
 import { api } from '../boot/axios';
-import type { LoginResponse } from '@/types/api.types';
-import type { UserData } from '@/types/user.types';
+import type { LoginResponse } from '../types/api.types';
+import type { UserData } from '../types/user.types';
 
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await api.post('/rest/api/auth/login-request', {
+    const response = await api.post('/rest/api/auth/login', {
       email: email,
       password: password,
     });

@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.customer;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

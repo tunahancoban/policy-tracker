@@ -1,7 +1,7 @@
 package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.mapper.UserMapper;
-import com.tunahancoban.policy_tracker.model.DTO.request.UserSearchRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.user.UserSearchRequest;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.model.indexes.UserIndex;
 import lombok.RequiredArgsConstructor;

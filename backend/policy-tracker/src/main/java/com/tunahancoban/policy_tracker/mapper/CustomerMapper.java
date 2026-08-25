@@ -1,8 +1,8 @@
 package com.tunahancoban.policy_tracker.mapper;
 
 
-import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.customer.CreateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.customer.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.model.indexes.CustomerIndex;
 import org.mapstruct.*;

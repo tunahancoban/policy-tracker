@@ -1,10 +1,8 @@
 package com.tunahancoban.policy_tracker.mapper;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
-import com.tunahancoban.policy_tracker.model.entity.Policy;
+import com.tunahancoban.policy_tracker.model.DTO.request.auth.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.user.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.entity.User;
-import com.tunahancoban.policy_tracker.model.indexes.PolicyIndex;
 import com.tunahancoban.policy_tracker.model.indexes.UserIndex;
 import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;

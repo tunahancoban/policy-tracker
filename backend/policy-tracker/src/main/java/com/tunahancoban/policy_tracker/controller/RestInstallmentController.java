@@ -12,12 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "rest/api/installment")
+@RequestMapping(path = "rest/api/installments")
 @RequiredArgsConstructor
 public class RestInstallmentController {
     private final InstallmentService installmentService;
 
-    @GetMapping(path="/with-params")
+    @GetMapping
     public ResponseEntity<Page<Installment>> getInstallment(@RequestParam(name="customerId", required = false) String customerId,
                                                                           @RequestParam(name="policyId", required = false) String policyId,
                                                                           @RequestParam(defaultValue = "0") int page,
@@ -27,13 +27,13 @@ public class RestInstallmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping(path="/update-installment/{id}")
+    @PatchMapping(path="/{id}")
     public ResponseEntity<Installment> updateInstallment(@PathVariable String id, @RequestParam(name = "status") PaymentStatus status){
         Installment installment = installmentService.updateInstallment(id, status);
         return ResponseEntity.ok(installment);
     }
 
-    @DeleteMapping(path = "/delete-installment/{policyId}")
+    @DeleteMapping(path = "/{policyId}")
     public ResponseEntity<Void> deleteInstallment(@PathVariable String policyId){
         installmentService.deleteInstallment(policyId);
         return ResponseEntity.noContent().build();

@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.user;
 
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import lombok.Getter;

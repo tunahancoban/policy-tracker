@@ -18,14 +18,14 @@ public class RestDashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping(path = "/get-summary")
+    @GetMapping(path = "/summary")
     public ResponseEntity<DashboardSummaryResponse> getSummary(){
         DashboardSummaryResponse dashboardSummaryResponse = dashboardService.getSummary();
         return ResponseEntity.ok(dashboardSummaryResponse);
 
     }
 
-    @GetMapping(path= "/get-summary/{id}")
+    @GetMapping(path= "/summary/{id}")
     public ResponseEntity<CustomerSummaryResponse> getSummaryById(@PathVariable(name = "id") String id){
         System.out.println(id);
         CustomerSummaryResponse customerSummaryResponse = dashboardService.getSummaryById(id);
@@ -33,14 +33,14 @@ public class RestDashboardController {
 
     }
 
-    @GetMapping(path="/get-recent-activities/{n}")
+    @GetMapping(path="/recent-activities/{n}")
     public ResponseEntity<List<Log>> getRecentActivities(@PathVariable(name="n") int number) {
         List<Log> logList   = dashboardService.getRecentActivities(number);
         return ResponseEntity.ok(logList);
     }
 
-    @GetMapping(path="/get-charts/{year}")
-    public ResponseEntity<ChartResponse> getCharts(@PathVariable(name="year") int year){
+    @GetMapping("/charts")
+    public ResponseEntity<ChartResponse> getCharts(@RequestParam(name = "year") int year) {
         ChartResponse chartResponse = dashboardService.getCharts(year);
         return ResponseEntity.ok( chartResponse );
     }

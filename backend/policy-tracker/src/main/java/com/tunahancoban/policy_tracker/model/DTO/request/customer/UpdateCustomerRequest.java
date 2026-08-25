@@ -1,6 +1,5 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.customer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 

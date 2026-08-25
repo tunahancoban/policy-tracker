@@ -2,8 +2,8 @@ package com.tunahancoban.policy_tracker.service;
 
 import com.tunahancoban.policy_tracker.mapper.UserMapper;
 import com.tunahancoban.policy_tracker.model.DTO.events.UserEvent;
-import com.tunahancoban.policy_tracker.model.DTO.request.RegisterRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.auth.RegisterRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.user.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.enums.EventTypes;
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import com.tunahancoban.policy_tracker.model.entity.User;

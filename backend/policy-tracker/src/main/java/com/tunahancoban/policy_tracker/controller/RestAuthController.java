@@ -1,9 +1,8 @@
 package com.tunahancoban.policy_tracker.controller;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.auth.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +19,7 @@ public class RestAuthController {
 
     private final AuthService authService;
 
-    @PostMapping(path = "/login-request")
+    @PostMapping(path = "/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response){
 
 

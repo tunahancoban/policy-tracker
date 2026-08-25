@@ -46,11 +46,11 @@ public class User implements UserDetails {
 
     private LocalDateTime deletedAt;
 
-    @NotBlank(message = "Password cannot be null")
+    @NotBlank(message = "Şifre boş olamaz")
     @JsonIgnore
     private String password;
 
-    @NotNull(message = "Role cannot be null")
+    @NotNull(message = "Rol boş olamaz")
     private Role role;
 
 

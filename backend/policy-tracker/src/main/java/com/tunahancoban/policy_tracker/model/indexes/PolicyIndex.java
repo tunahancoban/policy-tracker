@@ -53,7 +53,7 @@ public class PolicyIndex {
     @Field(type = FieldType.Keyword)
     private String responsibleUserId;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, analyzer = "standard")
     private String note;
 
     @Field(type = FieldType.Keyword)
@@ -76,4 +76,49 @@ public class PolicyIndex {
 
     @Field(type = FieldType.Integer)
     private Set<Integer> notifiedThresholds;
+
+    // ==========================================
+    // 1. TRAFFIC AND CASCO
+    // ==========================================
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String plateNumber;
+
+    @Field(type = FieldType.Keyword)
+    private String chassisNumber;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String vehicleBrand;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String vehicleModel;
+
+    @Field(type = FieldType.Integer)
+    private Integer modelYear;
+
+    // ==========================================
+    // 2.HOUSE AND DASK
+    // ==========================================
+
+    @Field(type = FieldType.Keyword)
+    private String uavtCode; // 10 haneli UAVT adres kodu
+
+    @Field(type = FieldType.Keyword)
+    private String residenceType; // Ev Sahibi / Kiracı
+
+    @Field(type = FieldType.Integer)
+    private Integer grossSquareMeters;
+
+    // ==========================================
+    // 3. HEALTH
+    // ==========================================
+
+    @Field(type = FieldType.Keyword)
+    private String identityNumber; // TCKN veya Pasaport No
+
+    @Field(type = FieldType.Keyword)
+    private String healthPlanType; // TSS / ÖSS
+
+    @Field(type = FieldType.Keyword)
+    private String coverageScope; // Yatarak / Ayakta+Yatarak
 }

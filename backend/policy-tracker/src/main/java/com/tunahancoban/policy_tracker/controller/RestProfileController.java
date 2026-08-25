@@ -1,6 +1,6 @@
 package com.tunahancoban.policy_tracker.controller;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdateUserRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.user.UpdateUserRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
@@ -19,7 +19,7 @@ public class RestProfileController {
     private final UserService userService;
     private final AuthService authService;
 
-    @PutMapping(path = "/update-profile")
+    @PutMapping
     public ResponseEntity<User> updateProfile(
             Authentication authentication,
             @Valid @RequestBody UpdateUserRequest updateUserRequest) {
@@ -32,7 +32,7 @@ public class RestProfileController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @GetMapping("/get-profile")
+    @GetMapping
     public ResponseEntity<User> getProfile(Authentication authentication) {
         String email = authentication.getName();
         User user = userService.getUserByEmail(email);

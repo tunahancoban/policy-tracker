@@ -1,15 +1,11 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.policy;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
-import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,13 +14,8 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePolicyRequest {
-    
-    @NotBlank
-    private String customerId;
-
-    @NotNull
-    private PolicyType type;
+@Builder(toBuilder = true)
+public class RenewPolicyRequest {
 
     private String note;
 
@@ -34,14 +25,17 @@ public class CreatePolicyRequest {
     @NotNull
     private LocalDate endDate; //Policy end date
 
-    @NotBlank
-    private String responsibleUserId;
-
     @Positive
     private BigDecimal premium;
 
     @NotNull
+    private String responsibleUserId;
+
+    @NotNull
     private InstallmentOptions installment;
+
+    @NotBlank
+    private String previousPolicyId;
 
     @AssertTrue(message = "Poliçe bitiş günü başlangıç gününden önce olamaz.")
     public boolean isValidDateRange() {
@@ -50,5 +44,4 @@ public class CreatePolicyRequest {
         }
         return !endDate.isBefore(startDate);
     }
-
 }

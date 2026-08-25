@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.customer;
 
 import lombok.Getter;
 import lombok.Setter;

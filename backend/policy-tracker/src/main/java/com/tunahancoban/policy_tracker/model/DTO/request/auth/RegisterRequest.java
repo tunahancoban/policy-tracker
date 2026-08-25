@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.auth;
 
 import com.tunahancoban.policy_tracker.model.enums.Role;
 import jakarta.validation.constraints.NotBlank;

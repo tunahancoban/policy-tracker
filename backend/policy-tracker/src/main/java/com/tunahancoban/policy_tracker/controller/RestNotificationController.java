@@ -15,13 +15,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "rest/api/notification")
+@RequestMapping(path = "rest/api/notifications")
 @RequiredArgsConstructor
 public class RestNotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping(path = "/get-notifications")
+    @GetMapping
     public ResponseEntity<Page<Notification>> getNotifications(
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user) {
@@ -33,7 +33,7 @@ public class RestNotificationController {
         return ResponseEntity.ok(notificationList);
     }
 
-    @GetMapping(path = "/get-unread")
+    @GetMapping(path = "/unread")
     public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal User user){
         String userId = user.getId();
 
@@ -41,11 +41,6 @@ public class RestNotificationController {
         return ResponseEntity.ok(unreadCount);
     }
 
-    /**
-     *
-     * THIS LOGIC COMPLETELY WRONG FIX THIS
-     *
-     */
     @PatchMapping(path = "/mark-as-read/{id}")
     public ResponseEntity<Void> markAsRead(@PathVariable String id){
         notificationService.markAsRead(id);

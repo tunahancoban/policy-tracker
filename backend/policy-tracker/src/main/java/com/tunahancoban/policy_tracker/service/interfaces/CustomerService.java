@@ -1,7 +1,7 @@
 package com.tunahancoban.policy_tracker.service.interfaces;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.CreateCustomerRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.customer.CreateCustomerRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.customer.UpdateCustomerRequest;
 import com.tunahancoban.policy_tracker.model.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

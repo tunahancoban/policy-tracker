@@ -1,4 +1,4 @@
-package com.tunahancoban.policy_tracker.model.DTO.request;
+package com.tunahancoban.policy_tracker.model.DTO.request.policy;
 
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;

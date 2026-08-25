@@ -1,8 +1,8 @@
 package com.tunahancoban.policy_tracker.service.interfaces;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.CreatePolicyRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.RenewPolicyRequest;
-import com.tunahancoban.policy_tracker.model.DTO.request.UpdatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.policy.CreatePolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.policy.RenewPolicyRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.policy.UpdatePolicyRequest;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;

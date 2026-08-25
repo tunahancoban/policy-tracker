@@ -1,12 +1,11 @@
 package com.tunahancoban.policy_tracker.service;
 
-import com.tunahancoban.policy_tracker.model.DTO.request.LoginRequest;
+import com.tunahancoban.policy_tracker.model.DTO.request.auth.LoginRequest;
 import com.tunahancoban.policy_tracker.model.DTO.response.LoginResponse;
 import com.tunahancoban.policy_tracker.model.entity.User;
 import com.tunahancoban.policy_tracker.repository.UserRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.AuthService;
 import com.tunahancoban.policy_tracker.service.interfaces.TokenService;
-import com.tunahancoban.policy_tracker.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
