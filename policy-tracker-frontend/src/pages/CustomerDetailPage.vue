@@ -113,7 +113,6 @@ const showModal = ref(false);
 const isEditModalOpen = ref(false);
 const selectedPolicy = ref<Policy | null>(null);
 
-// Ekleme / Yenileme Modal State'leri
 const isCreateModalOpen = ref(false);
 const isRenewal = ref(false);
 const selectedPolicyForModal = ref<Policy | null>(null);

@@ -58,7 +58,6 @@ public class UserSearchService {
     private Criteria buildCriteria(UserSearchRequest request) {
         Criteria criteria = new Criteria();
 
-        // 1. Aktiflik / Silinme Durumu Filtresi
         if (request.getIsActive() != null) {
             criteria = criteria.and(new Criteria("isActive").is(request.getIsActive()));
         } else {

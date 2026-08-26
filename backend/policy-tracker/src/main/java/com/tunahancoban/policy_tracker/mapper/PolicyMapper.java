@@ -71,7 +71,29 @@ public interface PolicyMapper {
     PolicyIndex toDocument(HousePolicy policy);
     PolicyIndex toDocument(HealthPolicy policy);
 
-    Policy toEntity(PolicyIndex document);
+    default Policy toEntity(PolicyIndex document) {
+        if (document == null) {
+            return null;
+        }
+        if (document.getType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Poliçe tipi bulunamadı.");
+        }
+
+        return switch (document.getType()) {
+            case TRAFIK -> toTrafficPolicyEntity(document);
+            case KASKO -> toCascoPolicyEntity(document);
+            case DASK -> toDaskPolicyEntity(document);
+            case KONUT -> toHousePolicyEntity(document);
+            case SAGLIK -> toHealthPolicyEntity(document);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bilinmeyen poliçe tipi: " + document.getType());
+        };
+    }
+
+    TrafficPolicy toTrafficPolicyEntity(PolicyIndex document);
+    CascoPolicy toCascoPolicyEntity(PolicyIndex document);
+    DaskPolicy toDaskPolicyEntity(PolicyIndex document);
+    HousePolicy toHousePolicyEntity(PolicyIndex document);
+    HealthPolicy toHealthPolicyEntity(PolicyIndex document);
 
 
     // ==========================================

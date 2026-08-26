@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.model.indexes;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
+import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import lombok.*;
@@ -37,6 +38,9 @@ public class PolicyIndex {
 
     @Field(type = FieldType.Keyword)
     private PolicyStatus isActive;
+
+    @Field
+    private InsuranceCompany company;
 
     @Field(type = FieldType.Keyword)
     private PolicyType type;
@@ -81,23 +85,56 @@ public class PolicyIndex {
     // 1. TRAFFIC AND CASCO
     // ==========================================
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Keyword)
     private String plateNumber;
 
     @Field(type = FieldType.Keyword)
     private String chassisNumber;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Keyword)
+    private String engineNumber;
+
+    @Field(type = FieldType.Keyword)
     private String vehicleBrand;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Keyword)
     private String vehicleModel;
 
     @Field(type = FieldType.Integer)
     private Integer modelYear;
 
+    @Field(type = FieldType.Double)
+    private BigDecimal vehicleValue;
+
+    @Field(type = FieldType.Keyword)
+    private String cascoType;
+
+    @Field(type = FieldType.Boolean)
+    private Boolean hasReplacementCar;
+
+    @Field(type = FieldType.Integer)
+    private Integer replacementCarDays;
+
+    @Field(type = FieldType.Boolean)
+    private Boolean authorizedServiceOnly;
+
+    @Field(type = FieldType.Boolean)
+    private Boolean glassExemption;
+
+    @Field(type = FieldType.Keyword)
+    private String vehicleUsageType;
+
+    @Field(type = FieldType.Integer)
+    private Integer noClaimDiscountStep;
+
+    @Field(type = FieldType.Boolean)
+    private Boolean hasImm;
+
+    @Field(type = FieldType.Double)
+    private BigDecimal immLimit;
+
     // ==========================================
-    // 2.HOUSE AND DASK
+    // 2. HOUSE AND DASK
     // ==========================================
 
     @Field(type = FieldType.Keyword)
@@ -108,6 +145,39 @@ public class PolicyIndex {
 
     @Field(type = FieldType.Integer)
     private Integer grossSquareMeters;
+
+    @Field(type = FieldType.Double)
+    private BigDecimal buildingCoverageLimit; // Bina teminat bedeli
+
+    @Field(type = FieldType.Double)
+    private BigDecimal contentsCoverageLimit; // Eşya teminat bedeli
+
+    @Field(type = FieldType.Boolean)
+    private Boolean theftCoverage; // Hırsızlık
+
+    @Field(type = FieldType.Boolean)
+    private Boolean waterDamageCoverage; // Dahili su/su baskını
+
+    @Field(type = FieldType.Boolean)
+    private Boolean glassBreakageCoverage; // Cam kırılması
+
+    @Field(type = FieldType.Double)
+    private BigDecimal thirdPartyLiabilityLimit; // Komşuluk sorumluluk limiti
+
+    @Field(type = FieldType.Keyword)
+    private String buildingConstructionType; // Betonarme, Yığma Kagir vb.
+
+    @Field(type = FieldType.Integer)
+    private Integer buildingConstructionYear;
+
+    @Field(type = FieldType.Integer)
+    private Integer totalFloorCount;
+
+    @Field(type = FieldType.Integer)
+    private Integer apartmentFloor;
+
+    @Field(type = FieldType.Integer)
+    private Integer earthquakeZone; // 1-5 arası deprem bölgesi
 
     // ==========================================
     // 3. HEALTH
@@ -120,5 +190,20 @@ public class PolicyIndex {
     private String healthPlanType; // TSS / ÖSS
 
     @Field(type = FieldType.Keyword)
-    private String coverageScope; // Yatarak / Ayakta+Yatarak
+    private String coverageScope;
+
+    @Field(type = FieldType.Date, format = DateFormat.date, pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+
+    @Field(type = FieldType.Keyword)
+    private String gender; // Erkek / Kadın
+
+    @Field(type = FieldType.Integer)
+    private Integer outpatientLimitCount; // Yıllık ayakta muayene adedi (örn: 8, 10)
+
+    @Field(type = FieldType.Keyword)
+    private String networkTier; // Network A, Network B vb.
+
+    @Field(type = FieldType.Boolean)
+    private Boolean maternityCoverage; // Doğum teminatı
 }

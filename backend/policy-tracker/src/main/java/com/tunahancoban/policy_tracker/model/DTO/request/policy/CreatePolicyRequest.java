@@ -3,6 +3,7 @@ package com.tunahancoban.policy_tracker.model.DTO.request.policy;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
+import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -41,6 +42,8 @@ public class CreatePolicyRequest {
     @NotNull
     private PolicyType type;
 
+    @NotNull
+    private InsuranceCompany company;
     private String note;
 
     @NotNull

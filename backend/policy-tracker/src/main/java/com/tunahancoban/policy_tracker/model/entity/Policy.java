@@ -1,6 +1,7 @@
 package com.tunahancoban.policy_tracker.model.entity;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
+import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
 import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
@@ -38,7 +39,11 @@ public class Policy {
     @Indexed
     private String customerId;
 
+    @NotNull
     private InstallmentOptions installment;
+
+    @NotNull
+    private InsuranceCompany company;
 
     @Builder.Default
     private PolicyStatus isActive = PolicyStatus.ACTIVE;

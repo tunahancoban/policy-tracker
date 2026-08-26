@@ -178,7 +178,7 @@ public class PolicyServiceImp implements PolicyService {
         Policy policy = policyMapper.clonePolicy(previousPolicy);
 
         policyMapper.updateEntityFromRenewRequest(request, policy);
-
+        policy.setId(null);
         policy.setPolicyId(idGeneratorService.generatePolicyId(previousPolicy.getType()));
         policy.setCustomerId(previousPolicy.getCustomerId());
         policy.setType(previousPolicy.getType());
