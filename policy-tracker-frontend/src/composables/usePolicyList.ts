@@ -1,6 +1,6 @@
 import { storeToRefs } from 'pinia';
-import { usePolicyStore } from '@/stores/policy';
-import type { CreatePolicyRequest, Policy, RenewPolicyRequest } from '@/types/policy.types';
+import { usePolicyStore } from '../stores/policy';
+import type { CreatePolicyRequest, Policy, RenewPolicyRequest } from '../types/policy.types';
 
 export function usePolicyList() {
   const policyStore = usePolicyStore();

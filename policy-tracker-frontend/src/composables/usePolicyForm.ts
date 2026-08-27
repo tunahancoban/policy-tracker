@@ -50,7 +50,6 @@ export function usePolicyForm(
   const filteredInsuranceCompanyOptions = ref([...insuranceCompanyOptions]);
 
   const typeSpecificFields = ref<TypeSpecificFields>({});
-
   const suppressTypeWatch = ref(false);
 
   const withLoading = async <T>(fn: () => Promise<T>): Promise<T | undefined> => {
@@ -77,7 +76,7 @@ export function usePolicyForm(
 
   const form = ref<PolicyForm>(initialFormState());
 
-  // When policy type changes in create mode, reset type-specific fields.
+  // Poliçe türü değiştikçe alt tipe özel alanları sıfırlar
   watch(() => form.value.type, (newType) => {
     if (suppressTypeWatch.value) return;
     typeSpecificFields.value = getInitialTypeFields(newType);
@@ -85,8 +84,7 @@ export function usePolicyForm(
 
   const customerOptions = computed<CustomerOption[]>(() =>
     customerStore.customerData.map((c) => {
-      const namePart =
-        `${c.fullName || ''}`.trim() || c.email || 'İsimsiz Müşteri';
+      const namePart = `${c.fullName || ''}`.trim() || c.email || 'İsimsiz Müşteri';
       const identityPart = c.identityNumber ? `(TC: ${c.identityNumber})` : `(ID: ${c.customerId})`;
       return {
         customerId: c.customerId,
@@ -166,13 +164,11 @@ export function usePolicyForm(
     filteredUserOptions.value = [];
 
     if (props.isRenewal && props.policyData) {
-  
       suppressTypeWatch.value = true;
       _fillRenewalForm(props.policyData);
 
       await nextTick();
       typeSpecificFields.value = fillTypeFieldsFromPolicy(props.policyData);
-
       suppressTypeWatch.value = false;
     } else {
       form.value = initialFormState();
@@ -184,13 +180,13 @@ export function usePolicyForm(
     const start = policy.endDate ? formatDateToSlash(policy.endDate) : getTodayFormatted();
     const end = getNextYearFormatted(start);
 
+    // Form state'inde doğrudan ID tutulur
     form.value = {
       customerId: policy.customerId || '',
       type: policy.type || '',
       premium: policy.premium ?? 0,
       installment: policy.installment ?? 1,
-      responsibleUserId:
-      userStore.users.find((u) => u.id === policy.responsibleUserId)?.fullName || '',
+      responsibleUserId: policy.responsibleUserId || '',
       startDate: start,
       endDate: end,
       note: policy.note ? `${policy.note} (Yenileme)` : 'Poliçe Yenileme',
@@ -198,34 +194,52 @@ export function usePolicyForm(
       company: policy.company || '',
     };
 
+    // Müşterinin ekranda etiketinin doğru görünmesi için
     const matchedCustomer = customerOptions.value.find((c) => c.customerId === policy.customerId);
-    if (matchedCustomer) filteredCustomerOptions.value = [matchedCustomer];
+    if (matchedCustomer) {
+      filteredCustomerOptions.value = [matchedCustomer];
+    }
 
-    const matchedUser = userOptions.value.find((u) => u.userId === policy.responsibleUserId);
-    if (matchedUser) filteredUserOptions.value = [matchedUser];
+    // Personelin ekranda ID yerine İsim olarak görünmesi için
+    const foundUser = (Array.isArray(userStore.users) ? userStore.users : []).find(
+      (u) => u.id === policy.responsibleUserId,
+    );
+
+    if (foundUser) {
+      const namePart = `${foundUser.fullName || ''}`.trim() || 'Acente Personeli';
+      const infoPart = foundUser.email ? `(${foundUser.email})` : '';
+      filteredUserOptions.value = [
+        {
+          userId: foundUser.id,
+          email: foundUser.email || '',
+          fullName: `${namePart} ${infoPart}`.trim(),
+        },
+      ];
+    }
   };
-const buildTypeFieldsPayload = (): Partial<TypeSpecificFields> =>
-  Object.fromEntries(
-    Object.entries(typeSpecificFields.value).filter(
-      ([, v]) => v !== null && v !== undefined,
-    ),
-  );
 
-const buildCreatePayload = (): CreatePolicyRequest => {
-  return {
-    customerId: form.value.customerId,
-    type: form.value.type,
-    startDate: form.value.startDate,
-    endDate: form.value.endDate,
-    premium: form.value.premium,
-    installment: form.value.installment,
-    responsibleUserId: form.value.responsibleUserId,
-    note: form.value.note,
-    isActive: form.value.isActive,
-    company: form.value.company,
-    ...buildTypeFieldsPayload(),
-  } as CreatePolicyRequest;
-};
+  const buildTypeFieldsPayload = (): Partial<TypeSpecificFields> =>
+    Object.fromEntries(
+      Object.entries(typeSpecificFields.value).filter(
+        ([, v]) => v !== null && v !== undefined,
+      ),
+    );
+
+  const buildCreatePayload = (): CreatePolicyRequest => {
+    return {
+      customerId: form.value.customerId,
+      type: form.value.type,
+      startDate: form.value.startDate,
+      endDate: form.value.endDate,
+      premium: form.value.premium,
+      installment: form.value.installment,
+      responsibleUserId: form.value.responsibleUserId,
+      note: form.value.note,
+      isActive: form.value.isActive,
+      company: form.value.company,
+      ...buildTypeFieldsPayload(),
+    } as CreatePolicyRequest;
+  };
 
   const buildRenewPayload = (policy: Policy): RenewPolicyRequest => ({
     previousPolicyId: policy.policyId,
@@ -235,7 +249,6 @@ const buildCreatePayload = (): CreatePolicyRequest => {
     installment: form.value.installment,
     responsibleUserId: form.value.responsibleUserId,
     note: form.value.note,
-
     ...buildTypeFieldsPayload(),
   });
 
@@ -259,11 +272,12 @@ const buildCreatePayload = (): CreatePolicyRequest => {
   ): void => {
     const needle = val.trim().toLowerCase();
     update(() => {
-      filteredInsuranceCompanyOptions.value = needle.length === 0
-        ? insuranceCompanyOptions
-        : insuranceCompanyOptions.filter((opt) =>
-            opt.label.toLowerCase().includes(needle),
-          );
+      filteredInsuranceCompanyOptions.value =
+        needle.length === 0
+          ? insuranceCompanyOptions
+          : insuranceCompanyOptions.filter((opt) =>
+              opt.label.toLowerCase().includes(needle),
+            );
     });
   };
 
