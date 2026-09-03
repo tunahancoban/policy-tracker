@@ -19,7 +19,7 @@ export const customerService = {
     return response.data;
   },
 
-  async updateCustomer(updatedCustomer: Customer) {
+  async updateCustomer(updatedCustomer: Partial<Customer> & { customerId: string }): Promise<Customer> {
     const response = await api.patch<Customer>(
       `/rest/api/customers/${updatedCustomer.customerId}`,
       updatedCustomer,

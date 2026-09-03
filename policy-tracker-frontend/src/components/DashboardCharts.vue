@@ -37,7 +37,7 @@
             </q-card>
             <q-card flat bordered class="q-pa-sm">
                 <div class="chart-container-responsive">
-                    <canvas ref="myStatusChartCanvas"></canvas>
+                    <canvas ref="monthlyRenewalCanvas"></canvas>
                 </div>
             </q-card>
         </div>
@@ -76,12 +76,12 @@ const props = defineProps<{
     renewalChartData: ChartData<'bar'>;
     barChartData: ChartData<'bar'>;
     pieChartData: ChartData<'doughnut'>;
-    statusChartData: ChartData<'doughnut'>;
+    monthlyRenewalChartData: ChartData<'bar'>;
 }>();
 
 const myPieChartCanvas = ref<HTMLCanvasElement | null>(null);
 const myBarChartCanvas = ref<HTMLCanvasElement | null>(null);
-const myStatusChartCanvas = ref<HTMLCanvasElement | null>(null);
+const monthlyRenewalCanvas = ref<HTMLCanvasElement | null>(null);
 const renewalBarChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 const getCssVar = (varName: string): string => {
@@ -192,11 +192,24 @@ const initCharts = () => {
         }, true));
     }
 
-    if (myStatusChartCanvas.value) {
-        chartInstances.push(createStaggeredChart(myStatusChartCanvas.value, {
-            type: 'doughnut',
-            data: props.statusChartData,
+    if (monthlyRenewalCanvas.value) {
+        chartInstances.push(createStaggeredChart(monthlyRenewalCanvas.value, {
+            type: 'bar',
+            data: props.monthlyRenewalChartData,
             options: {
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: { color: textSecondary },
+                        grid: { display: false },
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, precision: 0, color: textSecondary },
+                        grid: { color: borderColor },
+                    },
+                },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -204,27 +217,21 @@ const initCharts = () => {
                     },
                     title: {
                         display: true,
-                        text: 'Poliçe Durum Dağılımı',
+                        text: 'Aylık Poliçe Yenilenme Grafiği',
                         color: textPrimary,
                         font: { size: 14, weight: 'bold' },
                     },
                     datalabels: {
-                        color: '#ffffff',
-                        font: { weight: 'bold', size: 12 },
-                        formatter: (value: number, ctx) => {
-                            const datapoints = (ctx.chart.data?.datasets?.[0]?.data ?? []) as number[];
-                            const total = datapoints.reduce((t, n) => t + n, 0);
-                            return total > 0 ? `%${Math.round((value / total) * 100)}` : '%0';
-                        },
+                        display: false,
                     },
                 },
             },
-        }, true));
+        }));
     }
 };
 
 watch(
-    [() => props.chartDataFromApi, () => props.renewalChartData],
+    [() => props.chartDataFromApi, () => props.renewalChartData, () => props.monthlyRenewalChartData],
     async () => {
         await nextTick();
         initCharts();

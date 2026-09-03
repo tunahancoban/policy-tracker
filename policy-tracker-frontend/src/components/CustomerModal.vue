@@ -82,6 +82,7 @@ const $q = useQuasar();
 
 const isEditMode = ref(false);
 const form = ref({ ...initialForm });
+const originalForm = ref({ ...initialForm });
 
 const fieldErrors = ref<Record<string, string>>({});
 
@@ -98,24 +99,53 @@ watch(
         if (newVal) {
             if (props.customerData && props.customerData.customerId) {
                 isEditMode.value = true;
-                form.value = {
+                const initialValues = {
                     ...initialForm,
                     ...(props.customerData as typeof initialForm),
                 };
+                form.value = { ...initialValues };
+                originalForm.value = { ...initialValues };
             } else {
                 isEditMode.value = false;
                 form.value = { ...initialForm };
+                originalForm.value = { ...initialForm };
             }
         }
     },
 );
+
+const buildUpdatePayload = (): Partial<Customer> & { customerId: string } => {
+    const payload: Partial<Customer> & { customerId: string } = {
+        customerId: form.value.customerId,
+    };
+
+    const editableFields: Array<keyof typeof initialForm> = [
+        'fullName',
+        'identityNumber',
+        'email',
+        'phoneNumber',
+        'city',
+        'district',
+        'fullAddress',
+        'isActive',
+    ];
+
+    for (const field of editableFields) {
+        if (form.value[field] !== originalForm.value[field]) {
+            Object.assign(payload, { [field]: form.value[field] });
+        }
+    }
+
+    return payload;
+};
 
 const saveCustomer = async () => {
     fieldErrors.value = {}; // Önceki hataları sıfırla
 
     try {
         if (isEditMode.value) {
-            await customerStore.updateCustomer(form.value);
+            const updatePayload = buildUpdatePayload();
+            await customerStore.updateCustomer(updatePayload);
             $q.notify({
                 message: 'Müşteri başarıyla güncellendi.',
                 color: 'positive',

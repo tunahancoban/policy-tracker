@@ -8,6 +8,7 @@ import com.tunahancoban.policy_tracker.model.entity.Customer;
 import com.tunahancoban.policy_tracker.model.exceptions.BusinessValidationException;
 import com.tunahancoban.policy_tracker.repository.CustomerRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.IdGeneratorService;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -165,10 +166,6 @@ class CustomerServiceTest {
 
             when(customerRepository.findByCustomerId("CST-000001"))
                     .thenReturn(Optional.of(sampleCustomer));
-            // Servis: mevcut müşterinin kendi TC'sini existsByIdentityNumber ile kontrol eder.
-            // Bu müşteri DB'de var olduğu için normalde true döner — update işlemini
-            // engellemek istenmediği varsayımıyla burada false mock'lanır.
-            when(customerRepository.existsByIdentityNumber("12345678901")).thenReturn(false);
             when(customerRepository.save(any(Customer.class))).thenReturn(sampleCustomer);
 
             Customer result = customerService.updateCustomer("CST-000001", updateRequest);
@@ -182,11 +179,12 @@ class CustomerServiceTest {
         @DisplayName("Başka müşterinin TC'si ile güncelleme yapılmamalı")
         void shouldThrowConflictWhenIdentityNumberTakenByAnotherCustomer() {
             UpdateCustomerRequest updateRequest = new UpdateCustomerRequest();
+            updateRequest.setIdentityNumber(JsonNullable.of("99999999999"));
 
             when(customerRepository.findByCustomerId("CST-000001"))
                     .thenReturn(Optional.of(sampleCustomer));
             // TC numarası başka müşteriye ait (çakışma)
-            when(customerRepository.existsByIdentityNumber("12345678901")).thenReturn(true);
+            when(customerRepository.existsByIdentityNumber("99999999999")).thenReturn(true);
 
             assertThatThrownBy(() -> customerService.updateCustomer("CST-000001", updateRequest))
                     .isInstanceOf(BusinessValidationException.class)
@@ -216,7 +214,6 @@ class CustomerServiceTest {
 
             when(customerRepository.findByCustomerId("CST-000001"))
                     .thenReturn(Optional.of(mutableCustomer));
-            when(customerRepository.existsByIdentityNumber("12345678901")).thenReturn(false);
             when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
 
             Customer result = customerService.updateCustomer("CST-000001", updateRequest);

@@ -141,6 +141,29 @@ public class DashboardServiceImp implements DashboardService {
             log.error("Error occurred while calculating Remaining Days Distribution", e);
         }
 
+        // ── Aylık yenilenme sayıları (type bazında) ──────────────────────────
+        Map<String, Map<Integer, Long>> monthlyRenewalsMap = new LinkedHashMap<>();
+        try {
+            LocalDate yearStart = LocalDate.of(year, 1, 1);
+            LocalDate yearEnd = LocalDate.of(year + 1, 1, 1);
+            List<Map<String, Object>> renewalResults = policyRepository.countRenewalsGroupedByTypeAndMonth(yearStart, yearEnd);
+
+            if (renewalResults != null) {
+                for (Map<String, Object> row : renewalResults) {
+                    String policyType = String.valueOf(row.get("type"));
+                    int month = ((Number) row.get("month")).intValue();
+                    long count = ((Number) row.get("count")).longValue();
+
+                    monthlyRenewalsMap
+                            .computeIfAbsent(policyType, k -> new LinkedHashMap<>())
+                            .put(month, count);
+                }
+            }
+            log.debug("Monthly renewals calculated - year: {}, types: {}", year, monthlyRenewalsMap.keySet());
+        } catch (Exception e) {
+            log.error("Error occurred while calculating Monthly Renewals", e);
+        }
+
         log.debug("Chart data calculated - year: {}", year);
 
         return ChartResponse.builder()
@@ -149,6 +172,7 @@ public class DashboardServiceImp implements DashboardService {
                 .numberOfWarningPolicies(warning)
                 .numberOfNormalPolicies(normal)
                 .numberOfCriticalPolicies(critical)
+                .monthlyRenewals(monthlyRenewalsMap)
                 .build();
     }
 }

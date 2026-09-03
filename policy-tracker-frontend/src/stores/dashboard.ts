@@ -21,6 +21,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     numberOfCriticalPolicies: 0,
     numberOfNormalPolicies: 0,
     numberOfWarningPolicies: 0,
+    monthlyRenewals: {},
   });
 
   const renewalPolicies = ref<Policy[]>([]);

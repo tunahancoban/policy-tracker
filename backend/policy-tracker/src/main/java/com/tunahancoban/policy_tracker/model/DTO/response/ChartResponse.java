@@ -15,5 +15,6 @@ public class ChartResponse {
     private long numberOfWarningPolicies;
     private long numberOfNormalPolicies;
 
-    //Add new data
+    // Aylık yenilenme sayıları: { "TRAFIK": { "1": 5, "2": 3 }, "SAGLIK": { "1": 2 } }
+    private Map<String, Map<Integer, Long>> monthlyRenewals;
 }

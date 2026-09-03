@@ -17,7 +17,7 @@
             <q-card-section>
                 <DashboardCharts v-model:selected-year="year" :chart-data-from-api="chartDataFromApi" :summary="summary"
                     :renewal-chart-data="renewalChartData" :bar-chart-data="barChartData" :pie-chart-data="pieChartData"
-                    :status-chart-data="statusChartData" @year-changed="refreshAllData" />
+                    :monthly-renewal-chart-data="monthlyRenewalChartData" @year-changed="refreshAllData" />
             </q-card-section>
 
             <q-card-section>
@@ -45,15 +45,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { useDashboardData } from '@/composables/useDashboardData';
-import DashboardSummaryCard from '@/components/DashboardSummaryCard.vue';
-import DashboardCharts from '@/components/DashboardCharts.vue';
-import RecentActivitiesTimeline from '@/components/RecentActivitiesTimeline.vue';
+import { useDashboardData } from '../composables/useDashboardData';
+import DashboardSummaryCard from '../components/DashboardSummaryCard.vue';
+import DashboardCharts from '../components/DashboardCharts.vue';
+import RecentActivitiesTimeline from '../components/RecentActivitiesTimeline.vue';
 import type { ChartData } from 'chart.js';
-import { getPolicyTypeColor } from '@/utils/policyHelper';
-import { dashboardSignal } from '@/composables/useWebSocket';
-import PolicyTable from '@/components/PolicyTable.vue';
-import { SORT_FIELD_MAP } from '@/types/policy.types';
+import { getPolicyTypeColor } from '../utils/policyHelper';
+import { dashboardSignal } from '../composables/useWebSocket';
+import PolicyTable from '../components/PolicyTable.vue';
+import { SORT_FIELD_MAP } from '../types/policy.types';
+
+const POLICY_TYPE_LABELS: Record<string, string> = {
+    TRAFIK: 'Trafik',
+    KASKO: 'Kasko',
+    SAGLIK: 'Sağlık',
+    KONUT: 'Konut',
+    DASK: 'DASK',
+};
+
+const MONTH_LABELS = [
+    'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+];
 
 const {
     summary, activities, chartDataFromApi,
@@ -126,18 +139,27 @@ const pieChartData = computed<ChartData<'doughnut'>>(() => {
     };
 });
 
-const statusChartData = computed<ChartData<'doughnut'>>(() => ({
-    labels: ['30 Günden Fazla Süresi Olanlar', '30 Gün İçinde Sona Erecek', 'Süresi Dolmuş'],
-    datasets: [{
-        label: 'Poliçe Durumu',
-        backgroundColor: ['#21BA45', '#F2C037', '#C10015'],
-        data: [
-            summary.value.activePolicyNumber - summary.value.expiringSoonPolicies,
-            summary.value.expiringSoonPolicies,
-            summary.value.expiredPolicies,
-        ],
-    }],
-}));
+const monthlyRenewalChartData = computed<ChartData<'bar'>>(() => {
+    const renewals = chartDataFromApi.value.monthlyRenewals || {};
+    const policyTypes = Object.keys(renewals);
+
+    const datasets = policyTypes.map((type) => {
+        const monthData = renewals[type] || {};
+        const data = MONTH_LABELS.map((_, i) => monthData[i + 1] || 0);
+
+        return {
+            label: POLICY_TYPE_LABELS[type] || type,
+            backgroundColor: getPolicyTypeColor(type),
+            data,
+            borderRadius: 4,
+        };
+    });
+
+    return {
+        labels: MONTH_LABELS,
+        datasets,
+    };
+});
 
 const renewalChartData = computed<ChartData<'bar'>>(() => {
     return {

@@ -23,4 +23,5 @@ export interface ChartResponse {
   numberOfCriticalPolicies: number;
   numberOfWarningPolicies: number;
   numberOfNormalPolicies: number;
+  monthlyRenewals: Record<string, Record<number, number>>;
 }

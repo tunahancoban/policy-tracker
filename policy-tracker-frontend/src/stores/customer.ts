@@ -62,16 +62,16 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   };
 
-  const updateCustomer = async (updatedCustomer: Customer) => {
+  const updateCustomer = async (updatedCustomer: Partial<Customer> & { customerId: string }) => {
     isLoading.value = true;
     try {
       const result = await customerService.updateCustomer(updatedCustomer);
       const index = customerData.value.findIndex((c) => c.customerId === result.customerId);
       if (index !== -1) {
-        customerData.value[index] = result;
+        customerData.value[index] = { ...customerData.value[index], ...result };
       }
       if (selectedCustomer.value?.customerId === result.customerId) {
-        selectedCustomer.value = result;
+        selectedCustomer.value = { ...selectedCustomer.value, ...result };
       }
       return result;
     } finally {

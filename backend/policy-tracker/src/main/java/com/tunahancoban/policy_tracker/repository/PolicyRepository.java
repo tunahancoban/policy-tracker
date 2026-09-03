@@ -102,4 +102,16 @@ public interface PolicyRepository extends MongoRepository<Policy, String> {
             exists = true)
     boolean existsOverlappingCascoPolicyExcluding(String chassisNumber, LocalDate newEndDate, LocalDate newStartDate, String excludePolicyId);
 
+    /**
+     * Yenilenen poliçeleri (renewalSequence > 0) yıl bazında, type ve ay'a göre gruplayarak sayar.
+     * Dönen her satır: { type: "TRAFIK", month: 3, count: 5 }
+     */
+    @Aggregation(pipeline = {
+            "{ '$match': { 'renewalSequence': { '$gt': 0 }, 'startDate': { '$gte': ?0, '$lt': ?1 } } }",
+            "{ '$group': { '_id': { 'type': '$type', 'month': { '$month': '$startDate' } }, 'count': { '$sum': 1 } } }",
+            "{ '$project': { '_id': 0, 'type': '$_id.type', 'month': '$_id.month', 'count': '$count' } }",
+            "{ '$sort': { 'type': 1, 'month': 1 } }"
+    })
+    List<Map<String, Object>> countRenewalsGroupedByTypeAndMonth(LocalDate yearStart, LocalDate yearEnd);
+
 }

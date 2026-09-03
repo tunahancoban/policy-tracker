@@ -112,12 +112,17 @@ public class CustomerServiceImp implements CustomerService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found: " + id);
                 });
 
-        if(customerRepository.existsByIdentityNumber(customer.getIdentityNumber())){
-            throw new BusinessValidationException(
-                    "identityNumber",
-                    "Bu T.C. Kimlik Numarası ile kayıtlı bir müşteri zaten var" ,
-                    HttpStatus.CONFLICT
-            );
+        if (updates.getIdentityNumber() != null && updates.getIdentityNumber().isPresent()) {
+            String newIdentityNumber = updates.getIdentityNumber().get();
+            if (newIdentityNumber != null && !newIdentityNumber.equals(customer.getIdentityNumber())) {
+                if (customerRepository.existsByIdentityNumber(newIdentityNumber)) {
+                    throw new BusinessValidationException(
+                            "identityNumber",
+                            "Bu T.C. Kimlik Numarası ile kayıtlı bir müşteri zaten var",
+                            HttpStatus.CONFLICT
+                    );
+                }
+            }
         }
 
         customerMapper.updateEntityFromRequest(updates, customer);

@@ -11,9 +11,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import java.util.Optional;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-
 public interface CustomerMapper {
-
 
     @Mapping(target = "customerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -22,7 +20,6 @@ public interface CustomerMapper {
     @Mapping(target = "isActive", constant = "true")
     Customer toEntity(CreateCustomerRequest request);
 
-
     @Mapping(target = "customerId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -30,11 +27,15 @@ public interface CustomerMapper {
     void updateEntityFromRequest(UpdateCustomerRequest request, @MappingTarget Customer customer);
 
     CustomerIndex toIndex(Customer customer);
-
     Customer toEntity(CustomerIndex document);
 
     default <T> T mapJsonNullable(JsonNullable<T> jsonNullable) {
         return jsonNullable != null && jsonNullable.isPresent() ? jsonNullable.get() : null;
+    }
+
+    @Condition
+    default <T> boolean isPresent(JsonNullable<T> jsonNullable) {
+        return jsonNullable != null && jsonNullable.isPresent();
     }
 
     @Condition
