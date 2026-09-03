@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.data.elasticsearch.annotations.Field;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,7 +46,7 @@ public class UpdatePolicyRequest {
 
     private JsonNullable<BigDecimal> premium = JsonNullable.undefined();
 
-    private JsonNullable<PolicyStatus> isActive = JsonNullable.undefined();
+    private JsonNullable<Boolean> isActive = JsonNullable.undefined();
 
     private JsonNullable<String> responsibleUserId =  JsonNullable.undefined();
 

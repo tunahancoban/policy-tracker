@@ -74,7 +74,7 @@ public class CascoPolicy extends Policy {
 
     // Kural 1: Model yılı içinde bulunulan yıldan en fazla 1 yıl ileri olabilir (yeni tescil araçlar için)
     @AssertTrue(message = "Model yılı geçerli bir yıl olmalıdır")
-    private boolean isModelYearValid() {
+    private boolean isModelYear() {
         if (modelYear != null) {
             int currentYear = Year.now().getValue();
             return modelYear <= (currentYear + 1);
@@ -84,7 +84,7 @@ public class CascoPolicy extends Policy {
 
     // Kural 2: İkame araç teminatı seçildiyse gün sayısı 0'dan büyük olmalıdır
     @AssertTrue(message = "İkame araç teminatı seçildiyse gün sayısı 0'dan büyük olmalıdır")
-    private boolean isReplacementCarDaysValid() {
+    private boolean isReplacementCarDays() {
         if (Boolean.TRUE.equals(hasReplacementCar)) {
             return replacementCarDays != null && replacementCarDays > 0;
         }

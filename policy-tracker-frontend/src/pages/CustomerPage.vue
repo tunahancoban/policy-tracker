@@ -147,8 +147,8 @@ const buildQueryParams = (
     const effectiveDescending = descending ?? sortDescending.value;
 
     if (effectiveSortBy && CUSTOMER_SORT_FIELD_MAP[effectiveSortBy]) {
-        const direction = effectiveDescending ? 'desc' : 'asc';
-        params.sort = `${CUSTOMER_SORT_FIELD_MAP[effectiveSortBy]},${direction}`;
+        params.sortBy = CUSTOMER_SORT_FIELD_MAP[effectiveSortBy];
+        params.sortDirection = effectiveDescending ? 'DESC' : 'ASC';
     }
 
     return params;

@@ -95,8 +95,8 @@ import {
 
 const authStore = useAuthStore();
 const activeOptions = [
-    { value: 'ACTIVE', label: 'Aktif' },
-    { value: 'PASSIVE', label: 'Pasif' },
+    { value: true, label: 'Aktif' },
+    { value: false, label: 'Pasif' },
     { value: null, label: 'Tümü' }
 ];
 const {
@@ -115,7 +115,7 @@ const {
 const router = useRouter();
 const searchQuery = ref<string>('');
 const selectedType = ref<string | null>(null);
-const selectedActive = ref<string | null>('ACTIVE');
+const selectedActive = ref<boolean | null>(true);
 const { confirm } = useConfirmDialog();
 
 // Modal State'leri
@@ -136,7 +136,7 @@ const buildParams = (
     const extra: Record<string, string> = {};
     if (!authStore.isAdmin && authStore.id) extra.responsibleUserId = authStore.id;
     if (selectedType.value) extra.type = selectedType.value;
-    if (selectedActive.value) extra.isActive = selectedActive.value;
+    if (selectedActive.value !== null) extra.isActive = String(selectedActive.value);
 
     return buildQueryParams(
         {
@@ -164,7 +164,7 @@ const onSearch = () => {
 const resetFilters = () => {
     searchQuery.value = '';
     selectedType.value = null;
-    selectedActive.value = 'ACTIVE';
+    selectedActive.value = true;
     currentPage.value = 0;
     void loadPolicies(buildParams(0));
 };
@@ -213,39 +213,51 @@ const openEditDialog = (policy: Policy) => {
     isEditModalOpen.value = true;
 };
 
-const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
+const handlePolicyCreate = async (
+    newPolicyPayload: CreatePolicyRequest, 
+    resolve?: () => void, 
+    reject?: (err: unknown) => void
+) => {
     try {
         await createPolicy(newPolicyPayload);
         Notify.create({ message: 'Poliçe başarıyla oluşturuldu.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
-        isCreateModalOpen.value = false;
         void loadPolicies(buildParams());
+        resolve?.(); 
     } catch (err) {
-        Notify.create({ message: 'Poliçe oluşturulurken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
-        console.error('Policy Create Error:', err);
+        reject?.(err);
     }
 };
-
-const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
+const handlePolicyRenew = async (
+    renewPayload: RenewPolicyRequest,
+    resolve?: () => void,
+    reject?: (err: unknown) => void
+) => {
     try {
         await renewPolicy(renewPayload);
         Notify.create({ message: 'Poliçe başarıyla yenilendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         isCreateModalOpen.value = false;
         void loadPolicies(buildParams());
+        resolve?.();
     } catch (error) {
-        Notify.create({ message: 'Poliçe yenilenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Renew Error:', error);
+        reject?.(error);
     }
 };
 
-const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
+const handlePolicyUpdate = async (event: {
+    id: string;
+    data: Partial<Policy>;
+    resolve?: () => void;
+    reject?: (err: unknown) => void;
+}) => {
     try {
         await updatePolicy(event.id, event.data);
         Notify.create({ message: 'Poliçe başarıyla güncellendi.', color: 'positive', icon: 'check_circle', position: 'top-right', timeout: 4000 });
         void loadPolicies(buildParams());
+        event.resolve?.();
     } catch (error) {
-        Notify.create({ message: 'Poliçe güncellenirken bir hata oluştu.', color: 'negative', icon: 'error', position: 'top-right', timeout: 5000 });
         console.error('Policy Update Error:', error);
-        throw error;
+        event.reject?.(error);
     }
 };
 

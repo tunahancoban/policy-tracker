@@ -2,7 +2,6 @@ package com.tunahancoban.policy_tracker.model.entity;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
 import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +13,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -46,7 +44,7 @@ public class Policy {
     private InsuranceCompany company;
 
     @Builder.Default
-    private PolicyStatus isActive = PolicyStatus.ACTIVE;
+    private Boolean isActive = true;
 
     @NotNull
     private PolicyType type;

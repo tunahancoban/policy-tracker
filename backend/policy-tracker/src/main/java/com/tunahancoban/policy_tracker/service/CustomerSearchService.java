@@ -32,9 +32,12 @@ public class CustomerSearchService {
 
         Criteria criteria = buildCriteria(request);
 
+        String sortField = resolveEsSortField(
+                request.getSortBy() != null && !request.getSortBy().isBlank() ? request.getSortBy() : "customerId"
+        );
         Sort sort = Sort.by(
                 "DESC".equalsIgnoreCase(request.getSortDirection()) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                request.getSortBy() != null && !request.getSortBy().isBlank() ? request.getSortBy() : "customerId"
+                sortField
         );
 
         PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize(), sort);
@@ -100,5 +103,16 @@ public class CustomerSearchService {
         }
 
         return criteria;
+    }
+
+    /**
+     * Elasticsearch'te `text` tipindeki alanlara doğrudan sort uygulanamaz.
+     * Bu metot, bilinen text alanları için `.keyword` sub-field'ına yönlendirir.
+     */
+    private String resolveEsSortField(String requestedField) {
+        return switch (requestedField) {
+            case "fullName" -> "fullName.keyword";
+            default -> requestedField;
+        };
     }
 }

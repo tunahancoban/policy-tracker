@@ -23,7 +23,6 @@ import java.util.List;
 public class InstallmentDueNotifier {
 
     private final InstallmentRepository installmentRepository;
-    private final NotificationRepository notificationRepository;
     private final PolicyRepository policyRepository;
 
     private static final List<Integer> THRESHOLDS = List.of(3, 0, -1);

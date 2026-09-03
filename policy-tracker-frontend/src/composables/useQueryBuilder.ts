@@ -57,8 +57,8 @@ export function buildQueryParams(
 
   // ── Sıralama ───────────────────────────────────────────────────────────────
   if (sortBy && sortFieldMap[sortBy]) {
-    const direction = descending ? 'desc' : 'asc';
-    params.sort = `${sortFieldMap[sortBy]},${direction}`;
+    params.sortBy = sortFieldMap[sortBy];
+    params.sortDirection = descending ? 'DESC' : 'ASC';
   }
 
   return params;

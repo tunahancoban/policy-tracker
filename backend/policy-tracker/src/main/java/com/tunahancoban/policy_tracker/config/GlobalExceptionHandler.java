@@ -1,7 +1,9 @@
 package com.tunahancoban.policy_tracker.config;
 
 import com.tunahancoban.policy_tracker.model.exceptions.BusinessValidationException;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -16,26 +18,29 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ----------------------------------------------------------------
-    // 400 - @Valid ile işaretli @RequestBody DTO validasyon hataları
-    // ----------------------------------------------------------------
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
-        Map<String, String> fieldErrors = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .collect(Collectors.toMap(
-                        FieldError::getField,
-                        fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Geçersiz değer",
-                        (existing, replacement) -> existing // aynı field'da 2 hata varsa ilkini tut
-                ));
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+
+        // 1) Normal alan hataları (@NotNull, @Size, @Positive vb.)
+        for (FieldError fe : exception.getBindingResult().getFieldErrors()) {
+            fieldErrors.put(fe.getField(), fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Geçersiz değer");
+        }
+
+        // 2) Global hatalar (@AssertTrue metotları)
+        //    codes[0] örneği: "AssertTrue.createHealthPolicyRequest.endDate"
+        //    veya codes dizisinin son elemanı metot adıdır: "isEndDate" -> "endDate"
+        for (org.springframework.validation.ObjectError ge : exception.getBindingResult().getGlobalErrors()) {
+            String fieldName = resolveAssertTrueFieldName(ge);
+            fieldErrors.putIfAbsent(fieldName, ge.getDefaultMessage() != null ? ge.getDefaultMessage() : "Kural ihlali");
+        }
 
         log.warn("Validation Error: {}", fieldErrors);
 
@@ -43,6 +48,44 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Validasyon Hatası");
         problemDetail.setProperty("errors", fieldErrors);
         return problemDetail;
+    }
+
+    /**
+     * @AssertTrue metot adından frontend ile eşleşen alan adını çıkarır.
+     * Örnek: codes = ["AssertTrue.createHealthPolicyRequest.endDate", "AssertTrue.endDate", "endDate"]
+     *   -> Son parça: "endDate"
+     * Eğer codes yoksa veya parse edilemezse, objectName döner (fallback).
+     */
+    private String resolveAssertTrueFieldName(org.springframework.validation.ObjectError ge) {
+        if (ge.getCodes() != null && ge.getCodes().length > 0) {
+            // codes dizisinin son elemanı genellikle saf metot adıdır
+            // Örn: ["AssertTrue.createPolicyRequest.endDate", "AssertTrue.endDate", "endDate"]
+            // Son eleman "endDate" direkt kullanılabilir.
+            // Ancak bazı durumlarda son eleman "isEndDate" olabilir (constraint adı)
+            // İlk codes elemanından parçalayalım: codes[0].split(".") -> son parça
+            String firstCode = ge.getCodes()[0];
+            String[] parts = firstCode.split("\\.");
+            String rawName = parts[parts.length - 1];
+
+            // "is" prefix'ini kaldır ve ilk harfi küçült: "isEndDate" -> "endDate"
+            return stripIsPrefix(rawName);
+        }
+        return ge.getObjectName();
+    }
+
+    /**
+     * @AssertTrue metot adından "is" prefix'ini kaldırır.
+     * "isEndDate"       -> "endDate"
+     * "isBirthDate"     -> "birthDate"
+     * "endDate"         -> "endDate" (prefix yoksa dokunmaz)
+     */
+    private String stripIsPrefix(String methodName) {
+        if (methodName.length() > 2
+                && methodName.startsWith("is")
+                && Character.isUpperCase(methodName.charAt(2))) {
+            return Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+        }
+        return methodName;
     }
 
     // ----------------------------------------------------------------
@@ -68,14 +111,46 @@ public class GlobalExceptionHandler {
     // ----------------------------------------------------------------
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolationException(ConstraintViolationException exception) {
-        String cleanErrorMessage = exception.getConstraintViolations()
-                .stream()
-                .map(violation -> violation.getMessage())
-                .findFirst()
-                .orElse("Validation error occurred");
+        Map<String, String> errorsMap = new LinkedHashMap<>();
 
-        log.warn("Constraint Violation Error: {}", cleanErrorMessage);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, cleanErrorMessage);
+        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
+            String fieldName = extractFieldName(violation);
+            errorsMap.put(fieldName, violation.getMessage());
+        }
+
+        log.warn("Constraint Violation Error: {}", errorsMap);
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Doğrulama hatası");
+        problemDetail.setTitle("Validasyon Hatası");
+        problemDetail.setProperty("errors", errorsMap);
+        return problemDetail;
+    }
+
+    /**
+     * ConstraintViolation propertyPath üzerinden alan adını çıkarır.
+     *
+     * Örnekler:
+     *   - Normal alan: propertyPath = "birthDate"  -> "birthDate"
+     *   - @AssertTrue metot: propertyPath = "maternityCoverage" (bean-property adı)
+     *     veya bazen "isMaternityCoverage" -> stripIsPrefix -> "maternityCoverage"
+     *
+     * propertyPath boşsa, constraint annotation adını fallback olarak kullanır.
+     */
+    private String extractFieldName(ConstraintViolation<?> violation) {
+        Path propertyPath = violation.getPropertyPath();
+        String lastNode = null;
+
+        for (Path.Node node : propertyPath) {
+            lastNode = node.getName();
+        }
+
+        if (lastNode != null && !lastNode.isBlank()) {
+            return stripIsPrefix(lastNode);
+        }
+
+        // Fallback: constraint annotation adı
+        return violation.getConstraintDescriptor()
+                .getAnnotation().annotationType().getSimpleName();
     }
 
     // ----------------------------------------------------------------

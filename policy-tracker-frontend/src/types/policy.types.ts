@@ -8,7 +8,7 @@ export interface CreatePolicyRequest {
   endDate: string;
   premium: number;
   customerId: string;
-  isActive: string;
+  isActive: boolean;
   responsibleUserId: string;
   note: string;
   installment: number;
@@ -64,7 +64,7 @@ export interface UpdatePolicyRequest {
   startDate?: string;
   endDate?: string;
   premium?: number;
-  isActive?: string;
+  isActive?: boolean;
   responsibleUserId?: string;
   note?: string;
   company?: string;
@@ -131,7 +131,7 @@ export interface Policy {
   startDate: string;
   endDate: string;
   premium: number;
-  isActive: string;
+  isActive: boolean;
   company: string;
   previousPolicyId: string;
   rootPolicyId: string;
@@ -193,7 +193,7 @@ export interface PolicyForm {
   startDate: string;
   endDate: string;
   responsibleUserId: string;
-  isActive: string;
+  isActive: boolean;
   company: string;
 }
 
@@ -435,7 +435,7 @@ export const policyColumns = [
   {
     name: 'isActive',
     label: 'Aktif/Pasif',
-    field: (row: Policy) => activeOptions.find((opt) => opt.value === row.isActive)?.label || row.isActive,
+    field: 'isActive',
     align: 'center' as const,
   },
   { name: 'installment', label: 'Ödeme Sayısı', field: (row: Policy) => `${row.installment} `, align: 'center' as const, sortable: true },
@@ -444,8 +444,8 @@ export const policyColumns = [
 ];
 
 export const activeOptions = [
-  { value: 'ACTIVE', label: 'Aktif' },
-  { value: 'PASSIVE', label: 'Pasif' },
+  { value: 'true', label: 'Aktif' },
+  { value: 'false', label: 'Pasif' },
 ];
 
 export const policyTypeOptions = [

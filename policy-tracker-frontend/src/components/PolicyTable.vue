@@ -53,9 +53,9 @@
 
                 <template v-slot:body-cell-isActive="props">
                     <q-td :props="props" class="text-center">
-                        <q-chip :color="props.row.isActive === 'ACTIVE' ? 'positive' : 'negative'" text-color="white"
-                            dense class="text-weight-bold compact-chip">
-                            {{ getActiveLabel(props.row.isActive) }}
+                        <q-chip :color="props.row.isActive ? 'positive' : 'negative'" text-color="white" dense
+                            class="text-weight-bold compact-chip">
+                            {{ props.row.isActive ? 'Aktif' : 'Pasif' }}
                         </q-chip>
                     </q-td>
                 </template>
@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { policyColumns, activeOptions, type Policy } from '../types/policy.types';
+import { policyColumns, type Policy } from '../types/policy.types';
 import { calculateRemainingDays, getRemainingDaysColor } from '../utils/dateHelper';
 import { useCustomerStore } from '../stores/customer';
 
@@ -130,9 +130,7 @@ const emit = defineEmits<{
 
 const customerStore = useCustomerStore();
 
-const getActiveLabel = (value: string) => {
-    return activeOptions.find((opt) => opt.value === value)?.label || value;
-};
+
 
 const enrichedPolicies = ref<EnrichedPolicy[]>([]);
 

@@ -3,7 +3,6 @@ package com.tunahancoban.policy_tracker.model.DTO.events;
 import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.enums.EventTypes;
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 
 import java.math.BigDecimal;
@@ -17,7 +16,7 @@ public record PolicyEvent(
         String policyId,
         String customerId,
         InstallmentOptions installment,
-        PolicyStatus isActive,
+        Boolean isActive,
         PolicyType type,
         LocalDate startDate,
         LocalDate endDate,

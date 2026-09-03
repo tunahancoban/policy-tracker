@@ -62,7 +62,7 @@ public class CreatePolicyRequest {
     private InstallmentOptions installment;
 
     @AssertTrue(message = "Poliçe bitiş günü başlangıç gününden önce olamaz.")
-    public boolean isValidDateRange() {
+    public boolean isEndDate() {
         if (startDate == null || endDate == null) {
             return true;
         }

@@ -70,7 +70,7 @@ export function usePolicyForm(
     note: '',
     installment: 1,
     responsibleUserId: '',
-    isActive: 'ACTIVE',
+    isActive: true,
     company: '',
   });
 
@@ -190,17 +190,15 @@ export function usePolicyForm(
       startDate: start,
       endDate: end,
       note: policy.note ? `${policy.note} (Yenileme)` : 'Poliçe Yenileme',
-      isActive: policy.isActive || '',
+      isActive: policy.isActive ,
       company: policy.company || '',
     };
 
-    // Müşterinin ekranda etiketinin doğru görünmesi için
     const matchedCustomer = customerOptions.value.find((c) => c.customerId === policy.customerId);
     if (matchedCustomer) {
       filteredCustomerOptions.value = [matchedCustomer];
     }
 
-    // Personelin ekranda ID yerine İsim olarak görünmesi için
     const foundUser = (Array.isArray(userStore.users) ? userStore.users : []).find(
       (u) => u.id === policy.responsibleUserId,
     );

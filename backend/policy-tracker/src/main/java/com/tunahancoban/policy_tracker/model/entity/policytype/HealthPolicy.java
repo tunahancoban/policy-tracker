@@ -58,7 +58,7 @@ public class HealthPolicy extends Policy {
     private Boolean maternityCoverage = false;
 
     @AssertTrue(message = "Ayakta tedavi teminatı seçildiyse muayene adedi 0'dan büyük olmalıdır")
-    private boolean isOutpatientLimitValid() {
+    private boolean isOutpatientLimitCount() {
         if ("YATARAK_AYAKTA".equalsIgnoreCase(coverageScope)) {
             return outpatientLimitCount != null && outpatientLimitCount > 0;
         }
@@ -66,7 +66,7 @@ public class HealthPolicy extends Policy {
     }
 
     @AssertTrue(message = "Doğum teminatı yalnızca kadın sigortalılar için seçilebilir")
-    private boolean isMaternityCoverageValid() {
+    private boolean isMaternityCoverage() {
         if (Boolean.TRUE.equals(maternityCoverage)) {
             return "KADIN".equalsIgnoreCase(gender) || "FEMALE".equalsIgnoreCase(gender);
         }
@@ -74,7 +74,7 @@ public class HealthPolicy extends Policy {
     }
 
     @AssertTrue(message = "Sigortalının yaşı sağlık poliçesi kabul sınırını (maksimum 69) aşamaz")
-    private boolean isAgeEligible() {
+    private boolean isBirthDate() {
         if (birthDate != null) {
             int age = Period.between(birthDate, LocalDate.now()).getYears();
             return age >= 0 && age <= 69;

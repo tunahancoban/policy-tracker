@@ -24,8 +24,7 @@ public class PolicyExpiryNotifier {
 
     private static final List<Integer> THRESHOLDS = List.of(30, 15, 7, 3, 1);
 
-    //@Scheduled(cron = "30 * * * * *") // every day at 10:33
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 8 * * *") // EVERYDAY
     public void checkExpiringPolicies() {
         LocalDate today = LocalDate.now();
 

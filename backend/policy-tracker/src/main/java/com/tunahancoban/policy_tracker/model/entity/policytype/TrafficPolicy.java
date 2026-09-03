@@ -51,7 +51,7 @@ public class TrafficPolicy extends Policy {
 
     // Sınıf içi koşullu validasyon
     @AssertTrue(message = "İMM teminatı seçildiyse geçerli bir İMM limiti girilmelidir")
-    private boolean isImmLimitValid() {
+    private boolean isImmLimit() {
         if (Boolean.TRUE.equals(hasImm)) {
             return immLimit != null && immLimit.compareTo(BigDecimal.ZERO) > 0;
         }

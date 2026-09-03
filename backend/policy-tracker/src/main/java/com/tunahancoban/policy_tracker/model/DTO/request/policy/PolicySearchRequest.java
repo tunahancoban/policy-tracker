@@ -1,6 +1,5 @@
 package com.tunahancoban.policy_tracker.model.DTO.request.policy;
 
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ public class PolicySearchRequest {
     private String customerId;
     private String policyId;
     private String responsibleUserId;
-    private PolicyStatus isActive;
+    private Boolean isActive;
     private PolicyType type;
     private String keyword;
     private LocalDate endDateFrom;

@@ -52,7 +52,14 @@ public class PolicySearchService {
     }
 
     private Criteria buildCriteria(PolicySearchRequest request) {
-        Criteria criteria = new Criteria("deletedAt").exists().not();
+        Criteria criteria;
+
+        if (Boolean.FALSE.equals(request.getIsActive())) {
+            criteria = new Criteria("isActive").is(false);
+        } else {
+            criteria = new Criteria("isActive").is(true)
+                    .and(new Criteria("deletedAt").exists().not());
+        }
 
         if (request.getPolicyId() != null && !request.getPolicyId().isBlank()) {
             criteria = criteria.and(new Criteria("policyId").startsWith(request.getPolicyId()));

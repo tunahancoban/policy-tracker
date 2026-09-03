@@ -2,7 +2,6 @@ package com.tunahancoban.policy_tracker.model.indexes;
 
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
 import com.tunahancoban.policy_tracker.model.enums.InsuranceCompany;
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -37,7 +36,7 @@ public class PolicyIndex {
     private InstallmentOptions installment;
 
     @Field(type = FieldType.Keyword)
-    private PolicyStatus isActive;
+    private Boolean isActive;
 
     @Field
     private InsuranceCompany company;

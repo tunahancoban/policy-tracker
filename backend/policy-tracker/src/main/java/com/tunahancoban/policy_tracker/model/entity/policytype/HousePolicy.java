@@ -48,7 +48,7 @@ public class HousePolicy extends Policy {
 
     // Bina veya Eşya teminatından en az birinin girilmiş olmasını zorunlu kılan kural
     @AssertTrue(message = "Bina veya eşya teminat bedelinden en az biri sıfırdan büyük olmalıdır")
-    private boolean isAtLeastOneCoverageProvided() {
+    private boolean isBuildingCoverageLimit() {
         boolean hasBuilding = buildingCoverageLimit != null && buildingCoverageLimit.compareTo(BigDecimal.ZERO) > 0;
         boolean hasContents = contentsCoverageLimit != null && contentsCoverageLimit.compareTo(BigDecimal.ZERO) > 0;
         return hasBuilding || hasContents;

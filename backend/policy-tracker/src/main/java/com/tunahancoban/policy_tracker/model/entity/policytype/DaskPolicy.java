@@ -53,7 +53,7 @@ public class DaskPolicy extends Policy {
     private Integer earthquakeZone;
 
     @AssertTrue(message = "Bulunduğu kat, binanın toplam kat sayısından büyük olamaz")
-    private boolean isApartmentFloorValid() {
+    private boolean isApartmentFloor() {
         if (apartmentFloor != null && totalFloorCount != null) {
             return apartmentFloor <= totalFloorCount;
         }
@@ -61,7 +61,7 @@ public class DaskPolicy extends Policy {
     }
 
     @AssertTrue(message = "Bina inşa yılı içinde bulunulan yıldan büyük olamaz")
-    private boolean isConstructionYearValid() {
+    private boolean isConstructionYear() {
         if (buildingConstructionYear != null) {
             return buildingConstructionYear <= Year.now().getValue();
         }

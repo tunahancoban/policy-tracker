@@ -7,7 +7,6 @@ import com.tunahancoban.policy_tracker.model.entity.Policy;
 import com.tunahancoban.policy_tracker.model.entity.policytype.CascoPolicy;
 import com.tunahancoban.policy_tracker.model.entity.policytype.TrafficPolicy;
 import com.tunahancoban.policy_tracker.model.enums.InstallmentOptions;
-import com.tunahancoban.policy_tracker.model.enums.PolicyStatus;
 import com.tunahancoban.policy_tracker.model.enums.PolicyType;
 import com.tunahancoban.policy_tracker.repository.PolicyRepository;
 import com.tunahancoban.policy_tracker.service.interfaces.CustomerService;
@@ -62,7 +61,7 @@ class PolicyServiceTest {
                 .premium(new BigDecimal("1200.00"))
                 .startDate(LocalDate.of(2026, 1, 1))
                 .endDate(LocalDate.of(2027, 1, 1))
-                .isActive(PolicyStatus.ACTIVE)
+                .isActive(true)
                 .rootPolicyId("TRF202608001")
                 .renewalSequence(0)
                 .build();
@@ -155,7 +154,7 @@ class PolicyServiceTest {
                     .premium(new BigDecimal("1200.00"))
                     .startDate(LocalDate.of(2026, 1, 1))
                     .endDate(LocalDate.of(2027, 1, 1))
-                    .isActive(PolicyStatus.ACTIVE)
+                    .isActive(true)
                     .renewalSequence(0)
                     .build();
 
@@ -187,7 +186,7 @@ class PolicyServiceTest {
 
             policyService.deletePolicy("TRF202608001");
 
-            assertThat(samplePolicy.getIsActive()).isEqualTo(PolicyStatus.PASSIVE);
+            assertThat(samplePolicy.getIsActive()).isEqualTo(false);
             assertThat(samplePolicy.getDeletedAt()).isNotNull();
             verify(installmentService, times(1)).deleteInstallment("TRF202608001");
             verify(eventPublisher, times(1)).publishEvent(any(PolicyEvent.class));
@@ -283,7 +282,7 @@ class PolicyServiceTest {
                     .premium(new BigDecimal("5000.00"))
                     .startDate(LocalDate.of(2026, 1, 1))
                     .endDate(LocalDate.of(2027, 1, 1))
-                    .isActive(PolicyStatus.ACTIVE)
+                    .isActive(true)
                     .renewalSequence(0)
                     .build();
 
@@ -313,7 +312,7 @@ class PolicyServiceTest {
             trafficPolicy.setPremium(new BigDecimal("800.00"));
             trafficPolicy.setStartDate(LocalDate.of(2026, 1, 1));
             trafficPolicy.setEndDate(LocalDate.of(2027, 1, 1));
-            trafficPolicy.setIsActive(PolicyStatus.ACTIVE);
+            trafficPolicy.setIsActive(true);
             trafficPolicy.setRenewalSequence(0);
 
             UpdateTrafficPolicyRequest updateRequest = new UpdateTrafficPolicyRequest();
@@ -368,7 +367,7 @@ class PolicyServiceTest {
                     .premium(new BigDecimal("1200.00"))
                     .startDate(LocalDate.of(2026, 1, 1))
                     .endDate(LocalDate.of(2027, 1, 1))
-                    .isActive(PolicyStatus.ACTIVE)
+                    .isActive(true)
                     .renewalSequence(0)
                     .rootPolicyId("TRF202608001")
                     .build();
@@ -468,7 +467,7 @@ class PolicyServiceTest {
             when(policyRepository.findAll(any(Example.class), any(Pageable.class))).thenReturn(page);
 
             Page<Policy> result = policyService.getPolicyWithParams(
-                    "CST-000001", null, PolicyType.TRAFIK, null, PolicyStatus.ACTIVE,
+                    "CST-000001", null, PolicyType.TRAFIK, null, true,
                     PageRequest.of(0, 10)
             );
 

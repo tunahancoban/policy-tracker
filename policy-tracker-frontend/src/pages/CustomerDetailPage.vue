@@ -163,7 +163,12 @@ const onPolicyTableRequest = async (requestProp: {
     await fetchPoliciesOnly(sortByColumn.value, sortDescending.value);
 };
 
-const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) => {
+const handlePolicyUpdate = async (event: {
+    id: string;
+    data: Partial<Policy>;
+    resolve?: () => void;
+    reject?: (err: unknown) => void;
+}) => {
     try {
         await updatePolicyGlobal(event.id, event.data);
 
@@ -175,16 +180,19 @@ const handlePolicyUpdate = async (event: { id: string; data: Partial<Policy> }) 
             timeout: 4000,
         });
 
-        isEditModalOpen.value = false;
-        selectedPolicy.value = null;
         await fetchPoliciesOnly(sortByColumn.value, sortDescending.value);
+        event.resolve?.();
     } catch (err) {
-        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Update Error:', err);
+        event.reject?.(err);
     }
 };
 
-const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
+const handlePolicyCreate = async (
+    newPolicyPayload: CreatePolicyRequest,
+    resolve?: () => void,
+    reject?: (err: unknown) => void
+) => {
     try {
         await createPolicy(newPolicyPayload);
 
@@ -196,15 +204,19 @@ const handlePolicyCreate = async (newPolicyPayload: CreatePolicyRequest) => {
             timeout: 4000,
         });
 
-        isCreateModalOpen.value = false;
         await loadAllData();
+        resolve?.();
     } catch (err) {
-        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Create Error:', err);
+        reject?.(err);
     }
 };
 
-const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
+const handlePolicyRenew = async (
+    renewPayload: RenewPolicyRequest,
+    resolve?: () => void,
+    reject?: (err: unknown) => void
+) => {
     try {
         await renewPolicy(renewPayload);
 
@@ -216,11 +228,11 @@ const handlePolicyRenew = async (renewPayload: RenewPolicyRequest) => {
             timeout: 4000,
         });
 
-        isCreateModalOpen.value = false;
         await loadAllData();
+        resolve?.();
     } catch (err) {
-        // Hata zaten axios interceptor tarafından Toast olarak basıldı
         console.error('Policy Renew Error:', err);
+        reject?.(err);
     }
 };
 

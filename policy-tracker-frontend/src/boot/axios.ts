@@ -1,8 +1,8 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { Notify } from 'quasar';
-import { ApiError, AuthError, ForbiddenError, NetworkError, ValidationError } from '@/error/errors';
-import { useAuthStore } from '@/stores/auth';
-import { useNotify } from '@/composables/useNotify';
+import { ApiError, AuthError, ForbiddenError, NetworkError, ValidationError } from '../error/errors';
+import { useAuthStore } from '../stores/auth';
+import { useNotify } from '../composables/useNotify';
 
 // Backend Hata Tipleri
 const { notifyError } = useNotify();
@@ -36,7 +36,6 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Backend formatı ne olursa olsun (detail, message veya error) güvenli okuyan yardımcı fonksiyon
 function extractErrorMessage(data: unknown, fallback: string): string {
   if (!data) return fallback;
 
@@ -90,7 +89,6 @@ api.interceptors.response.use(
       return Promise.reject(new ForbiddenError(data as ProblemDetail));
     }
 
-    // 4. Form Validasyon Hataları (Inline / Form altlarına aktarılabilmesi için Toast BASILMAZ)
     if (data?.errors && Object.keys(data.errors).length > 0) {
       return Promise.reject(new ValidationError(data as ProblemDetail));
     }

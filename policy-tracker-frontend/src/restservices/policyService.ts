@@ -34,6 +34,6 @@ export const policyService = {
   },
 
   async deletePolicy(policyId: string) {
-    await api.delete<void>(`/rest/api/policyies/${policyId}`);
+    await api.delete<void>(`/rest/api/policies/${policyId}`);
   },
 };
